@@ -7,7 +7,7 @@
 ---
 
 ## Goals
-Most libraries forget about the user, leaving him wondering in dark and making libraries frustrating to install, use and package. Thus, installing Prisma should be simple, using it should feel intuitive and packaging the library self-explanatory, aided with sufficient documentation.
+Most libraries forget about the user side of things, leaving him wondering in the dark and making it frustrating to install, use and package a library. Thus, installing Prisma should be simple, using it should feel intuitive and packaging the library self-explanatory, aided with sufficient documentation.
 
 Moreover, the library should be lightweight, available for embedded usage and cross-platform, implementing only the necessary features mainly for CPU execution.  
 
