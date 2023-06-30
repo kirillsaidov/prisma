@@ -9,10 +9,11 @@
 ## Goals
 Most libraries forget about the user, leaving him wondering in dark and making libraries frustrating to install, use and package. Thus, installing Prisma should be simple, using it should feel intuitive and packaging the library self-explanatory, aided with sufficient documentation.
 
+Moreover, the library should be lightweight, available for embedded usage and cross-platform, implementing only the necessary features mainly for CPU execution.  
+
 The above can be summarized into the following:
-1. Easy to install;
-2. Easy to use;
-3. Easy to package.
+1. Easy to install, use and package;
+2. Lightweight, embeddable, cross-platform.
 
 ## LICENSE
 All code is licensed under the BSL license.
