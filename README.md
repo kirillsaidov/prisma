@@ -1,10 +1,8 @@
-<p align="center">
+<div align="center">
     <img src="imgs/icon.png" width="128" height="128" align="center"></img>
-</p>
-<p align="center" style="font-size:27px">Prisma</p>
-<p align="center" style="font-size:16px;font-style:italic">Tiny computer vision library aimed at ease of use and usability.</p>
-
----
+</div>
+<h1 align="center" style="font-size:27px">Prisma</h1>
+<h2 align="center" style="font-style:italic">Tiny computer vision library aimed at ease of use and usability.</h2>
 
 ## Goals
 Most libraries forget about the user side of things, leaving him wondering in the dark and making it frustrating to install, use and package a library. Thus, installing Prisma should be simple, using it should feel intuitive and packaging the library self-explanatory, aided with sufficient documentation.
