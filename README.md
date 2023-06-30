@@ -1,6 +1,6 @@
 <div align="center">
     <img src="imgs/icon.png" width="128" height="128" align="center"></img>
-    <h2>PRISMA<br>Tiny computer vision library aimed at ease of use and usability.</h2>    
+    <h2>PRISMA<br><em>Tiny computer vision library aimed at ease of use and usability.</em></h2>    
 </div>
 
 ## Goals
