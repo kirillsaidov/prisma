@@ -1,5 +1,7 @@
+FILE=main
+
 all:
-	mkdir -p bin && gcc -o bin/$(FILE) src/$(FILE).c -L../lib -lvita -g
+	mkdir -p bin && gcc -o bin/$(FILE) src/$(FILE).c -I../third_party -I../inc -L../lib -lvita -lprisma -g
 run:
 	./bin/$(FILE)
 clean:
