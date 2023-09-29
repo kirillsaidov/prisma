@@ -6,15 +6,14 @@
     - prsm_tensor_destroy    
 */
 
-#include "core.h"
+#include "prisma/core/core.h"
 #include "vita/allocator/mallocator.h"
 
 typedef struct PrismaTensor {
-    size_t dim;         // number or dimensions: 1d, 2d, 3d, nd.
-    size_t size;        // number of rows (the height, vertical size)
-    size_t stride;      // how much we need to move to get to the next row (the width, horizontal size)
-    // bool is_view; ?       // defines if tensor is modifiable or only viewable
+    bool is_view;       // defines if tensor is modifiable or only viewable
 
+    size_t ndim;        // number or dimensions: 1d, 2d, 3d, nd.
+    size_t *shape;      // tensor shape
     prsm_float *data;   // data ptr
 
     // allocator: if `NULL`, then calloc/realloc/free is used
@@ -25,24 +24,25 @@ typedef struct PrismaTensor {
     Tensor creation/destruction
 */
 
-extern prsm_tensor_t *prsm_tensor_create(const size_t length, struct VitaBaseAllocatorType *const alloctr);
+extern prsm_tensor_t *prsm_tensor_create(struct VitaBaseAllocatorType *const alloctr, const size_t ndim, ...);
+extern prsm_tensor_t *prsm_tensor_create_shape(struct VitaBaseAllocatorType *const alloctr, const size_t ndim, const size_t *const shape);
+extern prsm_tensor_t *prsm_tensor_create_vec(struct VitaBaseAllocatorType *const alloctr, const size_t len);
+extern prsm_tensor_t *prsm_tensor_create_mat(struct VitaBaseAllocatorType *const alloctr, const size_t rows, const size_t cols);
 extern void prsm_tensor_destroy(prsm_tensor_t *t);
-
 
 /* 
     Tensor data structure properties
 */
 
 extern size_t prsm_tensor_dim(const prsm_tensor_t *const t);
-extern size_t prsm_tensor_size(const prsm_tensor_t *const t);
-extern size_t prsm_tensor_stride(const prsm_tensor_t *const t);
+extern const size_t *prsm_tensor_shape(const prsm_tensor_t *const t);
 extern prsm_float *prsm_tensor_data(const prsm_tensor_t *const t);
 
 /* 
     Tensor data structure operations
 */
 
-extern void prsm_tensor_resize(prsm_tensor_t *const t);
+extern bool prsm_tensor_resize(prsm_tensor_t *const t);
 extern prsm_tensor_t *prsm_tensor_dup(const prsm_tensor_t *const t);
 extern bool prsm_tensor_dup_into(prsm_tensor_t *const tout, const prsm_tensor_t *const t);
 
