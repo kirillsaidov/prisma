@@ -26,6 +26,7 @@ typedef PRSM_FLOAT prsm_float;
     apply(PRSM_STATUS_ERROR_INVALID_ARGUMENTS)        /* invalid arguments supplied */ \
     apply(PRSM_STATUS_ERROR_OUT_OF_BOUNDS_ACCESS)     /* accessing memory beyond allocated size */ \
     apply(PRSM_STATUS_ERROR_INCOMPATIBLE_SHAPES)      /* incompatible tensor shape */ \
+    apply(PRSM_STATUS_ERROR_INCOMPATIBLE_DIMENSIONS)  /* different dimensions */ \
     apply(PRSM_STATUS_OPERATION_FAILURE)              /* failed to perform an action */ \
     apply(PRSM_STATUS_OPERATION_SUCCESS)              /* all good */ \
     apply(PRSM_STATUS_COUNT)                          /* number of elements */

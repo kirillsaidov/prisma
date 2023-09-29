@@ -26,9 +26,10 @@ typedef struct PrismaTensor {
 */
 
 /**
- * @brief  Creates a tensor with custom shape
+ * @brief  Creates a tensor
  * @param  alloctr allocator instance
- * @param  ndim dimensions
+ * @param  ndim number of dimensions
+ * @param  ... tensor shape
  * @returns valid `prsm_tensor_t*` or asserts on failure
  */
 extern prsm_tensor_t *prsm_tensor_create(struct VitaBaseAllocatorType *const alloctr, const size_t ndim, ...);
@@ -36,7 +37,7 @@ extern prsm_tensor_t *prsm_tensor_create(struct VitaBaseAllocatorType *const all
 /**
  * @brief  Creates a tensor with from custom shape
  * @param  alloctr allocator instance
- * @param  ndim dimensions
+ * @param  ndim number of dimensions
  * @param  shape tensor shape
  * @returns valid `prsm_tensor_t*` or asserts on failure
  */
@@ -99,7 +100,7 @@ extern const size_t *prsm_tensor_shape(const prsm_tensor_t *const t);
 extern prsm_float *prsm_tensor_data(const prsm_tensor_t *const t);
 
 /**
- * @brief  Returns tensor size (length, number of elements)
+ * @brief  Returns tensor size
  * @param  t tensor
  * @returns number of elements
  */
@@ -109,10 +110,38 @@ extern size_t prsm_tensor_size(const prsm_tensor_t *const t);
     Tensor data structure operations
 */
 
+/**
+ * @brief  Resizes tensor
+ * @param  t tensor
+ * @param  ndim number of dimensions
+ * @param  ... tensor shape
+ * @returns None
+ */
 extern void prsm_tensor_resize(prsm_tensor_t *const t, const size_t ndim, ...);
+
+/**
+ * @brief  Resizes tensor from custom shape
+ * @param  t tensor
+ * @param  ndim number of dimensions
+ * @param  shape tensor shape
+ * @returns None
+ */
 extern void prsm_tensor_resize_shape(prsm_tensor_t *const t, const size_t ndim, const size_t *const shape);
+
+/**
+ * @brief  Duplicates tensor
+ * @param  t tensor
+ * @returns tensor copy
+ */
 extern prsm_tensor_t *prsm_tensor_dup(const prsm_tensor_t *const t);
-extern enum PrismaStatus prsm_tensor_dup_into(prsm_tensor_t *const tout, const prsm_tensor_t *const t);
+
+/**
+ * @brief  Duplicates tensor into the preallocated tensor instance
+ * @param  tout copy to tensor (output)
+ * @param  tin copy from tensor (input)
+ * @returns None
+ */
+extern void prsm_tensor_dup_into(prsm_tensor_t *const tout, const prsm_tensor_t *const tin);
 
 /* 
     Tensor data operations

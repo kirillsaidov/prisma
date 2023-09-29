@@ -225,19 +225,19 @@ prsm_tensor_t *prsm_tensor_dup(const prsm_tensor_t *const t) {
 
     // duplicate tensor
     prsm_tensor_t *tdup = prsm_tensor_create_shape(t->alloctr, t->ndim, t->shape);
-    vt_memcopy(tdup->data, t->data, prsm_tensor_size(t));
+    vt_memcopy(tdup->data, t->data, prsm_tensor_size(tdup) * sizeof(prsm_float));
 
     return tdup;
 }
 
-enum PrismaStatus prsm_tensor_dup_into(prsm_tensor_t *const tout, const prsm_tensor_t *const t) {
+void prsm_tensor_dup_into(prsm_tensor_t *const tout, const prsm_tensor_t *const tin) {
     // check for invalid input
     VT_DEBUG_ASSERT(!prsm_tensor_is_null(tout), "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INVALID_ARGUMENTS));
-    VT_DEBUG_ASSERT(!prsm_tensor_is_null(t), "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INVALID_ARGUMENTS));
-
-    // check if two tensors are compatible
-
+    VT_DEBUG_ASSERT(!prsm_tensor_is_null(tin), "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INVALID_ARGUMENTS));
+    VT_DEBUG_ASSERT(prsm_tensor_match_shape(tout, tin), "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INCOMPATIBLE_SHAPES));
+    
     // copy data
+    vt_memcopy(tout->data, tin->data, prsm_tensor_size(tout) * sizeof(prsm_float));
 }
 
 /* 
@@ -245,8 +245,12 @@ enum PrismaStatus prsm_tensor_dup_into(prsm_tensor_t *const tout, const prsm_ten
 */
 
 bool prsm_tensor_match_shape(const prsm_tensor_t *const t1, const prsm_tensor_t *const t2) {
-    
-    return true;
+    // check for invalid input
+    VT_DEBUG_ASSERT(!prsm_tensor_is_null(t1), "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INVALID_ARGUMENTS));
+    VT_DEBUG_ASSERT(!prsm_tensor_is_null(t2), "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INVALID_ARGUMENTS));
+    VT_DEBUG_ASSERT(t1->ndim == t2->ndim, "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INCOMPATIBLE_DIMENSIONS));
+
+    return vt_memcmp(t1->shape, t2->shape, t1->ndim * sizeof(size_t));
 }
 
 bool prsm_tensor_equals(const prsm_tensor_t *const t1, const prsm_tensor_t *const t2);
