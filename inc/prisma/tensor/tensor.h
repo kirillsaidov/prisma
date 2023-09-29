@@ -147,9 +147,36 @@ extern void prsm_tensor_dup_into(prsm_tensor_t *const tout, const prsm_tensor_t 
     Tensor data operations
 */
 
+/**
+ * @brief  Checks if shapes match
+ * @param  t1 tensor
+ * @param  t2 tensor
+ * @returns true if `t1.shape==t2.shape`
+ */
 extern bool prsm_tensor_match_shape(const prsm_tensor_t *const t1, const prsm_tensor_t *const t2);
+
+/**
+ * @brief  Checks if tensors are equal
+ * @param  t1 tensor
+ * @param  t2 tensor
+ * @returns true if `t1==t2`
+ */
 extern bool prsm_tensor_equals(const prsm_tensor_t *const t1, const prsm_tensor_t *const t2);
-extern void prsm_tensor_assign(prsm_tensor_t *const t1, const prsm_tensor_t *const t2);
+
+/**
+ * @brief  Assigns values to `lhs` from `rhs`
+ * @param  lhs tensor
+ * @param  rhs tensor
+ * @returns None
+ */
+extern void prsm_tensor_assign(prsm_tensor_t *const lhs, const prsm_tensor_t *const rhs);
+
+/**
+ * @brief  Swaps tensors
+ * @param  t1 tensor
+ * @param  t2 tensor
+ * @returns None
+ */
 extern void prsm_tensor_swap(prsm_tensor_t *const t1, prsm_tensor_t *const t2);
 
 /* 

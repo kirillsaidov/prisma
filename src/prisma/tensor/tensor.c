@@ -253,9 +253,32 @@ bool prsm_tensor_match_shape(const prsm_tensor_t *const t1, const prsm_tensor_t 
     return vt_memcmp(t1->shape, t2->shape, t1->ndim * sizeof(size_t));
 }
 
-bool prsm_tensor_equals(const prsm_tensor_t *const t1, const prsm_tensor_t *const t2);
-void prsm_tensor_assign(prsm_tensor_t *const t1, const prsm_tensor_t *const t2);
-void prsm_tensor_swap(prsm_tensor_t *const t1, prsm_tensor_t *const t2);
+bool prsm_tensor_equals(const prsm_tensor_t *const t1, const prsm_tensor_t *const t2) {
+    return (
+        !prsm_tensor_is_null(t1) &&
+        !prsm_tensor_is_null(t2) &&
+        vt_memcmp(t1, t2, sizeof(prsm_tensor_t))
+    );
+}
+
+void prsm_tensor_assign(prsm_tensor_t *const lhs, const prsm_tensor_t *const rhs) {
+    // check for invalid input
+    VT_DEBUG_ASSERT(!prsm_tensor_is_null(lhs), "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INVALID_ARGUMENTS));
+    VT_DEBUG_ASSERT(!prsm_tensor_is_null(rhs), "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INVALID_ARGUMENTS));
+    VT_DEBUG_ASSERT(prsm_tensor_match_shape(lhs, rhs), "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INCOMPATIBLE_SHAPES));
+
+    // copy data
+    vt_memcopy(lhs->data, rhs->data, prsm_tensor_size(lhs) * sizeof(prsm_float));
+}
+
+void prsm_tensor_swap(prsm_tensor_t *const t1, prsm_tensor_t *const t2) {
+    // check for invalid input
+    VT_DEBUG_ASSERT(!prsm_tensor_is_null(t1), "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INVALID_ARGUMENTS));
+    VT_DEBUG_ASSERT(!prsm_tensor_is_null(t2), "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INVALID_ARGUMENTS));
+
+    // swap elements
+    vt_pswap((void*)&t1, (void*)&t2);
+}
 
 /* 
     Tensor slicing/view operations
