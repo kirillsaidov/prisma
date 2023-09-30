@@ -8,6 +8,7 @@
 
 #include "prisma/core/core.h"
 #include "vita/util/debug.h"
+#include "vita/container/common.h"
 #include "vita/allocator/mallocator.h"
 
 typedef struct PrismaTensor {
@@ -238,11 +239,50 @@ extern prsm_tensor_t prsm_tensor_make_view_range(const prsm_tensor_t *const t, c
     Tensor get/set value operations
 */
 
-extern prsm_float prsm_tensor_get_v(const prsm_tensor_t *const t, const size_t idx);
-extern void prsm_tensor_set_v(prsm_tensor_t *const t, const size_t idx, const prsm_float value);
+/**
+ * @brief  Get value
+ * @param  t tensor
+ * @param  idx index
+ * @returns prsm_float
+ */
+extern prsm_float prsm_tensor_get_val(const prsm_tensor_t *const t, const size_t idx);
+
+/**
+ * @brief  Set value
+ * @param  t tensor
+ * @param  idx index
+ * @param  value value
+ * @returns None
+ */
+extern void prsm_tensor_set_val(prsm_tensor_t *const t, const size_t idx, const prsm_float value);
+
+/**
+ * @brief  Set entire tensor to value
+ * @param  t tensor
+ * @param  value value
+ * @returns None
+ */
 extern void prsm_tensor_set_all(prsm_tensor_t *const t, const prsm_float value);
+
+/**
+ * @brief  Set entire tensor to 1
+ * @param  t tensor
+ * @returns None
+ */
 extern void prsm_tensor_set_ones(prsm_tensor_t *const t);
+
+/**
+ * @brief  Set entire tensor to 0
+ * @param  t tensor
+ * @returns None
+ */
 extern void prsm_tensor_set_zeros(prsm_tensor_t *const t);
+
+/**
+ * @brief  Make identity
+ * @param  t tensor
+ * @returns None
+ */
 extern void prsm_tensor_set_identity(prsm_tensor_t *const t);
 
 /* 

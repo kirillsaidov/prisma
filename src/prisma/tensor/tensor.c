@@ -404,19 +404,104 @@ prsm_tensor_t prsm_tensor_make_view_range(const prsm_tensor_t *const t, const si
     Tensor get/set value operations
 */
 
-prsm_float prsm_tensor_get_v(const prsm_tensor_t *const t, const size_t idx);
-void prsm_tensor_set_v(prsm_tensor_t *const t, const size_t idx, const prsm_float value);
-void prsm_tensor_set_all(prsm_tensor_t *const t, const prsm_float value);
-void prsm_tensor_set_ones(prsm_tensor_t *const t);
-void prsm_tensor_set_zeros(prsm_tensor_t *const t);
-void prsm_tensor_set_identity(prsm_tensor_t *const t);
+prsm_float prsm_tensor_get_val(const prsm_tensor_t *const t, const size_t idx) {
+    // check for invalid input
+    VT_DEBUG_ASSERT(!prsm_tensor_is_null(t), "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INVALID_ARGUMENTS));
+    return t->data[idx];
+}
+
+void prsm_tensor_set_val(prsm_tensor_t *const t, const size_t idx, const prsm_float value) {
+    // check for invalid input
+    VT_DEBUG_ASSERT(!prsm_tensor_is_null(t), "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INVALID_ARGUMENTS));
+    t->data[idx] = value;
+}
+
+void prsm_tensor_set_all(prsm_tensor_t *const t, const prsm_float value) {
+    // check for invalid input
+    VT_DEBUG_ASSERT(!prsm_tensor_is_null(t), "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INVALID_ARGUMENTS));
+    vt_memset(t->data, value, prsm_tensor_size(t));
+}
+
+void prsm_tensor_set_ones(prsm_tensor_t *const t) {
+    // check for invalid input
+    VT_DEBUG_ASSERT(!prsm_tensor_is_null(t), "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INVALID_ARGUMENTS));
+    prsm_tensor_set_all(t, 1);
+}
+
+void prsm_tensor_set_zeros(prsm_tensor_t *const t) {
+    // check for invalid input
+    VT_DEBUG_ASSERT(!prsm_tensor_is_null(t), "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INVALID_ARGUMENTS));
+    prsm_tensor_set_all(t, 0);
+}
+
+void prsm_tensor_set_identity(prsm_tensor_t *const t) {
+    // check for invalid input
+    VT_DEBUG_ASSERT(!prsm_tensor_is_null(t), "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INVALID_ARGUMENTS));
+    
+    // set identity
+    if (t->ndim == 1) {
+        t->data[0] = 1;
+    } else if (t->ndim == 2) {
+        VT_FOREACH(i, 0, t->shape[0]) {
+            VT_FOREACH(j, 0, t->shape[1]) {
+                if (i == j) {
+                    t->data[vt_index_2d_to_1d(i, j, t->shape[1])] = 1;
+                }
+            }
+        }
+    } else if (t->ndim == 3) {
+        VT_FOREACH(i, 0, t->shape[0]) {
+            VT_FOREACH(j, 0, t->shape[1]) {
+                VT_FOREACH(k, 0, t->shape[2]) {
+                    if (i == j) {
+                        t->data[vt_index_3d_to_1d(i, j, k, t->shape[0], t->shape[1])] = 1;
+                    }
+                }
+            }
+        }
+    } else {
+        VT_ENFORCE(0, "%s: t.ndim > 3 is unsupported!\n", prsm_status_to_str(PRSM_STATUS_OPERATION_FAILURE));
+    }
+}
 
 /* 
     Tensor-wise operations
 */
 
-prsm_tensor_t *prsm_tensor_add(const prsm_tensor_t *const t1, const prsm_tensor_t *const t2);
-prsm_tensor_t *prsm_tensor_sub(const prsm_tensor_t *const t1, const prsm_tensor_t *const t2);
+prsm_tensor_t *prsm_tensor_add(const prsm_tensor_t *const t1, const prsm_tensor_t *const t2) {
+    // check for invalid input
+    VT_DEBUG_ASSERT(!prsm_tensor_is_null(t1), "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INVALID_ARGUMENTS));
+    VT_DEBUG_ASSERT(!prsm_tensor_is_null(t2), "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INVALID_ARGUMENTS));
+    VT_DEBUG_ASSERT(prsm_tensor_match_shape(t1, t2), "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INCOMPATIBLE_SHAPES));
+
+    // create tensor
+    prsm_tensor_t *tret = prsm_tensor_create_shape(t1->alloctr, t1->ndim, t1->shape);
+
+    // add tensors
+    VT_FOREACH(i, 0, prsm_tensor_size(tret)) {
+        tret->data[i] = t1->data[i] + t2->data[i];
+    }
+
+    return tret;
+}
+
+prsm_tensor_t *prsm_tensor_sub(const prsm_tensor_t *const t1, const prsm_tensor_t *const t2) {
+    // check for invalid input
+    VT_DEBUG_ASSERT(!prsm_tensor_is_null(t1), "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INVALID_ARGUMENTS));
+    VT_DEBUG_ASSERT(!prsm_tensor_is_null(t2), "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INVALID_ARGUMENTS));
+    VT_DEBUG_ASSERT(prsm_tensor_match_shape(t1, t2), "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INCOMPATIBLE_SHAPES));
+
+    // create tensor
+    prsm_tensor_t *tret = prsm_tensor_create_shape(t1->alloctr, t1->ndim, t1->shape);
+
+    // add tensors
+    VT_FOREACH(i, 0, prsm_tensor_size(tret)) {
+        tret->data[i] = t1->data[i] - t2->data[i];
+    }
+
+    return tret;
+}
+
 prsm_tensor_t *prsm_tensor_mul(const prsm_tensor_t *const t1, const prsm_tensor_t *const t2);
 prsm_tensor_t *prsm_tensor_div(const prsm_tensor_t *const t1, const prsm_tensor_t *const t2);
 
