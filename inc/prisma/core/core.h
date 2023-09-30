@@ -22,6 +22,7 @@ typedef PRSM_FLOAT prsm_float;
 // prisma error codes
 #define PRSM_i_GENERATE_PRSM_STATUS(apply) \
     apply(PRSM_STATUS_ERROR_IS_NULL)                  /* element wasn't initialized or is NULL */ \
+    apply(PRSM_STATUS_ERROR_IS_VIEW)                  /* object is viewable only */ \
     apply(PRSM_STATUS_ERROR_ALLOCATION)               /* failed to allocate or reallocate memory */ \
     apply(PRSM_STATUS_ERROR_INVALID_ARGUMENTS)        /* invalid arguments supplied */ \
     apply(PRSM_STATUS_ERROR_OUT_OF_BOUNDS_ACCESS)     /* accessing memory beyond allocated size */ \

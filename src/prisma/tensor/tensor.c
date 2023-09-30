@@ -157,6 +157,7 @@ void prsm_tensor_resize(prsm_tensor_t *const t, const size_t ndim, ...) {
     // check for invalid input
     VT_DEBUG_ASSERT(!prsm_tensor_is_null(t), "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INVALID_ARGUMENTS));
     VT_DEBUG_ASSERT(ndim > 0, "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INVALID_ARGUMENTS));
+    VT_ENFORCE(!t->is_view, "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_IS_VIEW));
 
     // calculate old tensor size
     const size_t total_size_old = prsm_tensor_size(t);
@@ -190,6 +191,7 @@ void prsm_tensor_resize_shape(prsm_tensor_t *const t, const size_t ndim, const s
     // check for invalid input
     VT_DEBUG_ASSERT(!prsm_tensor_is_null(t), "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INVALID_ARGUMENTS));
     VT_DEBUG_ASSERT(ndim > 0, "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INVALID_ARGUMENTS));
+    VT_ENFORCE(!t->is_view, "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_IS_VIEW));
 
     // calculate old tensor size
     const size_t total_size_old = prsm_tensor_size(t);
