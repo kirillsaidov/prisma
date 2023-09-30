@@ -295,7 +295,7 @@ prsm_tensor_t prsm_tensor_make_view_range(const prsm_tensor_t *const t, const si
     Tensor get/set value operations
 */
 
-float prsm_tensor_get_v(const prsm_tensor_t *const t, const size_t idx);
+prsm_float prsm_tensor_get_v(const prsm_tensor_t *const t, const size_t idx);
 void prsm_tensor_set_v(prsm_tensor_t *const t, const size_t idx, const prsm_float value);
 void prsm_tensor_set_all(prsm_tensor_t *const t, const prsm_float value);
 void prsm_tensor_set_ones(prsm_tensor_t *const t);
