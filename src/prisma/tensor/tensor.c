@@ -101,6 +101,11 @@ void prsm_tensor_destroy(prsm_tensor_t *t) {
     // check for invalid input
     VT_DEBUG_ASSERT(t != NULL, "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INVALID_ARGUMENTS));
 
+    // if tensor is view, skip
+    if (t->is_view) {
+        return;
+    }
+
     // free shape, data, tensor
     (t->alloctr) ? VT_ALLOCATOR_FREE(t->alloctr, t->shape) : VT_FREE(t->shape);
     (t->alloctr) ? VT_ALLOCATOR_FREE(t->alloctr, t->data) : VT_FREE(t->data);
@@ -286,12 +291,114 @@ void prsm_tensor_swap(prsm_tensor_t *const t1, prsm_tensor_t *const t2) {
     Tensor slicing/view operations
 */
 
-bool prsm_tensor_is_view(const prsm_tensor_t *const t);
-prsm_tensor_t prsm_tensor_make_view(const prsm_tensor_t *const t);
-prsm_tensor_t prsm_tensor_make_view_mat(const prsm_tensor_t *const t, const size_t dim);
-prsm_tensor_t prsm_tensor_make_view_vec(const prsm_tensor_t *const t, const size_t dim, const size_t col);
-prsm_tensor_t prsm_tensor_make_view_array(const prsm_tensor_t *const t, const size_t dim, const size_t row);
-prsm_tensor_t prsm_tensor_make_view_range(const prsm_tensor_t *const t, const size_t *const shapeFrom, const size_t *const shapeTo);
+bool prsm_tensor_is_view(const prsm_tensor_t *const t) {
+    // check for invalid input
+    VT_DEBUG_ASSERT(!prsm_tensor_is_null(t), "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INVALID_ARGUMENTS));
+    return t->is_view;
+}
+
+prsm_tensor_t prsm_tensor_make_view(const prsm_tensor_t *const t) {
+    // check for invalid input
+    VT_DEBUG_ASSERT(!prsm_tensor_is_null(t), "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INVALID_ARGUMENTS));
+
+    // create view of the entire tensor
+    prsm_tensor_t tview = *t;
+    tview.is_view = true;
+
+    return tview;
+}
+
+prsm_tensor_t prsm_tensor_make_view_mat(const prsm_tensor_t *const t, const size_t dim) {
+    // check for invalid input
+    VT_DEBUG_ASSERT(!prsm_tensor_is_null(t), "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INVALID_ARGUMENTS));
+    VT_ENFORCE(t->ndim >= 2, "%s: Can make view only of a higher dimension tensor.\n", prsm_status_to_str(PRSM_STATUS_ERROR_IS_REQUIRED));
+    VT_ENFORCE(
+        dim < t->ndim, 
+        "%s: %zu < %zu\n", 
+        prsm_status_to_str(PRSM_STATUS_ERROR_OUT_OF_BOUNDS_ACCESS),
+        dim,
+        t->ndim
+    );
+
+    // calcuate view size (number of elements)
+    size_t view_size = 1;
+    VT_FOREACH(i, 1, t->ndim) {
+        view_size *= t->shape[i];
+    }
+
+    // find view on data
+    prsm_float *view_data = t->data + view_size * dim;
+
+    // create view of a matrix
+    prsm_tensor_t tview = {
+        .ndim = t->ndim - 1,
+        .shape = t->shape + 1,
+        .data = view_data,
+        .is_view = true
+    };
+
+    return tview;
+}
+
+prsm_tensor_t prsm_tensor_make_view_vec(const prsm_tensor_t *const t, const size_t idxFrom, const size_t idxTo) {
+    // check for invalid input
+    VT_DEBUG_ASSERT(!prsm_tensor_is_null(t), "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INVALID_ARGUMENTS));
+    VT_ENFORCE(idxFrom < idxTo && idxTo < prsm_tensor_size(t), "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_OUT_OF_BOUNDS_ACCESS));
+
+    // create vector view
+    prsm_tensor_t tview = {
+        .ndim = 1,
+        .size = idxTo - idxFrom,
+        .data = t->data + idxFrom,
+        .is_view = true
+    };
+
+    return tview;
+}
+
+prsm_tensor_t prsm_tensor_make_view_range(const prsm_tensor_t *const t, const size_t *const shapeFrom, const size_t *const shapeTo) {
+    // check for invalid input
+    VT_DEBUG_ASSERT(!prsm_tensor_is_null(t), "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INVALID_ARGUMENTS));
+    VT_DEBUG_ASSERT(shapeFrom != NULL, "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INVALID_ARGUMENTS));
+    VT_DEBUG_ASSERT(shapeTo != NULL, "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INVALID_ARGUMENTS));
+
+    // check shapes for out-of-bounds access
+    VT_FOREACH(i, 0, t->ndim) {
+        VT_ENFORCE(
+            shapeFrom[i] <= shapeTo[i],
+            "%s: %zu < %zu\n", 
+            prsm_status_to_str(PRSM_STATUS_ERROR_OUT_OF_BOUNDS_ACCESS),
+            shapeFrom[i],
+            shapeTo[i]
+        );
+
+        VT_ENFORCE(
+            shapeTo[i] < t->shape[i],
+            "%s: %zu < %zu\n", 
+            prsm_status_to_str(PRSM_STATUS_ERROR_OUT_OF_BOUNDS_ACCESS),
+            shapeTo[i],
+            t->shape[i]
+        );
+    }
+
+    // calculate view start and adjust shape
+    size_t view_size = 1;
+    size_t view_start = 1;
+    VT_FOREACH(i, 0, t->ndim) {
+        view_size *= shapeTo[i] - shapeFrom[i] + 1;
+        view_start *= shapeFrom[i];
+    }
+
+    // create view
+    prsm_tensor_t tview = {
+        .ndim = 1,
+        .size = view_size,
+        .data = t->data + view_start,
+        .is_view = true
+    };
+
+    return tview;
+}
 
 /* 
     Tensor get/set value operations

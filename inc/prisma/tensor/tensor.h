@@ -14,7 +14,10 @@ typedef struct PrismaTensor {
     bool is_view;       // defines if tensor is modifiable or only viewable
 
     size_t ndim;        // number or dimensions: 1d, 2d, 3d, nd.
-    size_t *shape;      // tensor shape
+    union {
+        size_t size;    // number of elements
+        size_t *shape;  // tensor shape
+    };
     prsm_float *data;   // data ptr
 
     // allocator: if `NULL`, then calloc/realloc/free is used
@@ -180,14 +183,55 @@ extern void prsm_tensor_assign(prsm_tensor_t *const lhs, const prsm_tensor_t *co
 extern void prsm_tensor_swap(prsm_tensor_t *const t1, prsm_tensor_t *const t2);
 
 /* 
-    Tensor slicing/view operations
+    Tensor view: no allocations involved
 */
 
+/**
+ * @brief  Checks if tensor is a view object
+ * @param  t tensor
+ * @returns true if t.is_view
+ */
 extern bool prsm_tensor_is_view(const prsm_tensor_t *const t);
+
+/**
+ * @brief  Makes a view object from tensor
+ * @param  t tensor
+ * @returns prsm_tensor_t
+ * 
+ * @note it's a value type, no need to free it
+ */
 extern prsm_tensor_t prsm_tensor_make_view(const prsm_tensor_t *const t);
+
+/**
+ * @brief  Makes a view matrix from tensor
+ * @param  t tensor
+ * @param  dim view dimension
+ * @returns prsm_tensor_t
+ * 
+ * @note it's a value type, no need to free it
+ */
 extern prsm_tensor_t prsm_tensor_make_view_mat(const prsm_tensor_t *const t, const size_t dim);
-extern prsm_tensor_t prsm_tensor_make_view_vec(const prsm_tensor_t *const t, const size_t dim, const size_t col);
-extern prsm_tensor_t prsm_tensor_make_view_array(const prsm_tensor_t *const t, const size_t dim, const size_t row);
+
+/**
+ * @brief  Makes a view vector from tensor
+ * @param  t tensor
+ * @param  idxFrom start from index
+ * @param  idxTo end index
+ * @returns prsm_tensor_t
+ * 
+ * @note it's a value type, no need to free it
+ */
+extern prsm_tensor_t prsm_tensor_make_view_vec(const prsm_tensor_t *const t, const size_t idxFrom, const size_t idxTo);
+
+/**
+ * @brief  Makes a range view from tensor
+ * @param  t tensor
+ * @param  shapeFrom start shape range
+ * @param  shapeTo end shape range
+ * @returns prsm_tensor_t
+ * 
+ * @note it's a value type, no need to free it
+ */
 extern prsm_tensor_t prsm_tensor_make_view_range(const prsm_tensor_t *const t, const size_t *const shapeFrom, const size_t *const shapeTo);
 
 /* 
