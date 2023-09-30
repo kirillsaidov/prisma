@@ -1,5 +1,10 @@
 #include "prisma/tensor/tensor.h"
 
+static prsm_tensor_t *prsm_tensor_mul_vec_by_vec(prsm_tensor_t *const tout, const prsm_tensor_t *const t1, const prsm_tensor_t *const t2);
+static prsm_tensor_t *prsm_tensor_mul_vec_by_mat(prsm_tensor_t *const tout, const prsm_tensor_t *const t1, const prsm_tensor_t *const t2);
+static prsm_tensor_t *prsm_tensor_mul_mat_by_vec(prsm_tensor_t *const tout, const prsm_tensor_t *const t1, const prsm_tensor_t *const t2);
+static prsm_tensor_t *prsm_tensor_mul_mat_by_mat(prsm_tensor_t *const tout, const prsm_tensor_t *const t1, const prsm_tensor_t *const t2);
+
 /* 
     Tensor creation/destruction
 */
@@ -460,13 +465,28 @@ void prsm_tensor_set_identity(prsm_tensor_t *const t) {
             }
         }
     } else {
-        VT_ENFORCE(0, "%s: t.ndim > 3 is unsupported!\n", prsm_status_to_str(PRSM_STATUS_OPERATION_FAILURE));
+        VT_ENFORCE(0, "%s: Higher dimensions are not supported!\n", prsm_status_to_str(PRSM_STATUS_OPERATION_FAILURE));
     }
 }
 
 /* 
     Tensor-wise operations
 */
+
+prsm_float prsm_tensor_dot(const prsm_tensor_t *const t1, const prsm_tensor_t *const t2) {
+    // check for invalid input
+    VT_DEBUG_ASSERT(!prsm_tensor_is_null(t1), "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INVALID_ARGUMENTS));
+    VT_DEBUG_ASSERT(!prsm_tensor_is_null(t2), "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INVALID_ARGUMENTS));
+    VT_ENFORCE(t1->ndim == 1 && t2->ndim == 1, "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INCOMPATIBLE_DIMENSIONS));
+
+    // calculate result
+    prsm_float result = 0;
+    VT_FOREACH(i, 0, prsm_tensor_size(t1)) {
+        result += t1->data[i] * t2->data[i];
+    }
+
+    return result;
+}
 
 prsm_tensor_t *prsm_tensor_add(const prsm_tensor_t *const t1, const prsm_tensor_t *const t2) {
     // check for invalid input
@@ -502,7 +522,37 @@ prsm_tensor_t *prsm_tensor_sub(const prsm_tensor_t *const t1, const prsm_tensor_
     return tret;
 }
 
-prsm_tensor_t *prsm_tensor_mul(const prsm_tensor_t *const t1, const prsm_tensor_t *const t2);
+prsm_tensor_t *prsm_tensor_mul(const prsm_tensor_t *const t1, const prsm_tensor_t *const t2) {
+    // check for invalid input
+    VT_DEBUG_ASSERT(!prsm_tensor_is_null(t1), "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INVALID_ARGUMENTS));
+    VT_DEBUG_ASSERT(!prsm_tensor_is_null(t2), "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INVALID_ARGUMENTS));
+
+    /*
+     * v - vector
+     * m - matrix
+     * 
+     * There are 5 cases:
+     *  1. v * v
+     *  2. v * m
+     *  3. m * v
+     *  4. m * m
+     *  5. not supported
+     */
+
+    // calculate multiplication
+    if (t1->ndim == 1 && t2->ndim == 1) {                   // case 1: v * v
+        return prsm_tensor_mul_vec_by_vec(NULL, t1, t2);
+    } else if (t1->ndim == 1 && t2->ndim == 2) {            // case 2: v * m
+        return prsm_tensor_mul_vec_by_mat(NULL, t1, t2);
+    } else if (t1->ndim == 2 && t2->ndim == 1) {            // case 3: m * v
+        return prsm_tensor_mul_mat_by_vec(NULL, t1, t2);
+    } else if (t1->ndim == 2 && t2->ndim == 2) {            // case 4: m * m
+        return prsm_tensor_mul_mat_by_mat(NULL, t1, t2);
+    } else {
+        VT_ENFORCE(0, "%s: Higher dimensions are not supported!\n", prsm_status_to_str(PRSM_STATUS_OPERATION_FAILURE));
+    }
+}
+
 prsm_tensor_t *prsm_tensor_div(const prsm_tensor_t *const t1, const prsm_tensor_t *const t2);
 
 enum PrismaStatus prsm_tensor_add_into(prsm_tensor_t *const tout, const prsm_tensor_t *const t1, const prsm_tensor_t *const t2);
@@ -547,4 +597,42 @@ void prsm_tensor_rand(prsm_tensor_t *const t);
 void prsm_tensor_rand_uniform(prsm_tensor_t *const t, const prsm_float lbound, const prsm_float ubound);
 void prsm_tensor_rand_normal(prsm_tensor_t *const t, const prsm_float mu, const prsm_float sigma);
 void prsm_tensor_rand_std_normal(prsm_tensor_t *const t);
+
+// -------------------------- PRIVATE -------------------------- //
+
+static prsm_tensor_t *prsm_tensor_mul_vec_by_vec(prsm_tensor_t *const tout, const prsm_tensor_t *const t1, const prsm_tensor_t *const t2) {
+    // check for invalid input
+    VT_DEBUG_ASSERT(!prsm_tensor_is_null(t1), "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INVALID_ARGUMENTS));
+    VT_DEBUG_ASSERT(!prsm_tensor_is_null(t2), "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INVALID_ARGUMENTS));
+    VT_ENFORCE(t1->ndim == 1 && t2->ndim == 1, "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INCOMPATIBLE_DIMENSIONS));
+
+    // check size
+    const size_t size = prsm_tensor_size(t1);
+    VT_ENFORCE(size == prsm_tensor_size(t2), "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INCOMPATIBLE_SHAPES));
+
+    // create tensor
+    prsm_tensor_t *tresult = (tout == NULL) 
+        ? prsm_tensor_create(t1->alloctr, 2, size, size)
+        : tout;
+
+    // check size
+    if (tresult->ndim !=2 || prsm_tensor_size(tresult) != 2 * size) {
+        prsm_tensor_resize(tresult, 2, size, size);
+    }
+
+    // calculate multiplication
+    VT_FOREACH(i, 0, size) {
+        VT_FOREACH(j, 0, size) {
+            tresult->data[vt_index_2d_to_1d(i, j, size)] = t1->data[i] * t2->data[j];
+        }
+    }
+
+    return tresult;
+}
+
+
+static prsm_tensor_t *prsm_tensor_mul_vec_by_mat(prsm_tensor_t *const tout, const prsm_tensor_t *const t1, const prsm_tensor_t *const t2);
+static prsm_tensor_t *prsm_tensor_mul_mat_by_vec(prsm_tensor_t *const tout, const prsm_tensor_t *const t1, const prsm_tensor_t *const t2);
+static prsm_tensor_t *prsm_tensor_mul_mat_by_mat(prsm_tensor_t *const tout, const prsm_tensor_t *const t1, const prsm_tensor_t *const t2);
+
 

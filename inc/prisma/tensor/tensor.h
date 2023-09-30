@@ -289,6 +289,7 @@ extern void prsm_tensor_set_identity(prsm_tensor_t *const t);
     Tensor-wise operations
 */
 
+extern prsm_float prsm_tensor_dot(const prsm_tensor_t *const t1, const prsm_tensor_t *const t2);
 extern prsm_tensor_t *prsm_tensor_add(const prsm_tensor_t *const t1, const prsm_tensor_t *const t2);
 extern prsm_tensor_t *prsm_tensor_sub(const prsm_tensor_t *const t1, const prsm_tensor_t *const t2);
 extern prsm_tensor_t *prsm_tensor_mul(const prsm_tensor_t *const t1, const prsm_tensor_t *const t2);
