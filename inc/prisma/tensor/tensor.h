@@ -293,23 +293,69 @@ extern prsm_float prsm_tensor_dot(const prsm_tensor_t *const t1, const prsm_tens
 extern prsm_tensor_t *prsm_tensor_add(const prsm_tensor_t *const t1, const prsm_tensor_t *const t2);
 extern prsm_tensor_t *prsm_tensor_sub(const prsm_tensor_t *const t1, const prsm_tensor_t *const t2);
 extern prsm_tensor_t *prsm_tensor_mul(const prsm_tensor_t *const t1, const prsm_tensor_t *const t2);
-extern prsm_tensor_t *prsm_tensor_div(const prsm_tensor_t *const t1, const prsm_tensor_t *const t2);
+extern prsm_tensor_t *prsm_tensor_inv(const prsm_tensor_t *const t1, const prsm_tensor_t *const t2);
 
 extern enum PrismaStatus prsm_tensor_add_into(prsm_tensor_t *const tout, const prsm_tensor_t *const t1, const prsm_tensor_t *const t2);
 extern enum PrismaStatus prsm_tensor_sub_into(prsm_tensor_t *const tout, const prsm_tensor_t *const t1, const prsm_tensor_t *const t2);
 extern enum PrismaStatus prsm_tensor_mul_into(prsm_tensor_t *const tout, const prsm_tensor_t *const t1, const prsm_tensor_t *const t2);
 extern enum PrismaStatus prsm_tensor_div_into(prsm_tensor_t *const tout, const prsm_tensor_t *const t1, const prsm_tensor_t *const t2);
+extern enum PrismaStatus prsm_tensor_inv_into(prsm_tensor_t *const tout, const prsm_tensor_t *const t1, const prsm_tensor_t *const t2);
 
 /* 
     Tensor element-wise operations
 */
 
+/**
+ * @brief  Scale tensor element and add value
+ * @param  t tensor
+ * @param  sval scale value
+ * @param  aval add value
+ * @returns None
+ */
 extern void prsm_tensor_apply_scale_add(prsm_tensor_t *const t, const prsm_float sval, const prsm_float aval);
+
+/**
+ * @brief  Apply ceiling operation 
+ * @param  t tensor
+ * @returns None
+ */
 extern void prsm_tensor_apply_ceil(prsm_tensor_t *const t);
+
+/**
+ * @brief  Apply floor operation 
+ * @param  t tensor
+ * @returns None
+ */
 extern void prsm_tensor_apply_floor(prsm_tensor_t *const t);
+
+/**
+ * @brief  Round off tensor values 
+ * @param  t tensor
+ * @returns None
+ */
 extern void prsm_tensor_apply_round(prsm_tensor_t *const t);
+
+/**
+ * @brief  Clip tensor values 
+ * @param  t tensor
+ * @param  min lower bound
+ * @param  max upper bound
+ * @returns None
+ */
 extern void prsm_tensor_apply_clip(prsm_tensor_t *const t, const prsm_float min, const prsm_float max);
+
+/**
+ * @brief  Apply abs function 
+ * @param  t tensor
+ * @returns None
+ */
 extern void prsm_tensor_apply_abs(prsm_tensor_t *const t);
+
+/**
+ * @brief  Negate tensor values 
+ * @param  t tensor
+ * @returns None
+ */
 extern void prsm_tensor_apply_neg(prsm_tensor_t *const t);
 
 /* 

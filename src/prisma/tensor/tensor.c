@@ -481,7 +481,8 @@ prsm_float prsm_tensor_dot(const prsm_tensor_t *const t1, const prsm_tensor_t *c
 
     // calculate result
     prsm_float result = 0;
-    VT_FOREACH(i, 0, prsm_tensor_size(t1)) {
+    const size_t size = prsm_tensor_size(t1);
+    VT_FOREACH(i, 0, size) {
         result += t1->data[i] * t2->data[i];
     }
 
@@ -498,7 +499,8 @@ prsm_tensor_t *prsm_tensor_add(const prsm_tensor_t *const t1, const prsm_tensor_
     prsm_tensor_t *tret = prsm_tensor_create_shape(t1->alloctr, t1->ndim, t1->shape);
 
     // add tensors
-    VT_FOREACH(i, 0, prsm_tensor_size(tret)) {
+    const size_t size = prsm_tensor_size(tret);
+    VT_FOREACH(i, 0, size) {
         tret->data[i] = t1->data[i] + t2->data[i];
     }
 
@@ -515,7 +517,8 @@ prsm_tensor_t *prsm_tensor_sub(const prsm_tensor_t *const t1, const prsm_tensor_
     prsm_tensor_t *tret = prsm_tensor_create_shape(t1->alloctr, t1->ndim, t1->shape);
 
     // add tensors
-    VT_FOREACH(i, 0, prsm_tensor_size(tret)) {
+    const size_t size = prsm_tensor_size(tret);
+    VT_FOREACH(i, 0, size) {
         tret->data[i] = t1->data[i] - t2->data[i];
     }
 
@@ -553,24 +556,94 @@ prsm_tensor_t *prsm_tensor_mul(const prsm_tensor_t *const t1, const prsm_tensor_
     }
 }
 
-prsm_tensor_t *prsm_tensor_div(const prsm_tensor_t *const t1, const prsm_tensor_t *const t2);
+prsm_tensor_t *prsm_tensor_inv(const prsm_tensor_t *const t1, const prsm_tensor_t *const t2);
 
 enum PrismaStatus prsm_tensor_add_into(prsm_tensor_t *const tout, const prsm_tensor_t *const t1, const prsm_tensor_t *const t2);
 enum PrismaStatus prsm_tensor_sub_into(prsm_tensor_t *const tout, const prsm_tensor_t *const t1, const prsm_tensor_t *const t2);
 enum PrismaStatus prsm_tensor_mul_into(prsm_tensor_t *const tout, const prsm_tensor_t *const t1, const prsm_tensor_t *const t2);
 enum PrismaStatus prsm_tensor_div_into(prsm_tensor_t *const tout, const prsm_tensor_t *const t1, const prsm_tensor_t *const t2);
+enum PrismaStatus prsm_tensor_inv_into(prsm_tensor_t *const tout, const prsm_tensor_t *const t1, const prsm_tensor_t *const t2);
 
 /* 
     Tensor element-wise operations
 */
 
-void prsm_tensor_apply_scale_add(prsm_tensor_t *const t, const prsm_float sval, const prsm_float aval);
-void prsm_tensor_apply_ceil(prsm_tensor_t *const t);
-void prsm_tensor_apply_floor(prsm_tensor_t *const t);
-void prsm_tensor_apply_round(prsm_tensor_t *const t);
-void prsm_tensor_apply_clip(prsm_tensor_t *const t, const prsm_float min, const prsm_float max);
-void prsm_tensor_apply_abs(prsm_tensor_t *const t);
-void prsm_tensor_apply_neg(prsm_tensor_t *const t);
+void prsm_tensor_apply_scale_add(prsm_tensor_t *const t, const prsm_float sval, const prsm_float aval) {
+    // check for invalid input
+    VT_DEBUG_ASSERT(!prsm_tensor_is_null(t), "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INVALID_ARGUMENTS));
+
+    // scale and add
+    const size_t size = prsm_tensor_size(t);
+    VT_FOREACH(i, 0, size) {
+        t->data[i] = t->data[i] * sval + aval;
+    }
+}
+
+void prsm_tensor_apply_ceil(prsm_tensor_t *const t) {
+    // check for invalid input
+    VT_DEBUG_ASSERT(!prsm_tensor_is_null(t), "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INVALID_ARGUMENTS));
+
+    // scale and add
+    const size_t size = prsm_tensor_size(t);
+    VT_FOREACH(i, 0, size) {
+        t->data[i] = PRSM_CEIL(t->data[i]);
+    }
+}
+
+void prsm_tensor_apply_floor(prsm_tensor_t *const t) {
+    // check for invalid input
+    VT_DEBUG_ASSERT(!prsm_tensor_is_null(t), "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INVALID_ARGUMENTS));
+
+    // scale and add
+    const size_t size = prsm_tensor_size(t);
+    VT_FOREACH(i, 0, size) {
+        t->data[i] = PRSM_FLOOR(t->data[i]);
+    }
+}
+
+void prsm_tensor_apply_round(prsm_tensor_t *const t) {
+    // check for invalid input
+    VT_DEBUG_ASSERT(!prsm_tensor_is_null(t), "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INVALID_ARGUMENTS));
+
+    // scale and add
+    const size_t size = prsm_tensor_size(t);
+    VT_FOREACH(i, 0, size) {
+        t->data[i] = PRSM_ROUND(t->data[i]);
+    }
+}
+
+void prsm_tensor_apply_clip(prsm_tensor_t *const t, const prsm_float min, const prsm_float max) {
+    // check for invalid input
+    VT_DEBUG_ASSERT(!prsm_tensor_is_null(t), "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INVALID_ARGUMENTS));
+
+    // scale and add
+    const size_t size = prsm_tensor_size(t);
+    VT_FOREACH(i, 0, size) {
+        t->data[i] = PRSM_CLAMP(t->data[i], min, max);
+    }
+}
+
+void prsm_tensor_apply_abs(prsm_tensor_t *const t) {
+    // check for invalid input
+    VT_DEBUG_ASSERT(!prsm_tensor_is_null(t), "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INVALID_ARGUMENTS));
+
+    // scale and add
+    const size_t size = prsm_tensor_size(t);
+    VT_FOREACH(i, 0, size) {
+        t->data[i] = PRSM_ABS(t->data[i]);
+    }
+}
+
+void prsm_tensor_apply_neg(prsm_tensor_t *const t) {
+    // check for invalid input
+    VT_DEBUG_ASSERT(!prsm_tensor_is_null(t), "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INVALID_ARGUMENTS));
+
+    // scale and add
+    const size_t size = prsm_tensor_size(t);
+    VT_FOREACH(i, 0, size) {
+        t->data[i] = -t->data[i];
+    }
+}
 
 /* 
     Tensor statistics on the whole tensor
@@ -629,7 +702,6 @@ static prsm_tensor_t *prsm_tensor_mul_vec_by_vec(prsm_tensor_t *const tout, cons
 
     return tresult;
 }
-
 
 static prsm_tensor_t *prsm_tensor_mul_vec_by_mat(prsm_tensor_t *const tout, const prsm_tensor_t *const t1, const prsm_tensor_t *const t2);
 static prsm_tensor_t *prsm_tensor_mul_mat_by_vec(prsm_tensor_t *const tout, const prsm_tensor_t *const t1, const prsm_tensor_t *const t2);
