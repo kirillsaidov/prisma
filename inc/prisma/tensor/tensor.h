@@ -362,17 +362,85 @@ extern void prsm_tensor_apply_neg(prsm_tensor_t *const t);
     Tensor statistics on the whole tensor
 */
 
+/**
+ * @brief  Find minimum value 
+ * @param  t tensor
+ * @returns min
+ */
 extern prsm_float prsm_tensor_get_min(const prsm_tensor_t *const t);
+
+/**
+ * @brief  Find maximum value 
+ * @param  t tensor
+ * @returns max
+ */
 extern prsm_float prsm_tensor_get_max(const prsm_tensor_t *const t);
+
+/**
+ * @brief  Find minimum and maximum value 
+ * @param  t tensor
+ * @param  min save min value
+ * @param  min save max value
+ * @returns None
+ */
 extern void prsm_tensor_get_minmax(const prsm_tensor_t *const t, prsm_float *min, prsm_float *max);
+
+/**
+ * @brief  Find index of minimum value 
+ * @param  t tensor
+ * @returns index
+ */
 extern size_t prsm_tensor_get_min_index(const prsm_tensor_t *const t);
+
+/**
+ * @brief  Find index of maximum value 
+ * @param  t tensor
+ * @returns index
+ */
 extern size_t prsm_tensor_get_max_index(const prsm_tensor_t *const t);
+
+/**
+ * @brief  Find index of minimum and maximum value 
+ * @param  t tensor
+ * @param  min_index save min index value
+ * @param  max_index save max index value
+ * @returns None
+ */
 extern void prsm_tensor_get_minmax_index(const prsm_tensor_t *const t, size_t *min_index, size_t *max_index);
 
+/**
+ * @brief  Calculate sum 
+ * @param  t tensor
+ * @returns sum
+ */
 extern prsm_float prsm_tensor_calc_sum(const prsm_tensor_t *const t);
+
+/**
+ * @brief  Calculate product 
+ * @param  t tensor
+ * @returns product
+ */
 extern prsm_float prsm_tensor_calc_prod(const prsm_tensor_t *const t);
+
+/**
+ * @brief  Calculate mean 
+ * @param  t tensor
+ * @returns mean
+ */
 extern prsm_float prsm_tensor_calc_mean(const prsm_tensor_t *const t);
+
+/**
+ * @brief  Calculate variance 
+ * @param  t tensor
+ * @returns variance
+ */
 extern prsm_float prsm_tensor_calc_var(const prsm_tensor_t *const t);
+
+/**
+ * @brief  Calculate standard deviation 
+ * @param  t tensor
+ * @returns standard deviation
+ */
 extern prsm_float prsm_tensor_calc_stddev(const prsm_tensor_t *const t);
 
 /* 

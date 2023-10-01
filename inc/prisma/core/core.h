@@ -20,6 +20,8 @@
     #define PRSM_CEIL ceil
     #define PRSM_FLOOR floor
     #define PRSM_ROUND round
+    #define PRSM_POW pow
+    #define PRSM_SQRT sqrt
     #define PRSM_CLAMP vt_cmp_clampd
 #elif defined(PRISMA_USE_TYPE_LONG_DOUBLE)
     #define PRSM_FLOAT double
@@ -27,6 +29,8 @@
     #define PRSM_CEIL ceill
     #define PRSM_FLOOR floorl
     #define PRSM_ROUND roundl
+    #define PRSM_POW powl
+    #define PRSM_SQRT sqrtl
     #define PRSM_CLAMP vt_cmp_clampr
 #else
     #define PRSM_FLOAT float
@@ -34,6 +38,8 @@
     #define PRSM_CEIL ceilf
     #define PRSM_FLOOR floorf
     #define PRSM_ROUND roundf
+    #define PRSM_POW powf
+    #define PRSM_SQRT sqrtf
     #define PRSM_CLAMP vt_cmp_clampf
 #endif
 typedef PRSM_FLOAT prsm_float;
