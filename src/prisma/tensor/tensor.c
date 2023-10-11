@@ -529,6 +529,7 @@ prsm_tensor_t *prsm_tensor_mul(const prsm_tensor_t *const t1, const prsm_tensor_
     // check for invalid input
     VT_DEBUG_ASSERT(!prsm_tensor_is_null(t1), "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INVALID_ARGUMENTS));
     VT_DEBUG_ASSERT(!prsm_tensor_is_null(t2), "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INVALID_ARGUMENTS));
+    VT_ENFORCE(t1->ndim > 2 || t2->ndim > 2, "%s: Higher dimensions are not supported!\n", prsm_status_to_str(PRSM_STATUS_OPERATION_FAILURE));
 
     /*
      * v - vector
@@ -552,7 +553,7 @@ prsm_tensor_t *prsm_tensor_mul(const prsm_tensor_t *const t1, const prsm_tensor_
     } else if (t1->ndim == 2 && t2->ndim == 2) {            // case 4: m * m
         return prsm_tensor_mul_mat_by_mat(NULL, t1, t2);
     } else {
-        VT_ENFORCE(0, "%s: Higher dimensions are not supported!\n", prsm_status_to_str(PRSM_STATUS_OPERATION_FAILURE));
+        return NULL;
     }
 }
 
@@ -856,35 +857,33 @@ static prsm_tensor_t *prsm_tensor_mul_vec_by_vec(prsm_tensor_t *const tout, cons
  * 
  * @note if `tout==NULL`, tensor is allocated
  */
-static prsm_tensor_t *prsm_tensor_mul_vec_by_mat(prsm_tensor_t *const tout, const prsm_tensor_t *const t1, const prsm_tensor_t *const t2); /*{
+static prsm_tensor_t *prsm_tensor_mul_vec_by_mat(prsm_tensor_t *const tout, const prsm_tensor_t *const t1, const prsm_tensor_t *const t2) {
     // check for invalid input
     VT_DEBUG_ASSERT(!prsm_tensor_is_null(t1), "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INVALID_ARGUMENTS));
     VT_DEBUG_ASSERT(!prsm_tensor_is_null(t2), "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INVALID_ARGUMENTS));
     VT_ENFORCE(t1->ndim == 1 && t2->ndim == 2, "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INCOMPATIBLE_DIMENSIONS));
-
-    // check size
-    const size_t size = prsm_tensor_size(t1);
-    VT_ENFORCE(size == prsm_tensor_size(t2), "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INCOMPATIBLE_SHAPES));
+    VT_ENFORCE(t1->shape[0] == t2->shape[1], "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INCOMPATIBLE_SHAPES));
 
     // create tensor
+    const size_t size = t2->shape[1];
     prsm_tensor_t *tresult = (tout == NULL) 
-        ? prsm_tensor_create(t1->alloctr, 2, size, size)
+        ? prsm_tensor_create(t1->alloctr, 1, size)
         : tout;
 
     // check size
-    if (tresult->ndim !=2 || prsm_tensor_size(tresult) != 2 * size) {
-        prsm_tensor_resize(tresult, 2, size, size);
+    if (tresult->ndim != 1 || prsm_tensor_size(tresult) != size) {
+        prsm_tensor_resize(tresult, 1, size);
     }
 
     // calculate multiplication
     VT_FOREACH(i, 0, size) {
         VT_FOREACH(j, 0, size) {
-            tresult->data[vt_index_2d_to_1d(i, j, size)] = t1->data[i] * t2->data[j];
+            tresult->data[i] = t1->data[i] * t2->data[vt_index_2d_to_1d(i, j, size)];
         }
     }
 
     return tresult;
-}*/
+}
 
 /**
  * @brief  Multiplies matrix by vector
@@ -932,6 +931,33 @@ static prsm_tensor_t *prsm_tensor_mul_mat_by_vec(prsm_tensor_t *const tout, cons
  * 
  * @note if `tout==NULL`, tensor is allocated
  */
-static prsm_tensor_t *prsm_tensor_mul_mat_by_mat(prsm_tensor_t *const tout, const prsm_tensor_t *const t1, const prsm_tensor_t *const t2);
+static prsm_tensor_t *prsm_tensor_mul_mat_by_mat(prsm_tensor_t *const tout, const prsm_tensor_t *const t1, const prsm_tensor_t *const t2) {
+    // check for invalid input
+    VT_DEBUG_ASSERT(!prsm_tensor_is_null(t1), "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INVALID_ARGUMENTS));
+    VT_DEBUG_ASSERT(!prsm_tensor_is_null(t2), "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INVALID_ARGUMENTS));
+    VT_ENFORCE(t1->ndim == 2 && t2->ndim == 2, "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INCOMPATIBLE_DIMENSIONS));
+    VT_ENFORCE(t1->shape[1] == t2->shape[0], "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INCOMPATIBLE_SHAPES));
+
+    // create tensor
+    const size_t rows = t1->shape[0];
+    const size_t cols = t2->shape[1];
+    prsm_tensor_t *tresult = (tout == NULL) 
+        ? prsm_tensor_create(t1->alloctr, 2, rows, cols)
+        : tout;
+
+    // check size
+    if (tresult->ndim != 2 || prsm_tensor_size(tresult) != rows * cols) {
+        prsm_tensor_resize(tresult, 2, rows, cols);
+    }
+
+    // calculate multiplication
+    VT_FOREACH(i, 0, rows) {
+        VT_FOREACH(j, 0, cols) {
+            tresult->data[vt_index_2d_to_1d(i, j, cols)] += t1->data[vt_index_2d_to_1d(i, j, cols)] * t2->data[vt_index_2d_to_1d(i, j, cols)];
+        }
+    }
+
+    return tresult;
+}
 
 
