@@ -1,6 +1,5 @@
 #include "prisma/tensor/tensor.h"
 
-static prsm_tensor_t *prsm_tensor_mul_vec_by_vec(prsm_tensor_t *const tout, const prsm_tensor_t *const t1, const prsm_tensor_t *const t2);
 static prsm_tensor_t *prsm_tensor_mul_vec_by_mat(prsm_tensor_t *const tout, const prsm_tensor_t *const t1, const prsm_tensor_t *const t2);
 static prsm_tensor_t *prsm_tensor_mul_mat_by_vec(prsm_tensor_t *const tout, const prsm_tensor_t *const t1, const prsm_tensor_t *const t2);
 static prsm_tensor_t *prsm_tensor_mul_mat_by_mat(prsm_tensor_t *const tout, const prsm_tensor_t *const t1, const prsm_tensor_t *const t2);
@@ -530,23 +529,21 @@ prsm_tensor_t *prsm_tensor_mul(const prsm_tensor_t *const t1, const prsm_tensor_
     VT_DEBUG_ASSERT(!prsm_tensor_is_null(t1), "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INVALID_ARGUMENTS));
     VT_DEBUG_ASSERT(!prsm_tensor_is_null(t2), "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INVALID_ARGUMENTS));
     VT_ENFORCE(t1->ndim > 2 || t2->ndim > 2, "%s: Higher dimensions are not supported!\n", prsm_status_to_str(PRSM_STATUS_OPERATION_FAILURE));
+    VT_ENFORCE(t1->ndim == 1 || t2->ndim == 1, "%s: Use 'prsm_tensor_dot(t1, t2)'!\n", prsm_status_to_str(PRSM_STATUS_OPERATION_FAILURE));
 
     /*
      * v - vector
      * m - matrix
      * 
-     * There are 5 cases:
-     *  1. v * v
-     *  2. v * m
-     *  3. m * v
-     *  4. m * m
-     *  5. not supported
+     * There are 4 cases:
+     *  1. v * m
+     *  2. m * v
+     *  3. m * m
+     *  4. not supported
      */
 
     // calculate multiplication
-    if (t1->ndim == 1 && t2->ndim == 1) {                   // case 1: v * v
-        return prsm_tensor_mul_vec_by_vec(NULL, t1, t2);
-    } else if (t1->ndim == 1 && t2->ndim == 2) {            // case 2: v * m
+    if (t1->ndim == 1 && t2->ndim == 2) {            // case 2: v * m
         return prsm_tensor_mul_vec_by_mat(NULL, t1, t2);
     } else if (t1->ndim == 2 && t2->ndim == 1) {            // case 3: m * v
         return prsm_tensor_mul_mat_by_vec(NULL, t1, t2);
@@ -557,7 +554,7 @@ prsm_tensor_t *prsm_tensor_mul(const prsm_tensor_t *const t1, const prsm_tensor_
     }
 }
 
-prsm_tensor_t *prsm_tensor_inv(const prsm_tensor_t *const t1, const prsm_tensor_t *const t2);
+prsm_tensor_t *prsm_tensor_inv(const prsm_tensor_t *const t);
 
 enum PrismaStatus prsm_tensor_add_into(prsm_tensor_t *const tout, const prsm_tensor_t *const t1, const prsm_tensor_t *const t2);
 enum PrismaStatus prsm_tensor_sub_into(prsm_tensor_t *const tout, const prsm_tensor_t *const t1, const prsm_tensor_t *const t2);
@@ -810,43 +807,6 @@ void prsm_tensor_rand_normal(prsm_tensor_t *const t, const prsm_float mu, const 
 void prsm_tensor_rand_std_normal(prsm_tensor_t *const t);
 
 // -------------------------- PRIVATE -------------------------- //
-
-/**
- * @brief  Multiplies vector by vector
- * @param  tout output tensor
- * @param  t1 input vector tensor
- * @param  t2 input vector tensor
- * @returns matrix tensor
- * 
- * @note if `tout==NULL`, tensor is allocated
- */
-static prsm_tensor_t *prsm_tensor_mul_vec_by_vec(prsm_tensor_t *const tout, const prsm_tensor_t *const t1, const prsm_tensor_t *const t2) {
-    // check for invalid input
-    VT_DEBUG_ASSERT(!prsm_tensor_is_null(t1), "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INVALID_ARGUMENTS));
-    VT_DEBUG_ASSERT(!prsm_tensor_is_null(t2), "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INVALID_ARGUMENTS));
-    VT_ENFORCE(t1->ndim == 1 && t2->ndim == 1, "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INCOMPATIBLE_DIMENSIONS));
-    VT_ENFORCE(t1->shape[0] == t2->shape[0], "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INCOMPATIBLE_SHAPES));
-
-    // create tensor
-    const size_t size = t1->shape[0];
-    prsm_tensor_t *tresult = (tout == NULL) 
-        ? prsm_tensor_create(t1->alloctr, 2, size, size)
-        : tout;
-
-    // check size
-    if (tresult->ndim != 2 || prsm_tensor_size(tresult) != 2 * size) {
-        prsm_tensor_resize(tresult, 2, size, size);
-    }
-
-    // calculate multiplication
-    VT_FOREACH(i, 0, size) {
-        VT_FOREACH(j, 0, size) {
-            tresult->data[vt_index_2d_to_1d(i, j, size)] = t1->data[i] * t2->data[j];
-        }
-    }
-
-    return tresult;
-}
 
 /**
  * @brief  Multiplies vector by matrix

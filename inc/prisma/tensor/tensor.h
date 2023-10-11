@@ -289,11 +289,44 @@ extern void prsm_tensor_set_identity(prsm_tensor_t *const t);
     Tensor-wise operations
 */
 
+/**
+ * @brief  Dot product
+ * @param  t1 tensor vector
+ * @param  t2 tensor vector
+ * @returns prsm_float
+ */
 extern prsm_float prsm_tensor_dot(const prsm_tensor_t *const t1, const prsm_tensor_t *const t2);
+
+/**
+ * @brief  Add tensors
+ * @param  t1 tensor
+ * @param  t2 tensor
+ * @returns prsm_tensor*
+ */
 extern prsm_tensor_t *prsm_tensor_add(const prsm_tensor_t *const t1, const prsm_tensor_t *const t2);
+
+/**
+ * @brief  Substract tensors
+ * @param  t1 tensor
+ * @param  t2 tensor
+ * @returns prsm_tensor*
+ */
 extern prsm_tensor_t *prsm_tensor_sub(const prsm_tensor_t *const t1, const prsm_tensor_t *const t2);
+
+/**
+ * @brief  Multiply tensors
+ * @param  t1 tensor
+ * @param  t2 tensor
+ * @returns prsm_tensor*
+ */
 extern prsm_tensor_t *prsm_tensor_mul(const prsm_tensor_t *const t1, const prsm_tensor_t *const t2);
-extern prsm_tensor_t *prsm_tensor_inv(const prsm_tensor_t *const t1, const prsm_tensor_t *const t2);
+
+/**
+ * @brief  Find tensor inverse (for matrices)
+ * @param  t tensor
+ * @returns prsm_tensor*
+ */
+extern prsm_tensor_t *prsm_tensor_inv(const prsm_tensor_t *const t);
 
 extern enum PrismaStatus prsm_tensor_add_into(prsm_tensor_t *const tout, const prsm_tensor_t *const t1, const prsm_tensor_t *const t2);
 extern enum PrismaStatus prsm_tensor_sub_into(prsm_tensor_t *const tout, const prsm_tensor_t *const t1, const prsm_tensor_t *const t2);
