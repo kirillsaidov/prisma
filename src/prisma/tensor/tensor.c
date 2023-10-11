@@ -543,7 +543,7 @@ prsm_tensor_t *prsm_tensor_mul(const prsm_tensor_t *const t1, const prsm_tensor_
      */
 
     // calculate multiplication
-    if (t1->ndim == 1 && t2->ndim == 2) {            // case 2: v * m
+    if (t1->ndim == 1 && t2->ndim == 2) {                   // case 2: v * m
         return prsm_tensor_mul_vec_by_mat(NULL, t1, t2);
     } else if (t1->ndim == 2 && t2->ndim == 1) {            // case 3: m * v
         return prsm_tensor_mul_mat_by_vec(NULL, t1, t2);
@@ -553,14 +553,6 @@ prsm_tensor_t *prsm_tensor_mul(const prsm_tensor_t *const t1, const prsm_tensor_
         return NULL;
     }
 }
-
-prsm_tensor_t *prsm_tensor_inv(const prsm_tensor_t *const t);
-
-enum PrismaStatus prsm_tensor_add_into(prsm_tensor_t *const tout, const prsm_tensor_t *const t1, const prsm_tensor_t *const t2);
-enum PrismaStatus prsm_tensor_sub_into(prsm_tensor_t *const tout, const prsm_tensor_t *const t1, const prsm_tensor_t *const t2);
-enum PrismaStatus prsm_tensor_mul_into(prsm_tensor_t *const tout, const prsm_tensor_t *const t1, const prsm_tensor_t *const t2);
-enum PrismaStatus prsm_tensor_div_into(prsm_tensor_t *const tout, const prsm_tensor_t *const t1, const prsm_tensor_t *const t2);
-enum PrismaStatus prsm_tensor_inv_into(prsm_tensor_t *const tout, const prsm_tensor_t *const t1, const prsm_tensor_t *const t2);
 
 /* 
     Tensor element-wise operations
