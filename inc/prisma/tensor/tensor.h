@@ -472,5 +472,17 @@ extern void prsm_tensor_rand_uniform(prsm_tensor_t *const t, const prsm_float lb
 extern void prsm_tensor_rand_normal(prsm_tensor_t *const t, const prsm_float mu, const prsm_float sigma);
 extern void prsm_tensor_rand_std_normal(prsm_tensor_t *const t);
 
+/* 
+    Pretty printing
+*/
+
+/**
+ * @brief  Pretty printing 
+ * @param  t tensor
+ * @param  range view
+ * @returns None
+ */
+extern void prsm_tensor_display(const prsm_tensor_t *const t, const size_t range[]);
+
 #endif // PRISMA_CORE_TENSOR_H
 

@@ -265,11 +265,19 @@ bool prsm_tensor_match_shape(const prsm_tensor_t *const t1, const prsm_tensor_t 
 }
 
 bool prsm_tensor_equals(const prsm_tensor_t *const t1, const prsm_tensor_t *const t2) {
-    return (
-        !prsm_tensor_is_null(t1) &&
-        !prsm_tensor_is_null(t2) &&
-        vt_memcmp(t1, t2, sizeof(prsm_tensor_t))
-    );
+    // check for invalid input
+    VT_DEBUG_ASSERT(!prsm_tensor_is_null(t1), "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INVALID_ARGUMENTS));
+    VT_DEBUG_ASSERT(!prsm_tensor_is_null(t2), "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INVALID_ARGUMENTS));
+
+    if (t1->ndim != t2->ndim) return false;
+    if (prsm_tensor_size(t1) != prsm_tensor_size(t2)) return false;
+
+    // check values
+    VT_FOREACH(i, 0, prsm_tensor_size(t1)) {
+        if (t1->data[i] != t2->data[i]) return false;
+    }
+
+    return true;
 }
 
 void prsm_tensor_assign(prsm_tensor_t *const lhs, const prsm_tensor_t *const rhs) {
@@ -423,7 +431,10 @@ void prsm_tensor_set_val(prsm_tensor_t *const t, const size_t idx, const prsm_fl
 void prsm_tensor_set_all(prsm_tensor_t *const t, const prsm_float value) {
     // check for invalid input
     VT_DEBUG_ASSERT(!prsm_tensor_is_null(t), "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INVALID_ARGUMENTS));
-    vt_memset(t->data, value, prsm_tensor_size(t));
+
+    VT_FOREACH(i, 0, prsm_tensor_size(t)) {
+        t->data[i] = value;
+    }
 }
 
 void prsm_tensor_set_ones(prsm_tensor_t *const t) {
@@ -797,6 +808,36 @@ void prsm_tensor_rand(prsm_tensor_t *const t);
 void prsm_tensor_rand_uniform(prsm_tensor_t *const t, const prsm_float lbound, const prsm_float ubound);
 void prsm_tensor_rand_normal(prsm_tensor_t *const t, const prsm_float mu, const prsm_float sigma);
 void prsm_tensor_rand_std_normal(prsm_tensor_t *const t);
+
+/* 
+    Pretty printing
+*/
+
+void prsm_tensor_display(const prsm_tensor_t *const t, const size_t range[]) {
+    // check for invalid input
+    VT_DEBUG_ASSERT(!prsm_tensor_is_null(t), "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INVALID_ARGUMENTS));
+
+    // print
+    if (range == NULL && t->ndim == 1) {
+        printf("[ %.2f\n", t->data[0]);
+        VT_FOREACH(i, 1, t->shape[0]-1) {
+            printf("  %.2f\n", t->data[i]);
+        }
+        printf("  %.2f ]\n", t->data[t->shape[0]-1]);
+    } else if (range == NULL && t->ndim == 2) {
+        printf("[ ");
+        VT_FOREACH(i, 0, t->shape[0]) {
+            printf("[ ");
+            VT_FOREACH(j, 0, t->shape[1]) {
+                printf("%.2f ", t->data[vt_index_2d_to_1d(i, j, t->shape[1])]);
+            }
+            printf("]\n");
+        }
+        printf(" ]\n");
+    } else {
+        VT_UNIMPLEMENTED("Unsupported for now!");
+    }
+}
 
 // -------------------------- PRIVATE -------------------------- //
 
