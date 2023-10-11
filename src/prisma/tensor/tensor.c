@@ -810,11 +810,57 @@ void prsm_tensor_rand_std_normal(prsm_tensor_t *const t);
 
 // -------------------------- PRIVATE -------------------------- //
 
+/**
+ * @brief  Multiplies vector by vector
+ * @param  tout output tensor
+ * @param  t1 input vector tensor
+ * @param  t2 input vector tensor
+ * @returns matrix tensor
+ * 
+ * @note if `tout==NULL`, tensor is allocated
+ */
 static prsm_tensor_t *prsm_tensor_mul_vec_by_vec(prsm_tensor_t *const tout, const prsm_tensor_t *const t1, const prsm_tensor_t *const t2) {
     // check for invalid input
     VT_DEBUG_ASSERT(!prsm_tensor_is_null(t1), "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INVALID_ARGUMENTS));
     VT_DEBUG_ASSERT(!prsm_tensor_is_null(t2), "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INVALID_ARGUMENTS));
     VT_ENFORCE(t1->ndim == 1 && t2->ndim == 1, "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INCOMPATIBLE_DIMENSIONS));
+    VT_ENFORCE(t1->shape[0] == t2->shape[0], "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INCOMPATIBLE_SHAPES));
+
+    // create tensor
+    const size_t size = t1->shape[0];
+    prsm_tensor_t *tresult = (tout == NULL) 
+        ? prsm_tensor_create(t1->alloctr, 2, size, size)
+        : tout;
+
+    // check size
+    if (tresult->ndim != 2 || prsm_tensor_size(tresult) != 2 * size) {
+        prsm_tensor_resize(tresult, 2, size, size);
+    }
+
+    // calculate multiplication
+    VT_FOREACH(i, 0, size) {
+        VT_FOREACH(j, 0, size) {
+            tresult->data[vt_index_2d_to_1d(i, j, size)] = t1->data[i] * t2->data[j];
+        }
+    }
+
+    return tresult;
+}
+
+/**
+ * @brief  Multiplies vector by matrix
+ * @param  tout output tensor
+ * @param  t1 input vector tensor
+ * @param  t2 input matrix tensor
+ * @returns vector tensor
+ * 
+ * @note if `tout==NULL`, tensor is allocated
+ */
+static prsm_tensor_t *prsm_tensor_mul_vec_by_mat(prsm_tensor_t *const tout, const prsm_tensor_t *const t1, const prsm_tensor_t *const t2); /*{
+    // check for invalid input
+    VT_DEBUG_ASSERT(!prsm_tensor_is_null(t1), "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INVALID_ARGUMENTS));
+    VT_DEBUG_ASSERT(!prsm_tensor_is_null(t2), "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INVALID_ARGUMENTS));
+    VT_ENFORCE(t1->ndim == 1 && t2->ndim == 2, "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INCOMPATIBLE_DIMENSIONS));
 
     // check size
     const size_t size = prsm_tensor_size(t1);
@@ -838,10 +884,54 @@ static prsm_tensor_t *prsm_tensor_mul_vec_by_vec(prsm_tensor_t *const tout, cons
     }
 
     return tresult;
+}*/
+
+/**
+ * @brief  Multiplies matrix by vector
+ * @param  tout output tensor
+ * @param  t1 input matrix tensor
+ * @param  t2 input vector tensor
+ * @returns matrix tensor
+ * 
+ * @note if `tout==NULL`, tensor is allocated
+ */
+static prsm_tensor_t *prsm_tensor_mul_mat_by_vec(prsm_tensor_t *const tout, const prsm_tensor_t *const t1, const prsm_tensor_t *const t2) {
+    // check for invalid input
+    VT_DEBUG_ASSERT(!prsm_tensor_is_null(t1), "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INVALID_ARGUMENTS));
+    VT_DEBUG_ASSERT(!prsm_tensor_is_null(t2), "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INVALID_ARGUMENTS));
+    VT_ENFORCE(t1->ndim == 2 && t2->ndim == 1, "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INCOMPATIBLE_DIMENSIONS));
+    VT_ENFORCE(t1->shape[1] == t2->shape[0], "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INCOMPATIBLE_SHAPES));
+
+    // create tensor
+    const size_t size = t2->shape[0];
+    prsm_tensor_t *tresult = (tout == NULL) 
+        ? prsm_tensor_create(t1->alloctr, 1, size)
+        : tout;
+
+    // check size
+    if (tresult->ndim != 1 || prsm_tensor_size(tresult) != size) {
+        prsm_tensor_resize(tresult, 1, size);
+    }
+
+    // calculate multiplication
+    VT_FOREACH(i, 0, size) {
+        VT_FOREACH(j, 0, size) {
+            tresult->data[i] = t1->data[vt_index_2d_to_1d(i, j, size)] * t2->data[j];
+        }
+    }
+
+    return tresult;
 }
 
-static prsm_tensor_t *prsm_tensor_mul_vec_by_mat(prsm_tensor_t *const tout, const prsm_tensor_t *const t1, const prsm_tensor_t *const t2);
-static prsm_tensor_t *prsm_tensor_mul_mat_by_vec(prsm_tensor_t *const tout, const prsm_tensor_t *const t1, const prsm_tensor_t *const t2);
+/**
+ * @brief  Multiplies matrix by matrix
+ * @param  tout output tensor
+ * @param  t1 input vector tensor
+ * @param  t2 input vector tensor
+ * @returns matrix tensor
+ * 
+ * @note if `tout==NULL`, tensor is allocated
+ */
 static prsm_tensor_t *prsm_tensor_mul_mat_by_mat(prsm_tensor_t *const tout, const prsm_tensor_t *const t1, const prsm_tensor_t *const t2);
 
 
