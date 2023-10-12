@@ -2,11 +2,67 @@
 #define PRISMA_CORE_TENSOR_H
 
 /** TENSOR MODULE
-    - prsm_tensor_create    
-    - prsm_tensor_destroy    
+    - prsm_tensor_create
+    - prsm_tensor_create_shape
+    - prsm_tensor_create_vec
+    - prsm_tensor_create_mat
+    - prsm_tensor_destroy
+    - prsm_tensor_is_null
+    - prsm_tensor_dim
+    - prsm_tensor_shape
+    - prsm_tensor_data
+    - prsm_tensor_size
+    - prsm_tensor_resize
+    - prsm_tensor_resize_shape
+    - prsm_tensor_dup
+    - prsm_tensor_dup_into
+    - prsm_tensor_match_shape
+    - prsm_tensor_equals
+    - prsm_tensor_assign
+    - prsm_tensor_swap
+    - prsm_tensor_is_view
+    - prsm_tensor_make_view
+    - prsm_tensor_make_view_mat
+    - prsm_tensor_make_view_vec
+    - prsm_tensor_make_view_range
+    - prsm_tensor_get_val
+    - prsm_tensor_set_val
+    - prsm_tensor_set_all
+    - prsm_tensor_set_ones
+    - prsm_tensor_set_zeros
+    - prsm_tensor_set_identity
+    - prsm_tensor_dot
+    - prsm_tensor_add
+    - prsm_tensor_sub
+    - prsm_tensor_mul
+    - prsm_tensor_apply_scale_add
+    - prsm_tensor_apply_ceil
+    - prsm_tensor_apply_floor
+    - prsm_tensor_apply_round
+    - prsm_tensor_apply_clip
+    - prsm_tensor_apply_abs
+    - prsm_tensor_apply_neg
+    // - prsm_tensor_apply
+    - prsm_tensor_get_min
+    - prsm_tensor_get_max
+    - prsm_tensor_get_minmax
+    - prsm_tensor_get_min_index
+    - prsm_tensor_get_max_index
+    - prsm_tensor_get_minmax_index
+    - prsm_tensor_calc_sum
+    - prsm_tensor_calc_prod
+    - prsm_tensor_calc_mean
+    - prsm_tensor_calc_var
+    - prsm_tensor_calc_std
+    - prsm_tensor_rand
+    - prsm_tensor_rand_uniform
+    - prsm_tensor_rand_normal
+    - prsm_tensor_rand_std_normal
+    - prsm_tensor_display
 */
 
 #include "prisma/core/core.h"
+#include "vita/math/math.h"
 #include "vita/util/debug.h"
 #include "vita/container/common.h"
 #include "vita/allocator/mallocator.h"
@@ -299,27 +355,36 @@ extern prsm_float prsm_tensor_dot(const prsm_tensor_t *const t1, const prsm_tens
 
 /**
  * @brief  Add tensors
+ * @param  tout output tensor
  * @param  t1 tensor
  * @param  t2 tensor
  * @returns prsm_tensor*
+ * 
+ * @note if `tout==NULL`, tout is allocated
  */
-extern prsm_tensor_t *prsm_tensor_add(const prsm_tensor_t *const t1, const prsm_tensor_t *const t2);
+extern prsm_tensor_t *prsm_tensor_add(prsm_tensor_t *tout, const prsm_tensor_t *const t1, const prsm_tensor_t *const t2);
 
 /**
  * @brief  Substract tensors
+ * @param  tout output tensor
  * @param  t1 tensor
  * @param  t2 tensor
  * @returns prsm_tensor*
+ * 
+ * @note if `tout==NULL`, tout is allocated
  */
-extern prsm_tensor_t *prsm_tensor_sub(const prsm_tensor_t *const t1, const prsm_tensor_t *const t2);
+extern prsm_tensor_t *prsm_tensor_sub(prsm_tensor_t *tout, const prsm_tensor_t *const t1, const prsm_tensor_t *const t2);
 
 /**
  * @brief  Multiply tensors
+ * @param  tout output tensor
  * @param  t1 tensor
  * @param  t2 tensor
  * @returns prsm_tensor*
+ * 
+ * @note if `tout==NULL`, tout is allocated
  */
-extern prsm_tensor_t *prsm_tensor_mul(const prsm_tensor_t *const t1, const prsm_tensor_t *const t2);
+extern prsm_tensor_t *prsm_tensor_mul(prsm_tensor_t *tout, const prsm_tensor_t *const t1, const prsm_tensor_t *const t2);
 
 /* 
     Tensor element-wise operations
@@ -461,16 +526,25 @@ extern prsm_float prsm_tensor_calc_var(const prsm_tensor_t *const t);
  * @param  t tensor
  * @returns standard deviation
  */
-extern prsm_float prsm_tensor_calc_stddev(const prsm_tensor_t *const t);
+extern prsm_float prsm_tensor_calc_std(const prsm_tensor_t *const t);
 
 /* 
     Tensor rand operations
 */
 
+/**
+ * @brief  Randomize tensor values between [0; 1]
+ * @param  t tensor
+ * @returns None
+ */
 extern void prsm_tensor_rand(prsm_tensor_t *const t);
+
+/**
+ * @brief  Randomize tensor values uniformely between [lbound; ubound)
+ * @param  t tensor
+ * @returns None
+ */
 extern void prsm_tensor_rand_uniform(prsm_tensor_t *const t, const prsm_float lbound, const prsm_float ubound);
-extern void prsm_tensor_rand_normal(prsm_tensor_t *const t, const prsm_float mu, const prsm_float sigma);
-extern void prsm_tensor_rand_std_normal(prsm_tensor_t *const t);
 
 /* 
     Pretty printing

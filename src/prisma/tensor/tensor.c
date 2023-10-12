@@ -499,14 +499,24 @@ prsm_float prsm_tensor_dot(const prsm_tensor_t *const t1, const prsm_tensor_t *c
     return result;
 }
 
-prsm_tensor_t *prsm_tensor_add(const prsm_tensor_t *const t1, const prsm_tensor_t *const t2) {
+prsm_tensor_t *prsm_tensor_add(prsm_tensor_t *tout, const prsm_tensor_t *const t1, const prsm_tensor_t *const t2) {
     // check for invalid input
     VT_DEBUG_ASSERT(!prsm_tensor_is_null(t1), "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INVALID_ARGUMENTS));
     VT_DEBUG_ASSERT(!prsm_tensor_is_null(t2), "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INVALID_ARGUMENTS));
     VT_DEBUG_ASSERT(prsm_tensor_match_shape(t1, t2), "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INCOMPATIBLE_SHAPES));
 
     // create tensor
-    prsm_tensor_t *tret = prsm_tensor_create_shape(t1->alloctr, t1->ndim, t1->shape);
+    prsm_tensor_t *tret = (tout == NULL)
+        ? prsm_tensor_create_shape(t1->alloctr, t1->ndim, t1->shape)
+        : tout;
+
+    // check size
+    if (!prsm_tensor_match_shape(tret, t1)) {
+        prsm_tensor_resize_shape(tret, t1->ndim, t1->shape);
+    }
+
+    // zero out the values
+    prsm_tensor_set_all(tret, 0);
 
     // add tensors
     const size_t size = prsm_tensor_size(tret);
@@ -517,14 +527,24 @@ prsm_tensor_t *prsm_tensor_add(const prsm_tensor_t *const t1, const prsm_tensor_
     return tret;
 }
 
-prsm_tensor_t *prsm_tensor_sub(const prsm_tensor_t *const t1, const prsm_tensor_t *const t2) {
+prsm_tensor_t *prsm_tensor_sub(prsm_tensor_t *tout, const prsm_tensor_t *const t1, const prsm_tensor_t *const t2) {
     // check for invalid input
     VT_DEBUG_ASSERT(!prsm_tensor_is_null(t1), "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INVALID_ARGUMENTS));
     VT_DEBUG_ASSERT(!prsm_tensor_is_null(t2), "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INVALID_ARGUMENTS));
     VT_DEBUG_ASSERT(prsm_tensor_match_shape(t1, t2), "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INCOMPATIBLE_SHAPES));
 
     // create tensor
-    prsm_tensor_t *tret = prsm_tensor_create_shape(t1->alloctr, t1->ndim, t1->shape);
+    prsm_tensor_t *tret = (tout == NULL)
+        ? prsm_tensor_create_shape(t1->alloctr, t1->ndim, t1->shape)
+        : tout;
+
+    // check size
+    if (!prsm_tensor_match_shape(tret, t1)) {
+        prsm_tensor_resize_shape(tret, t1->ndim, t1->shape);
+    }
+
+    // zero out the values
+    prsm_tensor_set_all(tret, 0);
 
     // add tensors
     const size_t size = prsm_tensor_size(tret);
@@ -535,33 +555,30 @@ prsm_tensor_t *prsm_tensor_sub(const prsm_tensor_t *const t1, const prsm_tensor_
     return tret;
 }
 
-prsm_tensor_t *prsm_tensor_mul(const prsm_tensor_t *const t1, const prsm_tensor_t *const t2) {
+prsm_tensor_t *prsm_tensor_mul(prsm_tensor_t *tout, const prsm_tensor_t *const t1, const prsm_tensor_t *const t2) {
     // check for invalid input
     VT_DEBUG_ASSERT(!prsm_tensor_is_null(t1), "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INVALID_ARGUMENTS));
     VT_DEBUG_ASSERT(!prsm_tensor_is_null(t2), "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INVALID_ARGUMENTS));
-    VT_ENFORCE(t1->ndim > 2 || t2->ndim > 2, "%s: Higher dimensions are not supported!\n", prsm_status_to_str(PRSM_STATUS_OPERATION_FAILURE));
-    VT_ENFORCE(t1->ndim == 1 || t2->ndim == 1, "%s: Use 'prsm_tensor_dot(t1, t2)'!\n", prsm_status_to_str(PRSM_STATUS_OPERATION_FAILURE));
+    VT_ENFORCE(t1->ndim < 3 && t2->ndim < 3, "%s: Higher dimensions are not supported!\n", prsm_status_to_str(PRSM_STATUS_OPERATION_FAILURE));
+    VT_ENFORCE(t1->ndim != 1 && t2->ndim != 1, "%s: Use 'prsm_tensor_dot(t1, t2)'!\n", prsm_status_to_str(PRSM_STATUS_OPERATION_FAILURE));
 
     /*
      * v - vector
-     * m - matrix
+     * m - matrix (2d)
      * 
-     * There are 4 cases:
+     * There are 3 cases:
      *  1. v * m
      *  2. m * v
      *  3. m * m
-     *  4. not supported
      */
 
     // calculate multiplication
     if (t1->ndim == 1 && t2->ndim == 2) {                   // case 2: v * m
-        return prsm_tensor_mul_vec_by_mat(NULL, t1, t2);
+        return prsm_tensor_mul_vec_by_mat(tout, t1, t2);
     } else if (t1->ndim == 2 && t2->ndim == 1) {            // case 3: m * v
-        return prsm_tensor_mul_mat_by_vec(NULL, t1, t2);
-    } else if (t1->ndim == 2 && t2->ndim == 2) {            // case 4: m * m
-        return prsm_tensor_mul_mat_by_mat(NULL, t1, t2);
-    } else {
-        return NULL;
+        return prsm_tensor_mul_mat_by_vec(tout, t1, t2);
+    } else { // if (t1->ndim == 2 && t2->ndim == 2) {       // case 4: m * m
+        return prsm_tensor_mul_mat_by_mat(tout, t1, t2);
     }
 }
 
@@ -794,7 +811,7 @@ prsm_float prsm_tensor_calc_var(const prsm_tensor_t *const t) {
     return sum/size;
 }
 
-prsm_float prsm_tensor_calc_stddev(const prsm_tensor_t *const t) {
+prsm_float prsm_tensor_calc_std(const prsm_tensor_t *const t) {
     // check for invalid input
     VT_DEBUG_ASSERT(!prsm_tensor_is_null(t), "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INVALID_ARGUMENTS));
     return PRSM_SQRT(prsm_tensor_calc_var(t));
@@ -804,10 +821,27 @@ prsm_float prsm_tensor_calc_stddev(const prsm_tensor_t *const t) {
     Tensor rand operations
 */
 
-void prsm_tensor_rand(prsm_tensor_t *const t);
-void prsm_tensor_rand_uniform(prsm_tensor_t *const t, const prsm_float lbound, const prsm_float ubound);
-void prsm_tensor_rand_normal(prsm_tensor_t *const t, const prsm_float mu, const prsm_float sigma);
-void prsm_tensor_rand_std_normal(prsm_tensor_t *const t);
+void prsm_tensor_rand(prsm_tensor_t *const t) {
+    // check for invalid input
+    VT_DEBUG_ASSERT(!prsm_tensor_is_null(t), "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INVALID_ARGUMENTS));
+
+    // randomize
+    const size_t size = prsm_tensor_size(t);
+    VT_FOREACH(i, 0, size) {
+        t->data[i] = vt_math_random_f32(1);
+    }
+}
+
+void prsm_tensor_rand_uniform(prsm_tensor_t *const t, const prsm_float lbound, const prsm_float ubound) {
+    // check for invalid input
+    VT_DEBUG_ASSERT(!prsm_tensor_is_null(t), "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INVALID_ARGUMENTS));
+
+    // randomize
+    const size_t size = prsm_tensor_size(t);
+    VT_FOREACH(i, 0, size) {
+        t->data[i] = vt_math_random_f32_uniform(lbound, ubound);
+    }
+}
 
 /* 
     Pretty printing
@@ -825,15 +859,13 @@ void prsm_tensor_display(const prsm_tensor_t *const t, const size_t range[]) {
         }
         printf("  %.2f ]\n", t->data[t->shape[0]-1]);
     } else if (range == NULL && t->ndim == 2) {
-        printf("[ ");
         VT_FOREACH(i, 0, t->shape[0]) {
-            printf("[ ");
+            printf("%s", i == 0 ? "[ [ " : "  [ ");
             VT_FOREACH(j, 0, t->shape[1]) {
                 printf("%.2f ", t->data[vt_index_2d_to_1d(i, j, t->shape[1])]);
             }
-            printf("]\n");
+            printf("%s", i == t->shape[0]-1 ? "] ]\n" : "]\n");
         }
-        printf(" ]\n");
     } else {
         VT_UNIMPLEMENTED("Unsupported for now!");
     }
@@ -867,6 +899,9 @@ static prsm_tensor_t *prsm_tensor_mul_vec_by_mat(prsm_tensor_t *const tout, cons
     if (tresult->ndim != 1 || prsm_tensor_size(tresult) != size) {
         prsm_tensor_resize(tresult, 1, size);
     }
+
+    // zero out the values
+    prsm_tensor_set_all(tresult, 0);
 
     // calculate multiplication
     VT_FOREACH(i, 0, size) {
@@ -904,6 +939,9 @@ static prsm_tensor_t *prsm_tensor_mul_mat_by_vec(prsm_tensor_t *const tout, cons
     if (tresult->ndim != 1 || prsm_tensor_size(tresult) != size) {
         prsm_tensor_resize(tresult, 1, size);
     }
+
+    // zero out the values
+    prsm_tensor_set_all(tresult, 0);
 
     // calculate multiplication
     VT_FOREACH(i, 0, size) {
@@ -943,10 +981,15 @@ static prsm_tensor_t *prsm_tensor_mul_mat_by_mat(prsm_tensor_t *const tout, cons
         prsm_tensor_resize(tresult, 2, rows, cols);
     }
 
+    // zero out the values
+    prsm_tensor_set_all(tresult, 0);
+
     // calculate multiplication
     VT_FOREACH(i, 0, rows) {
         VT_FOREACH(j, 0, cols) {
-            tresult->data[vt_index_2d_to_1d(i, j, cols)] += t1->data[vt_index_2d_to_1d(i, j, cols)] * t2->data[vt_index_2d_to_1d(i, j, cols)];
+            VT_FOREACH(k, 0, t2->shape[0]) {
+                tresult->data[vt_index_2d_to_1d(i, j, cols)] += t1->data[vt_index_2d_to_1d(i, k, cols)] * t2->data[vt_index_2d_to_1d(k, j, cols)];
+            }
         }
     }
 
