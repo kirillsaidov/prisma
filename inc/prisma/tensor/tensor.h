@@ -101,7 +101,7 @@ extern prsm_tensor_t *prsm_tensor_create(struct VitaBaseAllocatorType *const all
  * @param  shape tensor shape
  * @returns valid `prsm_tensor_t*` or asserts on failure
  */
-extern prsm_tensor_t *prsm_tensor_create_shape(struct VitaBaseAllocatorType *const alloctr, const size_t ndim, const size_t *const shape);
+extern prsm_tensor_t *prsm_tensor_create_shape(struct VitaBaseAllocatorType *const alloctr, const size_t ndim, const size_t shape[]);
 
 /**
  * @brief  Creates a tensor vector
@@ -186,7 +186,7 @@ extern void prsm_tensor_resize(prsm_tensor_t *const t, const size_t ndim, ...);
  * @param  shape tensor shape
  * @returns None
  */
-extern void prsm_tensor_resize_shape(prsm_tensor_t *const t, const size_t ndim, const size_t *const shape);
+extern void prsm_tensor_resize_shape(prsm_tensor_t *const t, const size_t ndim, const size_t shape[]);
 
 /**
  * @brief  Duplicates tensor
@@ -208,10 +208,10 @@ extern void prsm_tensor_dup_into(prsm_tensor_t *const tout, const prsm_tensor_t 
 */
 
 /**
- * @brief  Checks if shapes match
+ * @brief  Checks if shapes and dimensions match
  * @param  t1 tensor
  * @param  t2 tensor
- * @returns true if `t1.shape==t2.shape`
+ * @returns true if `t1.ndim==t2.ndim` and `t1.shape==t2.shape`
  */
 extern bool prsm_tensor_match_shape(const prsm_tensor_t *const t1, const prsm_tensor_t *const t2);
 
@@ -289,7 +289,7 @@ extern prsm_tensor_t prsm_tensor_make_view_vec(const prsm_tensor_t *const t, con
  * 
  * @note it's a value type, no need to free it
  */
-extern prsm_tensor_t prsm_tensor_make_view_range(const prsm_tensor_t *const t, const size_t *const shapeFrom, const size_t *const shapeTo);
+extern prsm_tensor_t prsm_tensor_make_view_range(const prsm_tensor_t *const t, const size_t shapeFrom[], const size_t shapeTo[]);
 
 /* 
     Tensor get/set value operations

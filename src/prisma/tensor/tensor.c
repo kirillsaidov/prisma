@@ -48,7 +48,7 @@ prsm_tensor_t *prsm_tensor_create(struct VitaBaseAllocatorType *const alloctr, c
     return t;
 }
 
-prsm_tensor_t *prsm_tensor_create_shape(struct VitaBaseAllocatorType *const alloctr, const size_t ndim, const size_t *const shape) {
+prsm_tensor_t *prsm_tensor_create_shape(struct VitaBaseAllocatorType *const alloctr, const size_t ndim, const size_t shape[]) {
     // check for invalid input
     VT_DEBUG_ASSERT(ndim > 0, "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INVALID_ARGUMENTS));
 
@@ -196,7 +196,7 @@ void prsm_tensor_resize(prsm_tensor_t *const t, const size_t ndim, ...) {
     }
 }
 
-void prsm_tensor_resize_shape(prsm_tensor_t *const t, const size_t ndim, const size_t *const shape)  {
+void prsm_tensor_resize_shape(prsm_tensor_t *const t, const size_t ndim, const size_t shape[])  {
     // check for invalid input
     VT_DEBUG_ASSERT(!prsm_tensor_is_null(t), "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INVALID_ARGUMENTS));
     VT_DEBUG_ASSERT(ndim > 0, "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INVALID_ARGUMENTS));
@@ -259,9 +259,8 @@ bool prsm_tensor_match_shape(const prsm_tensor_t *const t1, const prsm_tensor_t 
     // check for invalid input
     VT_DEBUG_ASSERT(!prsm_tensor_is_null(t1), "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INVALID_ARGUMENTS));
     VT_DEBUG_ASSERT(!prsm_tensor_is_null(t2), "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INVALID_ARGUMENTS));
-    VT_DEBUG_ASSERT(t1->ndim == t2->ndim, "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INCOMPATIBLE_DIMENSIONS));
 
-    return vt_memcmp(t1->shape, t2->shape, t1->ndim * sizeof(size_t));
+    return (t1->ndim == t2->ndim) && vt_memcmp(t1->shape, t2->shape, t1->ndim * sizeof(size_t));
 }
 
 bool prsm_tensor_equals(const prsm_tensor_t *const t1, const prsm_tensor_t *const t2) {
@@ -368,7 +367,7 @@ prsm_tensor_t prsm_tensor_make_view_vec(const prsm_tensor_t *const t, const size
     return tview;
 }
 
-prsm_tensor_t prsm_tensor_make_view_range(const prsm_tensor_t *const t, const size_t *const shapeFrom, const size_t *const shapeTo) {
+prsm_tensor_t prsm_tensor_make_view_range(const prsm_tensor_t *const t, const size_t shapeFrom[], const size_t shapeTo[]) {
     // check for invalid input
     VT_DEBUG_ASSERT(!prsm_tensor_is_null(t), "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INVALID_ARGUMENTS));
     VT_DEBUG_ASSERT(shapeFrom != NULL, "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INVALID_ARGUMENTS));
