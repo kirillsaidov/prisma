@@ -656,6 +656,17 @@ void prsm_tensor_apply_neg(prsm_tensor_t *const t) {
     }
 }
 
+void prsm_tensor_apply_func(prsm_tensor_t *const t, prsm_float (*func)(prsm_float)) {
+    // check for invalid input
+    VT_DEBUG_ASSERT(!prsm_tensor_is_null(t), "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INVALID_ARGUMENTS));
+    VT_DEBUG_ASSERT(func != NULL, "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INVALID_ARGUMENTS));
+
+    const size_t size = prsm_tensor_size(t);
+    VT_FOREACH(i, 0, size) {
+        t->data[i] = func(t->data[i]);
+    }
+}
+
 /* 
     Tensor statistics on the whole tensor
 */

@@ -3,10 +3,10 @@
 #include "vita/vita.h"
 #include "prisma/prisma.h"
 
-#define TEST(func) { printf("TESTING: %s\n", #func); func(); }
+static int test_num = 0;
+#define TEST(func) { printf("(%d) ---> TESTING: %s\n", test_num, #func); func(); test_num++; }
 
 static vt_mallocator_t *alloctr = NULL;
-
 void test_tensor(void);
 
 int main(void) {
@@ -17,11 +17,7 @@ int main(void) {
     
     alloctr = vt_mallocator_create();
     {
-        printf("----\n");
-
         TEST(test_tensor);
-
-        printf("----\nDONE.\n");
     }
     vt_mallocator_destroy(alloctr);
     return 0;

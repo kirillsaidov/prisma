@@ -42,7 +42,7 @@
     - prsm_tensor_apply_clip
     - prsm_tensor_apply_abs
     - prsm_tensor_apply_neg
-    // - prsm_tensor_apply
+    - prsm_tensor_apply_func
     - prsm_tensor_get_min
     - prsm_tensor_get_max
     - prsm_tensor_get_minmax
@@ -56,8 +56,8 @@
     - prsm_tensor_calc_std
     - prsm_tensor_rand
     - prsm_tensor_rand_uniform
-    - prsm_tensor_rand_normal
-    - prsm_tensor_rand_std_normal
+    // - prsm_tensor_rand_normal
+    // - prsm_tensor_rand_std_normal
     - prsm_tensor_display
 */
 
@@ -442,6 +442,14 @@ extern void prsm_tensor_apply_abs(prsm_tensor_t *const t);
  * @returns None
  */
 extern void prsm_tensor_apply_neg(prsm_tensor_t *const t);
+
+/**
+ * @brief  Apply function to tensor values 
+ * @param  t tensor
+ * @param  func custom function
+ * @returns None
+ */
+extern void prsm_tensor_apply_func(prsm_tensor_t *const t, prsm_float (*func)(prsm_float));
 
 /* 
     Tensor statistics on the whole tensor
