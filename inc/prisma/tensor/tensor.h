@@ -550,9 +550,20 @@ extern void prsm_tensor_rand(prsm_tensor_t *const t);
 /**
  * @brief  Randomize tensor values uniformely between [lbound; ubound)
  * @param  t tensor
+ * @param  lbound lower bound
+ * @param  ubound upper bound
  * @returns None
  */
 extern void prsm_tensor_rand_uniform(prsm_tensor_t *const t, const prsm_float lbound, const prsm_float ubound);
+
+/**
+ * @brief  Randomize tensor values from normal distribution
+ * @param  t tensor
+ * @param  mu mean
+ * @param  std sigma
+ * @returns None
+ */
+extern void prsm_tensor_rand_normal(prsm_tensor_t *const t, const prsm_float mu, const prsm_float std);
 
 /* 
     Pretty printing

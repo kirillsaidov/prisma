@@ -853,6 +853,17 @@ void prsm_tensor_rand_uniform(prsm_tensor_t *const t, const prsm_float lbound, c
     }
 }
 
+void prsm_tensor_rand_normal(prsm_tensor_t *const t, const prsm_float mu, const prsm_float std) {
+    // check for invalid input
+    VT_DEBUG_ASSERT(!prsm_tensor_is_null(t), "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INVALID_ARGUMENTS));
+
+    // randomize
+    const size_t size = prsm_tensor_size(t);
+    VT_FOREACH(i, 0, size) {
+        t->data[i] = vt_math_random_f32_normal(mu, std);
+    }
+}
+
 /* 
     Pretty printing
 */
