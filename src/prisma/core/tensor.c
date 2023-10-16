@@ -1,4 +1,4 @@
-#include "prisma/tensor/tensor.h"
+#include "prisma/core/tensor.h"
 
 static prsm_tensor_t *prsm_tensor_mul_vec_by_mat(prsm_tensor_t *const tout, const prsm_tensor_t *const t1, const prsm_tensor_t *const t2);
 static prsm_tensor_t *prsm_tensor_mul_mat_by_vec(prsm_tensor_t *const tout, const prsm_tensor_t *const t1, const prsm_tensor_t *const t2);

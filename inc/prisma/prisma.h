@@ -3,7 +3,7 @@
 
 #include "prisma/core/core.h"
 #include "prisma/core/version.h"
-#include "prisma/tensor/tensor.h"
+#include "prisma/core/tensor.h"
 
 #endif // PRISMA_H
 
