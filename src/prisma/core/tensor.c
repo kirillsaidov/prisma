@@ -872,13 +872,11 @@ void prsm_tensor_display(const prsm_tensor_t *const t, const size_t range[]) {
     // check for invalid input
     VT_DEBUG_ASSERT(!prsm_tensor_is_null(t), "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INVALID_ARGUMENTS));
 
-    // print
+    // print data
     if (range == NULL && t->ndim == 1) {
-        printf("[ %.2f\n", t->data[0]);
-        VT_FOREACH(i, 1, t->shape[0]-1) {
-            printf("  %.2f\n", t->data[i]);
+        VT_FOREACH(i, 0, t->shape[0]) {
+            printf("%s%.2f%s", (i == 0 ? "[ " : "  "), t->data[i], (i == t->shape[0] - 1 ? " ]\n": "\n"));
         }
-        printf("  %.2f ]\n", t->data[t->shape[0]-1]);
     } else if (range == NULL && t->ndim == 2) {
         VT_FOREACH(i, 0, t->shape[0]) {
             printf("%s", i == 0 ? "[ [ " : "  [ ");
@@ -889,6 +887,11 @@ void prsm_tensor_display(const prsm_tensor_t *const t, const size_t range[]) {
         }
     } else {
         VT_UNIMPLEMENTED("Unsupported for now!");
+    }
+
+    // print shape
+    VT_FOREACH(i, 0, t->ndim) {
+        printf("%s%zu%s", (i == 0 ? "Shape: (": ", "), t->shape[i], (i == t->ndim-1 ? ")\n" : ""));
     }
 }
 
