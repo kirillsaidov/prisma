@@ -104,6 +104,15 @@ void test_tensor(void) {
     prsm_tensor_display(mat2, NULL);
 
     // views
+    assert(!prsm_tensor_is_view(mat2));
+    
+    prsm_tensor_t row_view_from_mat2 = prsm_tensor_make_view(mat2);
+    row_view_from_mat2 = prsm_tensor_make_view_vec(mat2, 2);
+    assert(prsm_tensor_get_val(&row_view_from_mat2, 0) == (prsm_float)5);
+
+    row_view_from_mat2 = prsm_tensor_make_view_range(mat2, (size_t[]){0, 0}, (size_t[]){1, 1});
+    assert(prsm_tensor_get_val(&row_view_from_mat2, 3) == (prsm_float)9);
+    prsm_tensor_display(&row_view_from_mat2, NULL);
 }
 
 

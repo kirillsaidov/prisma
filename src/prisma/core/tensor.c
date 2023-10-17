@@ -393,16 +393,17 @@ prsm_tensor_t prsm_tensor_make_view_mat(const prsm_tensor_t *const t, const size
     return tview;
 }
 
-prsm_tensor_t prsm_tensor_make_view_vec(const prsm_tensor_t *const t, const size_t idxFrom, const size_t idxTo) {
+prsm_tensor_t prsm_tensor_make_view_vec(const prsm_tensor_t *const t, const size_t row) {
     // check for invalid input
     VT_DEBUG_ASSERT(!prsm_tensor_is_null(t), "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INVALID_ARGUMENTS));
-    VT_ENFORCE(idxFrom < idxTo && idxTo < prsm_tensor_size(t), "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_OUT_OF_BOUNDS_ACCESS));
+    VT_ENFORCE(t->ndim == 2, "%s: Can make view only of a 2D tensor.\n", prsm_status_to_str(PRSM_STATUS_ERROR_IS_REQUIRED));
+    VT_ENFORCE(row < t->shape[0], "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_OUT_OF_BOUNDS_ACCESS));
 
     // create vector view
     prsm_tensor_t tview = {
         .ndim = 1,
-        .size = idxTo - idxFrom,
-        .data = t->data + idxFrom,
+        .shape = &t->shape[1],
+        .data = t->data + row * t->shape[1],
         .is_view = true
     };
 
@@ -445,10 +446,11 @@ prsm_tensor_t prsm_tensor_make_view_range(const prsm_tensor_t *const t, const si
     // create view
     prsm_tensor_t tview = {
         .ndim = 1,
-        .size = view_size,
+        ._shape = view_size,
         .data = t->data + view_start,
         .is_view = true
     };
+    tview.shape = &tview._shape;
 
     return tview;
 }

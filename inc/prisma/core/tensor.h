@@ -16,6 +16,7 @@
     - prsm_tensor_resize_shape
     - prsm_tensor_dup
     - prsm_tensor_dup_into
+    - prsm_tensor_transpose
     - prsm_tensor_match_shape
     - prsm_tensor_equals
     - prsm_tensor_assign
@@ -56,8 +57,7 @@
     - prsm_tensor_calc_std
     - prsm_tensor_rand
     - prsm_tensor_rand_uniform
-    // - prsm_tensor_rand_normal
-    // - prsm_tensor_rand_std_normal
+    - prsm_tensor_rand_normal
     - prsm_tensor_display
 */
 
@@ -71,10 +71,8 @@ typedef struct PrismaTensor {
     bool is_view;       // defines if tensor is modifiable or only viewable
 
     size_t ndim;        // number or dimensions: 1d, 2d, 3d, nd.
-    union {
-        size_t size;    // number of elements
-        size_t *shape;  // tensor shape
-    };
+    size_t _shape;      // number of elements
+    size_t *shape;      // tensor shape
     prsm_float *data;   // data ptr
 
     // allocator: if `NULL`, then calloc/realloc/free is used
@@ -267,7 +265,7 @@ extern bool prsm_tensor_is_view(const prsm_tensor_t *const t);
 extern prsm_tensor_t prsm_tensor_make_view(const prsm_tensor_t *const t);
 
 /**
- * @brief  Makes a view matrix from tensor
+ * @brief  Makes a view matrix given ndim matrix tensor
  * @param  t tensor
  * @param  dim view dimension
  * @returns prsm_tensor_t
@@ -277,15 +275,14 @@ extern prsm_tensor_t prsm_tensor_make_view(const prsm_tensor_t *const t);
 extern prsm_tensor_t prsm_tensor_make_view_mat(const prsm_tensor_t *const t, const size_t dim);
 
 /**
- * @brief  Makes a view vector from tensor
+ * @brief  Makes a view vector from 2d matrix row
  * @param  t tensor
- * @param  idxFrom start from index
- * @param  idxTo end index
+ * @param  row matrix row index
  * @returns prsm_tensor_t
  * 
  * @note it's a value type, no need to free it
  */
-extern prsm_tensor_t prsm_tensor_make_view_vec(const prsm_tensor_t *const t, const size_t idxFrom, const size_t idxTo);
+extern prsm_tensor_t prsm_tensor_make_view_vec(const prsm_tensor_t *const t, const size_t row);
 
 /**
  * @brief  Makes a range view from tensor
