@@ -8,6 +8,7 @@ static int test_num = 0;
 
 static vt_mallocator_t *alloctr = NULL;
 void test_tensor(void);
+void test_activation(void);
 
 int main(void) {
     vt_version_t 
@@ -18,6 +19,7 @@ int main(void) {
     alloctr = vt_mallocator_create();
     {
         TEST(test_tensor);
+        TEST(test_activation);
     }
     vt_mallocator_destroy(alloctr);
     return 0;
@@ -113,6 +115,15 @@ void test_tensor(void) {
     row_view_from_mat2 = prsm_tensor_make_view_range(mat2, (size_t[]){0, 0}, (size_t[]){1, 1});
     assert(prsm_tensor_get_val(&row_view_from_mat2, 3) == (prsm_float)9);
     prsm_tensor_display(&row_view_from_mat2, NULL);
+}
+
+void test_activation(void) {
+    prsm_tensor_t *m0 = prsm_tensor_create_mat(alloctr, 3, 3);
+    prsm_tensor_rand(m0);
+    prsm_tensor_display(m0, NULL);
+
+    prsm_tensor_apply_func(m0, prsm_activation_sigmoid);
+    prsm_tensor_display(m0, NULL);
 }
 
 

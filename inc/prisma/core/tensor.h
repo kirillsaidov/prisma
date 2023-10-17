@@ -2,6 +2,9 @@
 #define PRISMA_CORE_TENSOR_H
 
 /** TENSOR MODULE
+ * This module is a collection of tensor and linear algebra functionality required by NN.
+
+ * Functions:
     - prsm_tensor_create
     - prsm_tensor_create_shape
     - prsm_tensor_create_vec
@@ -63,7 +66,6 @@
 
 #include "prisma/core/core.h"
 #include "vita/math/math.h"
-#include "vita/util/debug.h"
 #include "vita/container/common.h"
 #include "vita/allocator/mallocator.h"
 

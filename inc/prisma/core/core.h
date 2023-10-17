@@ -12,6 +12,7 @@
 */
 
 #include "vita/core/core.h"
+#include "vita/util/debug.h"
 #include "vita/algorithm/comparison.h"
 
 #if defined(PRISMA_USE_TYPE_DOUBLE)
@@ -23,6 +24,10 @@
     #define PRSM_POW pow
     #define PRSM_SQRT sqrt
     #define PRSM_CLAMP vt_cmp_clampd
+    #define PRSM_MAX vt_cmp_maxd
+    #define PRSM_MIN vt_cmp_mind
+    #define PRSM_EXP exp
+    #define PRSM_TANH tanh
 #elif defined(PRISMA_USE_TYPE_LONG_DOUBLE)
     #define PRSM_FLOAT double
     #define PRSM_ABS fabsl
@@ -32,6 +37,10 @@
     #define PRSM_POW powl
     #define PRSM_SQRT sqrtl
     #define PRSM_CLAMP vt_cmp_clampr
+    #define PRSM_MAX vt_cmp_maxr
+    #define PRSM_MIN vt_cmp_minr
+    #define PRSM_EXP expl
+    #define PRSM_TANH tanhl
 #else
     #define PRSM_FLOAT float
     #define PRSM_ABS fabsf
@@ -41,6 +50,10 @@
     #define PRSM_POW powf
     #define PRSM_SQRT sqrtf
     #define PRSM_CLAMP vt_cmp_clampf
+    #define PRSM_MAX vt_cmp_maxf
+    #define PRSM_MIN vt_cmp_minf
+    #define PRSM_EXP expf
+    #define PRSM_TANH tanhf
 #endif
 typedef PRSM_FLOAT prsm_float;
 

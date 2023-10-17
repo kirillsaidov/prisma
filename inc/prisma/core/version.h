@@ -2,6 +2,9 @@
 #define PRISMA_CORE_VERSION_H
 
 /** VERSION MODULE
+ * This module describes library version.
+
+ * Functions:
     - prsm_version_get
 */
 
