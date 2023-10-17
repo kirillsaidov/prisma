@@ -203,6 +203,13 @@ extern prsm_tensor_t *prsm_tensor_dup(const prsm_tensor_t *const t);
  */
 extern void prsm_tensor_dup_into(prsm_tensor_t *const tout, const prsm_tensor_t *const tin);
 
+/**
+ * @brief  Transpose a tensor
+ * @param  t tensor
+ * @returns None
+ */
+extern void prsm_tensor_transpose(prsm_tensor_t *const t);
+
 /* 
     Tensor data operations
 */

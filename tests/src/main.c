@@ -98,6 +98,12 @@ void test_tensor(void) {
     prsm_tensor_display(mat2, NULL);
     assert(prsm_tensor_get_val(mat2, vt_index_2d_to_1d(0, 0, mat2->shape[1])) == 29);
     assert(prsm_tensor_get_val(mat2, vt_index_2d_to_1d(1, 0, mat2->shape[1])) == 77);
+
+    // transpose
+    prsm_tensor_transpose(mat2);
+    prsm_tensor_display(mat2, NULL);
+
+    // views
 }
 
 

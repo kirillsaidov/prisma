@@ -251,6 +251,48 @@ void prsm_tensor_dup_into(prsm_tensor_t *const tout, const prsm_tensor_t *const 
     vt_memcopy(tout->data, tin->data, prsm_tensor_size(tout) * sizeof(prsm_float));
 }
 
+void prsm_tensor_transpose(prsm_tensor_t *const t) {
+    // check for invalid input
+    VT_DEBUG_ASSERT(!prsm_tensor_is_null(t), "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INVALID_ARGUMENTS));
+
+    // transpose
+    if (t->ndim == 1) {
+        return;
+    } else if (t->ndim == 2) {
+        // transpose the matrix (from RosettaCode, the C version, uses permutations)
+        // RosettaCode: http://www.rosettacode.org/wiki/Matrix_transposition#C
+        // Wiki article on permutations: https://en.wikipedia.org/wiki/In-place_matrix_transposition
+        const size_t r = t->shape[0];
+        const size_t c = t->shape[1];
+        VT_FOREACH(start, 0, r*c) {
+            size_t next = start;
+            size_t i = 0;
+
+            do {
+                i++;
+                next = (next % r) * c + next / r;
+            } while (next > start);
+
+            if(next < start || i == 1) {
+                continue;
+            }
+
+            const size_t tmp = t->data[next = start];
+            do {
+                i = (next % r) * c + next / r;
+                t->data[next] = (i == start) ? tmp : t->data[i];
+                next = i;
+            } while (next > start);
+        }
+
+        // update tensor matrix shape
+        t->shape[0] = c;
+        t->shape[1] = r;
+    } else {
+        VT_UNIMPLEMENTED("Unsupported for now!");
+    }
+}
+
 /* 
     Tensor data operations
 */
@@ -881,7 +923,7 @@ void prsm_tensor_display(const prsm_tensor_t *const t, const size_t range[]) {
         VT_FOREACH(i, 0, t->shape[0]) {
             printf("%s", i == 0 ? "[ [ " : "  [ ");
             VT_FOREACH(j, 0, t->shape[1]) {
-                printf("%.2f ", t->data[vt_index_2d_to_1d(i, j, t->shape[1])]);
+                printf("%-*.2f ", j == t->shape[1]-1 ? 0 : 7, t->data[vt_index_2d_to_1d(i, j, t->shape[1])]);
             }
             printf("%s", i == t->shape[0]-1 ? "] ]\n" : "]\n");
         }
