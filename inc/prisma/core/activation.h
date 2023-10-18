@@ -13,6 +13,8 @@
     - prsm_activation_linear_d
     - prsm_activation_ramp
     - prsm_activation_ramp_d
+    - prsm_activation_htanh
+    - prsm_activation_htanh_d
     - prsm_activation_relu
     - prsm_activation_relu_d
     - prsm_activation_lrelu
@@ -29,131 +31,145 @@
 
 /**
  * @brief  Sigmoid activation
- * @param  v input value
+ * @param  x input value
  * @returns prsm_float
  */
-extern prsm_float prsm_activation_sigmoid(const prsm_float v);
+extern prsm_float prsm_activation_sigmoid(const prsm_float x);
 
 /**
  * @brief  Derivative of sigmoid activation
- * @param  v input value
+ * @param  x input value
  * @returns prsm_float
  */
-extern prsm_float prsm_activation_sigmoid_d(const prsm_float v);
+extern prsm_float prsm_activation_sigmoid_d(const prsm_float x);
 
 /**
  * @brief  Tanh activation
- * @param  v input value
+ * @param  x input value
  * @returns prsm_float
  */
-extern prsm_float prsm_activation_tanh(const prsm_float v);
+extern prsm_float prsm_activation_tanh(const prsm_float x);
 
 /**
  * @brief  Derivative of tanh activation
- * @param  v input value
+ * @param  x input value
  * @returns prsm_float
  */
-extern prsm_float prsm_activation_tahn_d(const prsm_float v);
+extern prsm_float prsm_activation_tahn_d(const prsm_float x);
 
 /**
  * @brief  Linear activation
- * @param  v input value
+ * @param  x input value
  * @returns prsm_float
  */
-extern prsm_float prsm_activation_linear(const prsm_float v);
-
-/**
- * @brief  Ramp activation
- * @param  v input value
- * @returns prsm_float
- */
-extern prsm_float prsm_activation_ramp(prsm_float v);
-
-/**
- * @brief  Derivative of ramp activation
- * @param  v input value
- * @returns prsm_float
- */
-extern prsm_float prsm_activation_ramp_d(prsm_float v);
+extern prsm_float prsm_activation_linear(const prsm_float x);
 
 /**
  * @brief  Derivative of linear activation
- * @param  v input value
+ * @param  x input value
  * @returns prsm_float
  */
-extern prsm_float prsm_activation_linear_d(const prsm_float v);
+extern prsm_float prsm_activation_linear_d(const prsm_float x);
+
+/**
+ * @brief  Ramp activation
+ * @param  x input value
+ * @returns prsm_float
+ */
+extern prsm_float prsm_activation_ramp(prsm_float x);
+
+/**
+ * @brief  Derivative of ramp activation
+ * @param  x input value
+ * @returns prsm_float
+ */
+extern prsm_float prsm_activation_ramp_d(prsm_float x);
+
+/**
+ * @brief  Hard tanh activation
+ * @param  x input value
+ * @returns prsm_float
+ */
+extern prsm_float prsm_activation_htanh(prsm_float x);
+
+/**
+ * @brief  Derivative of hard tanh activation
+ * @param  x input value
+ * @returns prsm_float
+ */
+extern prsm_float prsm_activation_htanh_d(prsm_float x);
 
 /**
  * @brief  RELU activation
- * @param  v input value
+ * @param  x input value
  * @returns prsm_float
  */
-extern prsm_float prsm_activation_relu(const prsm_float v);
+extern prsm_float prsm_activation_relu(const prsm_float x);
 
 /**
  * @brief  Derivative of RELU activation
- * @param  v input value
+ * @param  x input value
  * @returns prsm_float
  */
-extern prsm_float prsm_activation_relu_d(const prsm_float v);
+extern prsm_float prsm_activation_relu_d(const prsm_float x);
 
 /**
  * @brief  Leaky RELU activation
- * @param  v input value
+ * @param  x input value
  * @returns prsm_float
  */
-extern prsm_float prsm_activation_lrelu(const prsm_float v);
+extern prsm_float prsm_activation_lrelu(const prsm_float x);
 
 /**
  * @brief  Derivative of Leaky RELU activation
- * @param  v input value
+ * @param  x input value
  * @returns prsm_float
  */
-extern prsm_float prsm_activation_lrelu_d(const prsm_float v);
+extern prsm_float prsm_activation_lrelu_d(const prsm_float x);
 
 /**
  * @brief  ELU activation
- * @param  v input value
+ * @param  x input value
  * @returns prsm_float
  */
-extern prsm_float prsm_activation_elu(const prsm_float v);
+extern prsm_float prsm_activation_elu(const prsm_float x);
 
 /**
  * @brief  Derivative of ELU activation
- * @param  v input value
+ * @param  x input value
  * @returns prsm_float
  */
-extern prsm_float prsm_activation_elu_d(const prsm_float v);
+extern prsm_float prsm_activation_elu_d(const prsm_float x);
 
 /**
  * @brief  SELU activation
- * @param  v input value
+ * @param  x input value
  * @returns prsm_float
  */
-extern prsm_float prsm_activation_selu(const prsm_float v);
+extern prsm_float prsm_activation_selu(const prsm_float x);
 
 /**
  * @brief  Derivative of SELU activation
- * @param  v input value
+ * @param  x input value
  * @returns prsm_float
  */
-extern prsm_float prsm_activation_selu_d(const prsm_float v);
+extern prsm_float prsm_activation_selu_d(const prsm_float x);
 
 /**
  * @brief  Parametric RELU activation
- * @param  v input value
+ * @param  x input value
  * @param  a alpha learning rate
  * @returns prsm_float
  */
-extern prsm_float prsm_activation_prelu(const prsm_float v, const prsm_float a);
+extern prsm_float prsm_activation_prelu(const prsm_float x, const prsm_float a);
 
 /**
  * @brief  Derivative of Parametric RELU activation
- * @param  v input value
+ * @param  x input value
  * @param  a alpha learning rate
  * @returns prsm_float
  */
-extern prsm_float prsm_activation_prelu_d(const prsm_float v, const prsm_float a);
+extern prsm_float prsm_activation_prelu_d(const prsm_float x, const prsm_float a);
 
 #endif // PRISMA_CORE_ACTIVATION_H
 
