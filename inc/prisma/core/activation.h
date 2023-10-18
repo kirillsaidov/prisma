@@ -11,16 +11,18 @@
     - prsm_activation_tanh_d
     - prsm_activation_linear
     - prsm_activation_linear_d
+    - prsm_activation_ramp
+    - prsm_activation_ramp_d
     - prsm_activation_relu
     - prsm_activation_relu_d
     - prsm_activation_lrelu
     - prsm_activation_lrelu_d
-    - prsm_activation_prelu
-    - prsm_activation_prelu_d
     - prsm_activation_elu
     - prsm_activation_elu_d
     - prsm_activation_selu
     - prsm_activation_selu_d
+    - prsm_activation_prelu
+    - prsm_activation_prelu_d    
 */
 
 #include "prisma/core/core.h"
@@ -61,6 +63,20 @@ extern prsm_float prsm_activation_tahn_d(const prsm_float v);
 extern prsm_float prsm_activation_linear(const prsm_float v);
 
 /**
+ * @brief  Ramp activation
+ * @param  v input value
+ * @returns prsm_float
+ */
+extern prsm_float prsm_activation_ramp(prsm_float v);
+
+/**
+ * @brief  Derivative of ramp activation
+ * @param  v input value
+ * @returns prsm_float
+ */
+extern prsm_float prsm_activation_ramp_d(prsm_float v);
+
+/**
  * @brief  Derivative of linear activation
  * @param  v input value
  * @returns prsm_float
@@ -96,20 +112,6 @@ extern prsm_float prsm_activation_lrelu(const prsm_float v);
 extern prsm_float prsm_activation_lrelu_d(const prsm_float v);
 
 /**
- * @brief  Parametric RELU activation
- * @param  v input value
- * @returns prsm_float
- */
-extern prsm_float prsm_activation_prelu(const prsm_float v, const prsm_float a);
-
-/**
- * @brief  Derivative of Parametric RELU activation
- * @param  v input value
- * @returns prsm_float
- */
-extern prsm_float prsm_activation_prelu_d(const prsm_float v, const prsm_float a);
-
-/**
  * @brief  ELU activation
  * @param  v input value
  * @returns prsm_float
@@ -126,28 +128,32 @@ extern prsm_float prsm_activation_elu_d(const prsm_float v);
 /**
  * @brief  SELU activation
  * @param  v input value
- * @param  s scale (s > 0)
- * @param  a alpha (a > 0)
  * @returns prsm_float
- * 
- * @note if `s` and `a` have invalid values, the default values are used
- * @note s = 1.0507
- * @note a = 1.6732
  */
-extern prsm_float prsm_activation_selu(const prsm_float v, const prsm_float s, const prsm_float a);
+extern prsm_float prsm_activation_selu(const prsm_float v);
 
 /**
  * @brief  Derivative of SELU activation
  * @param  v input value
- * @param  s scale (s > 0)
- * @param  a alpha (a > 0)
  * @returns prsm_float
- * 
- * @note if `s` and `a` have invalid values, the default values are used
- * @note s = 1.0507
- * @note a = 1.6732
  */
-extern prsm_float prsm_activation_selu_d(const prsm_float v, const prsm_float s, const prsm_float a);
+extern prsm_float prsm_activation_selu_d(const prsm_float v);
+
+/**
+ * @brief  Parametric RELU activation
+ * @param  v input value
+ * @param  a alpha learning rate
+ * @returns prsm_float
+ */
+extern prsm_float prsm_activation_prelu(const prsm_float v, const prsm_float a);
+
+/**
+ * @brief  Derivative of Parametric RELU activation
+ * @param  v input value
+ * @param  a alpha learning rate
+ * @returns prsm_float
+ */
+extern prsm_float prsm_activation_prelu_d(const prsm_float v, const prsm_float a);
 
 #endif // PRISMA_CORE_ACTIVATION_H
 

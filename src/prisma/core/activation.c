@@ -35,6 +35,14 @@ prsm_float prsm_activation_linear_d(const prsm_float v) {
     return 1;
 }
 
+prsm_float prsm_activation_ramp(prsm_float v) {
+    return v * (v > 0) + 0.1 * v;
+}
+
+prsm_float prsm_activation_ramp_d(prsm_float v) {
+    return (v > 0) + 0.1;
+}
+
 prsm_float prsm_activation_relu(const prsm_float v) {
     return PRSM_MAX(0, v);
 }
@@ -51,14 +59,6 @@ prsm_float prsm_activation_lrelu_d(const prsm_float v) {
     return v >= 0 ? 1 : 0.01;
 }
 
-prsm_float prsm_activation_prelu(const prsm_float v, const prsm_float c) {
-    return PRSM_MAX(0, v) + c * PRSM_MIN(0, v);
-}
-
-prsm_float prsm_activation_prelu_d(const prsm_float v, const prsm_float c) {
-    return v >= 0 ? 1 : c;
-}
-
 prsm_float prsm_activation_elu(const prsm_float v) {
     return v > 0 ? v : (PRSM_EXP(v) - 1);
 }
@@ -67,11 +67,19 @@ prsm_float prsm_activation_elu_d(const prsm_float v) {
     return v > 0 ? 1 : PRSM_EXP(v);
 }
 
-prsm_float prsm_activation_selu(const prsm_float v, const prsm_float s, const prsm_float a) {
-    return v > 0 ? (s > 0 ? s : 1.0507)*v : (s > 0 ? s : 1.0507)*(a > 0 ? a : 1.6732)*(PRSM_EXP(v) - 1);
+prsm_float prsm_activation_selu(const prsm_float v) {
+    return v > 0 ? (1.0507*v) : (1.0507 * 1.6732 * (PRSM_EXP(v) - 1));
 }
 
-prsm_float prsm_activation_selu_d(const prsm_float v, const prsm_float s, const prsm_float a) {
-    return v > 0 ? (s > 0 ? s : 1.0507) : (s > 0 ? s : 1.0507) * (a > 0 ? a : 1.6732) * PRSM_EXP(v);
+prsm_float prsm_activation_selu_d(const prsm_float v) {
+    return v > 0 ? 1.0507 : (1.0507 * 1.6732 * PRSM_EXP(v));
+}
+
+prsm_float prsm_activation_prelu(const prsm_float v, const prsm_float c) {
+    return PRSM_MAX(0, v) + c * PRSM_MIN(0, v);
+}
+
+prsm_float prsm_activation_prelu_d(const prsm_float v, const prsm_float c) {
+    return v >= 0 ? 1 : c;
 }
 
