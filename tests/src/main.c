@@ -16,6 +16,7 @@ int main(void) {
         prsm_v = prsm_version_get();
     printf("Vita (%s) | Prisma (%s)\n", vt_v.str, prsm_v.str);
     
+    // vt_debug_disable_output(true);
     alloctr = vt_mallocator_create();
     {
         TEST(test_tensor);
@@ -30,7 +31,6 @@ int main(void) {
 
 void test_tensor(void) {
     prsm_tensor_t *v0 = prsm_tensor_create_vec(alloctr, 5);
-    prsm_tensor_display(v0, NULL);
 
     // get/set
     prsm_tensor_set_all(v0, 1);
@@ -59,7 +59,7 @@ void test_tensor(void) {
     prsm_tensor_t *v3 = prsm_tensor_sub(NULL, v2, v1);
     assert(prsm_tensor_calc_sum(v3) == 7);
 
-    // prsm_tensor_t *v4 = prsm_tensor_mul(NULL, v0, v1); // fails: use prsm_tensor_dot for vectors
+    // prsm_tensor_t *v4 = prsm_tensor_mul(NULL, v0, v1); // should fail: use prsm_tensor_dot for vectors
     prsm_float dotprod = prsm_tensor_dot(v1, v2);
     assert(dotprod == 38);
 
@@ -76,7 +76,6 @@ void test_tensor(void) {
     // set/get
     prsm_tensor_set_val(mat0, vt_index_2d_to_1d(2, 0, mat0->shape[1]), 7);
     assert(prsm_tensor_get_val(mat0, vt_index_2d_to_1d(2, 0, mat0->shape[1])) == (float)7);
-    prsm_tensor_display(mat0, NULL);
 
     // rand
     prsm_tensor_t *mat1 = prsm_tensor_create(alloctr, 2, 2, 3);
@@ -89,21 +88,18 @@ void test_tensor(void) {
 
     // multiplication
     prsm_tensor_t *mat2 = prsm_tensor_mul(NULL, mat1, mat0);
-    printf("MAT1 *:\n"); prsm_tensor_display(mat1, NULL);
-    printf("* MAT0:\n"); prsm_tensor_display(mat0, NULL);
-    printf("= MAT3:\n"); prsm_tensor_display(mat2, NULL);
     assert(prsm_tensor_get_val(mat2, vt_index_2d_to_1d(0, 0, mat2->shape[1])) == 14);
     assert(prsm_tensor_get_val(mat2, vt_index_2d_to_1d(1, 0, mat2->shape[1])) == 38);
 
     // scale add
     prsm_tensor_apply_scale_add(mat2, 2, 1);
-    prsm_tensor_display(mat2, NULL);
     assert(prsm_tensor_get_val(mat2, vt_index_2d_to_1d(0, 0, mat2->shape[1])) == 29);
     assert(prsm_tensor_get_val(mat2, vt_index_2d_to_1d(1, 0, mat2->shape[1])) == 77);
 
     // transpose
+    const prsm_float beforeT_val = prsm_tensor_get_val(mat2, vt_index_2d_to_1d(0, 2, mat2->shape[1]));
     prsm_tensor_transpose(mat2);
-    prsm_tensor_display(mat2, NULL);
+    assert(prsm_tensor_get_val(mat2, vt_index_2d_to_1d(2, 0, mat2->shape[1])) == beforeT_val);
 
     // views
     assert(!prsm_tensor_is_view(mat2));
@@ -114,7 +110,6 @@ void test_tensor(void) {
 
     row_view_from_mat2 = prsm_tensor_make_view_range(mat2, (size_t[]){0, 0, 1, 1});
     assert(prsm_tensor_get_val(&row_view_from_mat2, 3) == (prsm_float)9);
-    prsm_tensor_display(&row_view_from_mat2, NULL);
 }
 
 void test_activation(void) {

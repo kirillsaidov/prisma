@@ -1,7 +1,7 @@
 #ifndef PRISMA_CORE_ACTIVATION_H
 #define PRISMA_CORE_ACTIVATION_H
 
-/** CORE MODULE
+/** ACTIVATION MODULE
  * This module is a collection of common activation functions and its derivates.
 
  * Functions:
