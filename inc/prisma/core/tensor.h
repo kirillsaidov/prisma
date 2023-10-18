@@ -197,11 +197,11 @@ extern prsm_tensor_t *prsm_tensor_dup(const prsm_tensor_t *const t);
 
 /**
  * @brief  Duplicates tensor into the preallocated tensor instance
- * @param  tout copy to tensor (output)
- * @param  tin copy from tensor (input)
+ * @param  out copy to tensor (output)
+ * @param  in copy from tensor (input)
  * @returns None
  */
-extern void prsm_tensor_dup_into(prsm_tensor_t *const tout, const prsm_tensor_t *const tin);
+extern void prsm_tensor_dup_into(prsm_tensor_t *const out, const prsm_tensor_t *const in);
 
 /**
  * @brief  Transpose a tensor
@@ -216,19 +216,19 @@ extern void prsm_tensor_transpose(prsm_tensor_t *const t);
 
 /**
  * @brief  Checks if shapes and dimensions match
- * @param  t1 tensor
- * @param  t2 tensor
- * @returns true if `t1.ndim==t2.ndim` and `t1.shape==t2.shape`
+ * @param  lhs tensor
+ * @param  rhs tensor
+ * @returns true if `lhs.ndim==rhs.ndim` and `lhs.shape==rhs.shape`
  */
-extern bool prsm_tensor_match_shape(const prsm_tensor_t *const t1, const prsm_tensor_t *const t2);
+extern bool prsm_tensor_match_shape(const prsm_tensor_t *const lhs, const prsm_tensor_t *const rhs);
 
 /**
  * @brief  Checks if tensors are equal
- * @param  t1 tensor
- * @param  t2 tensor
- * @returns true if `t1==t2`
+ * @param  lhs tensor
+ * @param  rhs tensor
+ * @returns true if `lhs==rhs`
  */
-extern bool prsm_tensor_equals(const prsm_tensor_t *const t1, const prsm_tensor_t *const t2);
+extern bool prsm_tensor_equals(const prsm_tensor_t *const lhs, const prsm_tensor_t *const rhs);
 
 /**
  * @brief  Assigns values to `lhs` from `rhs`
@@ -240,11 +240,11 @@ extern void prsm_tensor_assign(prsm_tensor_t *const lhs, const prsm_tensor_t *co
 
 /**
  * @brief  Swaps tensors
- * @param  t1 tensor
- * @param  t2 tensor
+ * @param  lhs tensor
+ * @param  rhs tensor
  * @returns None
  */
-extern void prsm_tensor_swap(prsm_tensor_t *const t1, prsm_tensor_t *const t2);
+extern void prsm_tensor_swap(prsm_tensor_t *const lhs, prsm_tensor_t *const rhs);
 
 /* 
     Tensor view: no allocations involved
@@ -352,44 +352,44 @@ extern void prsm_tensor_set_identity(prsm_tensor_t *const t);
 
 /**
  * @brief  Dot product
- * @param  t1 tensor vector
- * @param  t2 tensor vector
+ * @param  lhs tensor vector
+ * @param  rhs tensor vector
  * @returns prsm_float
  */
-extern prsm_float prsm_tensor_dot(const prsm_tensor_t *const t1, const prsm_tensor_t *const t2);
+extern prsm_float prsm_tensor_dot(const prsm_tensor_t *const lhs, const prsm_tensor_t *const rhs);
 
 /**
  * @brief  Add tensors
- * @param  tout output tensor
- * @param  t1 tensor
- * @param  t2 tensor
+ * @param  out output tensor
+ * @param  lhs tensor
+ * @param  rhs tensor
  * @returns prsm_tensor*
  * 
- * @note if `tout==NULL`, tout is allocated
+ * @note if `out==NULL`, tensor is allocated
  */
-extern prsm_tensor_t *prsm_tensor_add(prsm_tensor_t *tout, const prsm_tensor_t *const t1, const prsm_tensor_t *const t2);
+extern prsm_tensor_t *prsm_tensor_add(prsm_tensor_t *out, const prsm_tensor_t *const lhs, const prsm_tensor_t *const rhs);
 
 /**
  * @brief  Substract tensors
- * @param  tout output tensor
- * @param  t1 tensor
- * @param  t2 tensor
+ * @param  out output tensor
+ * @param  lhs tensor
+ * @param  rhs tensor
  * @returns prsm_tensor*
  * 
- * @note if `tout==NULL`, tout is allocated
+ * @note if `out==NULL`, tensor is allocated
  */
-extern prsm_tensor_t *prsm_tensor_sub(prsm_tensor_t *tout, const prsm_tensor_t *const t1, const prsm_tensor_t *const t2);
+extern prsm_tensor_t *prsm_tensor_sub(prsm_tensor_t *out, const prsm_tensor_t *const lhs, const prsm_tensor_t *const rhs);
 
 /**
  * @brief  Multiply tensors
- * @param  tout output tensor
- * @param  t1 tensor
- * @param  t2 tensor
+ * @param  out output tensor
+ * @param  lhs tensor
+ * @param  rhs tensor
  * @returns prsm_tensor*
  * 
- * @note if `tout==NULL`, tout is allocated
+ * @note if `out==NULL`, tensor is allocated
  */
-extern prsm_tensor_t *prsm_tensor_mul(prsm_tensor_t *tout, const prsm_tensor_t *const t1, const prsm_tensor_t *const t2);
+extern prsm_tensor_t *prsm_tensor_mul(prsm_tensor_t *out, const prsm_tensor_t *const lhs, const prsm_tensor_t *const rhs);
 
 /* 
     Tensor element-wise operations
