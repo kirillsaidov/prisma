@@ -602,7 +602,7 @@ prsm_tensor_t *prsm_tensor_mul(prsm_tensor_t *out, const prsm_tensor_t *const lh
     VT_DEBUG_ASSERT(!prsm_tensor_is_null(lhs), "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INVALID_ARGUMENTS));
     VT_DEBUG_ASSERT(!prsm_tensor_is_null(rhs), "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INVALID_ARGUMENTS));
     VT_ENFORCE(lhs->ndim < 3 && rhs->ndim < 3, "%s: Higher dimensions are not supported!\n", prsm_status_to_str(PRSM_STATUS_OPERATION_FAILURE));
-    VT_ENFORCE(lhs->ndim != 1 && rhs->ndim != 1, "%s: Use 'prsm_tensor_dot(lhs, rhs)'!\n", prsm_status_to_str(PRSM_STATUS_OPERATION_FAILURE));
+    VT_ENFORCE(!(lhs->ndim == 1 && rhs->ndim == 1), "%s: Use 'prsm_tensor_dot(lhs, rhs)' for vectors!\n", prsm_status_to_str(PRSM_STATUS_OPERATION_FAILURE));
 
     /*
      * v - vector
@@ -954,7 +954,7 @@ static prsm_tensor_t *prsm_tensor_mul_vec_by_mat(prsm_tensor_t *const out, const
     VT_DEBUG_ASSERT(!prsm_tensor_is_null(lhs), "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INVALID_ARGUMENTS));
     VT_DEBUG_ASSERT(!prsm_tensor_is_null(rhs), "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INVALID_ARGUMENTS));
     VT_ENFORCE(lhs->ndim == 1 && rhs->ndim == 2, "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INCOMPATIBLE_DIMENSIONS));
-    VT_ENFORCE(lhs->shape[0] == rhs->shape[1], "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INCOMPATIBLE_SHAPES));
+    VT_ENFORCE(lhs->shape[0] == rhs->shape[0], "%s: Maybe transpose the matrix.\n", prsm_status_to_str(PRSM_STATUS_ERROR_INCOMPATIBLE_SHAPES));
 
     // create tensor
     const size_t size = rhs->shape[1];
@@ -971,9 +971,10 @@ static prsm_tensor_t *prsm_tensor_mul_vec_by_mat(prsm_tensor_t *const out, const
     prsm_tensor_set_all(tresult, 0);
 
     // calculate multiplication
+    const size_t lhs_size = prsm_tensor_size(lhs);
     VT_FOREACH(i, 0, size) {
-        VT_FOREACH(j, 0, size) {
-            tresult->data[i] = lhs->data[i] * rhs->data[vt_index_2d_to_1d(i, j, size)];
+        VT_FOREACH(j, 0, lhs_size) {
+            tresult->data[i] += lhs->data[j] * rhs->data[vt_index_2d_to_1d(j, i, size)];
         }
     }
 
@@ -997,7 +998,7 @@ static prsm_tensor_t *prsm_tensor_mul_mat_by_vec(prsm_tensor_t *const out, const
     VT_ENFORCE(lhs->shape[1] == rhs->shape[0], "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INCOMPATIBLE_SHAPES));
 
     // create tensor
-    const size_t size = rhs->shape[0];
+    const size_t size = lhs->shape[0];
     prsm_tensor_t *tresult = (out == NULL) 
         ? prsm_tensor_create(lhs->alloctr, 1, size)
         : out;
@@ -1011,9 +1012,10 @@ static prsm_tensor_t *prsm_tensor_mul_mat_by_vec(prsm_tensor_t *const out, const
     prsm_tensor_set_all(tresult, 0);
 
     // calculate multiplication
+    const size_t rhs_size = prsm_tensor_size(rhs);
     VT_FOREACH(i, 0, size) {
-        VT_FOREACH(j, 0, size) {
-            tresult->data[i] = lhs->data[vt_index_2d_to_1d(i, j, size)] * rhs->data[j];
+        VT_FOREACH(j, 0, rhs_size) {
+            tresult->data[i] += lhs->data[vt_index_2d_to_1d(i, j, rhs_size)] * rhs->data[j];
         }
     }
 

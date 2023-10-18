@@ -3,6 +3,8 @@
 #include "vita/vita.h"
 #include "prisma/prisma.h"
 
+#include "perceptron.c"
+
 static int test_num = 0;
 #define TEST(func) { printf("(%d) ---> TESTING: %s\n", test_num, #func); func(); test_num++; }
 
@@ -18,9 +20,11 @@ int main(void) {
         prsm_v = prsm_version_get();
     printf("Vita (%s) | Prisma (%s)\n", vt_v.str, prsm_v.str);
     
-    // vt_debug_disable_output(true);
     alloctr = vt_mallocator_create();
+    // vt_debug_redirect_output("debug.log");
     {   
+        // vt_debug_disable_output(true);
+
         // TEST(test_custom);
         TEST(test_tensor);
         TEST(test_activation);
@@ -33,7 +37,7 @@ int main(void) {
 /* ------ TESTS ------ */
 
 void test_custom(void) {
-    //
+    perceptron_run(alloctr);
 }
 
 void test_tensor(void) {
@@ -117,6 +121,28 @@ void test_tensor(void) {
 
     row_view_from_mat2 = prsm_tensor_make_view_range(mat2, (size_t[]){0, 0, 1, 1});
     assert(prsm_tensor_get_val(&row_view_from_mat2, 3) == (prsm_float)9);
+
+    // multiplication
+    prsm_tensor_t 
+        *mat_x = prsm_tensor_create_mat(alloctr, 4, 2),
+        *mat_w = prsm_tensor_create_vec(alloctr, 2);
+    VT_FOREACH(i, 0, prsm_tensor_size(mat_x)) prsm_tensor_set_val(mat_x, i, i);
+    prsm_tensor_set_all(mat_w, 0.5);
+
+    // mat by vec
+    prsm_tensor_t *mat_mv = prsm_tensor_mul(NULL, mat_x, mat_w);
+    assert(prsm_tensor_get_val(mat_mv, 0) == (prsm_float)0.5);
+    assert(prsm_tensor_get_val(mat_mv, 1) == (prsm_float)2.5);
+    assert(prsm_tensor_get_val(mat_mv, 2) == (prsm_float)4.5);
+    assert(prsm_tensor_get_val(mat_mv, 3) == (prsm_float)6.5);
+    
+    // vec by mat
+    prsm_tensor_transpose(mat_x);
+    prsm_tensor_t *mat_vm = prsm_tensor_mul(NULL, mat_w, mat_x);
+    assert(prsm_tensor_get_val(mat_vm, 0) == (prsm_float)0.5);
+    assert(prsm_tensor_get_val(mat_vm, 1) == (prsm_float)2.5);
+    assert(prsm_tensor_get_val(mat_vm, 2) == (prsm_float)4.5);
+    assert(prsm_tensor_get_val(mat_vm, 3) == (prsm_float)6.5);
 }
 
 void test_activation(void) {
