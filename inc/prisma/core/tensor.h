@@ -289,13 +289,12 @@ extern prsm_tensor_t prsm_tensor_make_view_vec(const prsm_tensor_t *const t, con
 /**
  * @brief  Makes a range view from tensor
  * @param  t tensor
- * @param  shapeFrom start shape range
- * @param  shapeTo end shape range
+ * @param  range shape range { from, to }
  * @returns prsm_tensor_t
  * 
  * @note it's a value type, no need to free it
  */
-extern prsm_tensor_t prsm_tensor_make_view_range(const prsm_tensor_t *const t, const size_t shapeFrom[], const size_t shapeTo[]);
+extern prsm_tensor_t prsm_tensor_make_view_range(const prsm_tensor_t *const t, const size_t range[]);
 
 /* 
     Tensor get/set value operations
