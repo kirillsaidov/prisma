@@ -7,8 +7,10 @@ static int test_num = 0;
 #define TEST(func) { printf("(%d) ---> TESTING: %s\n", test_num, #func); func(); test_num++; }
 
 static vt_mallocator_t *alloctr = NULL;
+void test_custom(void);
 void test_tensor(void);
 void test_activation(void);
+void test_cost(void);
 
 int main(void) {
     vt_version_t 
@@ -18,16 +20,21 @@ int main(void) {
     
     // vt_debug_disable_output(true);
     alloctr = vt_mallocator_create();
-    {
+    {   
+        // TEST(test_custom);
         TEST(test_tensor);
         TEST(test_activation);
+        TEST(test_cost);
     }
     vt_mallocator_destroy(alloctr);
     return 0;
 }
 
-
 /* ------ TESTS ------ */
+
+void test_custom(void) {
+    //
+}
 
 void test_tensor(void) {
     prsm_tensor_t *v0 = prsm_tensor_create_vec(alloctr, 5);
@@ -126,6 +133,17 @@ void test_activation(void) {
     assert((int32_t)(prsm_tensor_get_val(m0, 0)*100) == 25);
     assert((int32_t)(prsm_tensor_get_val(m0, 1)*100) == 19);
     assert((int32_t)(prsm_tensor_get_val(m0, 2)*100) == 10);
+}
+
+void test_cost(void) {
+    prsm_tensor_t *y = prsm_tensor_create_vec(alloctr, 4);
+    VT_FOREACH(i, 0, prsm_tensor_size(y)) prsm_tensor_set_val(y, i, i);
+    
+    prsm_tensor_t *yhat = prsm_tensor_create_vec(alloctr, 4);
+    VT_FOREACH(i, 0, prsm_tensor_size(yhat)) prsm_tensor_set_val(yhat, i, i+0.5);
+
+    assert(prsm_cost_mae(yhat, y) == (prsm_float)0.5);
+    assert(prsm_cost_mse(yhat, y) == (prsm_float)0.25);
 }
 
 

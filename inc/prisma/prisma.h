@@ -5,6 +5,7 @@
 #include "prisma/core/version.h"
 #include "prisma/core/tensor.h"
 #include "prisma/core/activation.h"
+#include "prisma/core/cost.h"
 
 #endif // PRISMA_H
 
