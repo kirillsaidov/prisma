@@ -35,6 +35,7 @@
     - prsm_tensor_set_ones
     - prsm_tensor_set_zeros
     - prsm_tensor_set_identity
+    - prsm_tensor_set_from_array
     - prsm_tensor_dot
     - prsm_tensor_add
     - prsm_tensor_sub
@@ -239,6 +240,15 @@ extern bool prsm_tensor_equals(const prsm_tensor_t *const lhs, const prsm_tensor
 extern void prsm_tensor_assign(prsm_tensor_t *const lhs, const prsm_tensor_t *const rhs);
 
 /**
+ * @brief  Assign values from array
+ * @param  t tensor
+ * @param  arr array
+ * @param  arr_size array length
+ * @returns None
+ */
+extern void prsm_tensor_assign_array(prsm_tensor_t *t, const prsm_float arr[], const size_t arr_size);
+
+/**
  * @brief  Swaps tensors
  * @param  lhs tensor
  * @param  rhs tensor
@@ -366,6 +376,7 @@ extern prsm_float prsm_tensor_dot(const prsm_tensor_t *const lhs, const prsm_ten
  * @returns prsm_tensor*
  * 
  * @note if `out==NULL`, tensor is allocated
+ * @note `out` is zero initialized
  */
 extern prsm_tensor_t *prsm_tensor_add(prsm_tensor_t *out, const prsm_tensor_t *const lhs, const prsm_tensor_t *const rhs);
 
@@ -377,6 +388,7 @@ extern prsm_tensor_t *prsm_tensor_add(prsm_tensor_t *out, const prsm_tensor_t *c
  * @returns prsm_tensor*
  * 
  * @note if `out==NULL`, tensor is allocated
+ * @note `out` is zero initialized
  */
 extern prsm_tensor_t *prsm_tensor_sub(prsm_tensor_t *out, const prsm_tensor_t *const lhs, const prsm_tensor_t *const rhs);
 
@@ -388,6 +400,7 @@ extern prsm_tensor_t *prsm_tensor_sub(prsm_tensor_t *out, const prsm_tensor_t *c
  * @returns prsm_tensor*
  * 
  * @note if `out==NULL`, tensor is allocated
+ * @note `out` is zero initialized
  */
 extern prsm_tensor_t *prsm_tensor_mul(prsm_tensor_t *out, const prsm_tensor_t *const lhs, const prsm_tensor_t *const rhs);
 

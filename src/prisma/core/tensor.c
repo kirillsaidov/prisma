@@ -331,6 +331,16 @@ void prsm_tensor_assign(prsm_tensor_t *const lhs, const prsm_tensor_t *const rhs
     vt_memcopy(lhs->data, rhs->data, prsm_tensor_size(lhs) * sizeof(prsm_float));
 }
 
+void prsm_tensor_assign_array(prsm_tensor_t *t, const prsm_float arr[], const size_t arr_size) {
+    // check for invalid input
+    VT_DEBUG_ASSERT(!prsm_tensor_is_null(t), "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INVALID_ARGUMENTS));
+    VT_DEBUG_ASSERT(arr != NULL, "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INVALID_ARGUMENTS));
+    VT_DEBUG_ASSERT(arr_size == prsm_tensor_size(t), "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INCOMPATIBLE_SHAPES));
+
+    // copy data
+    vt_memcopy(t->data, arr, arr_size * sizeof(prsm_float));
+}
+
 void prsm_tensor_swap(prsm_tensor_t *const lhs, prsm_tensor_t *const rhs) {
     // check for invalid input
     VT_DEBUG_ASSERT(!prsm_tensor_is_null(lhs), "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INVALID_ARGUMENTS));
