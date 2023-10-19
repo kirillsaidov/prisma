@@ -1,14 +1,9 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include "vita/vita.h"
-#include "prisma/prisma.h"
-
+#include "main.h"
 #include "perceptron.c"
 
 static int test_num = 0;
 #define TEST(func) { printf("(%d) ---> TESTING: %s\n", test_num, #func); func(); test_num++; }
 
-static vt_mallocator_t *alloctr = NULL;
 void test_custom(void);
 void test_tensor(void);
 void test_activation(void);
@@ -21,14 +16,13 @@ int main(void) {
     printf("Vita (%s) | Prisma (%s)\n", vt_v.str, prsm_v.str);
     
     alloctr = vt_mallocator_create();
-    // vt_debug_redirect_output("debug.log");
     {   
         // vt_debug_disable_output(true);
 
-        // TEST(test_custom);
-        TEST(test_tensor);
-        TEST(test_activation);
-        TEST(test_cost);
+        TEST(test_custom);
+        // TEST(test_tensor);
+        // TEST(test_activation);
+        // TEST(test_cost);
     }
     vt_mallocator_destroy(alloctr);
     return 0;
@@ -37,7 +31,7 @@ int main(void) {
 /* ------ TESTS ------ */
 
 void test_custom(void) {
-    perceptron_run(alloctr);
+    run_perceptron(alloctr);
 }
 
 void test_tensor(void) {
