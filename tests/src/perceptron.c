@@ -42,11 +42,11 @@ void run_perceptron(vt_mallocator_t *alloctr) {
 
     VT_LOG_INFO("Initializing model parameters...");
     const size_t epochs = 210;
-    const prsm_float alpha = 0.05;
+    const prsm_float alpha = 0.09;
 
     VT_LOG_INFO("  alpha      = %.2f", alpha);
     VT_LOG_INFO("  activation = %s", VT_STRING_OF(prsm_activation_sigmoid));
-    VT_LOG_INFO("  loss       = %s", VT_STRING_OF(prsm_cost_mse));
+    VT_LOG_INFO("  loss       = %s", VT_STRING_OF(prsm_loss_mse));
     VT_LOG_INFO("  epochs     = %zu", epochs);
 
     VT_LOG_INFO("Training model...");
@@ -70,7 +70,7 @@ void run_perceptron(vt_mallocator_t *alloctr) {
         // calculate error: (y - yhat) * activation_derrivative(yhat)
         prsm_tensor_sub(error, y_train, yhat);
         VT_FOREACH(i, 0, prsm_tensor_size(error)) {
-            error->data[i] *= prsm_activation_relu_d(yhat->data[i]);
+            error->data[i] *= 2 * prsm_activation_relu_d(yhat->data[i]) / prsm_tensor_size(error);
         }
         
         // learn
@@ -83,7 +83,7 @@ void run_perceptron(vt_mallocator_t *alloctr) {
         }
 
         // calculate mse
-        const prsm_float mse = prsm_cost_mse(yhat, y_train);
+        const prsm_float mse = prsm_loss_mse(yhat, y_train);
 
         // calculate accuracy
         prsm_float accuracy = 0;

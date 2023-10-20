@@ -7,7 +7,7 @@ static int test_num = 0;
 void test_custom(void);
 void test_tensor(void);
 void test_activation(void);
-void test_cost(void);
+void test_loss(void);
 
 int main(void) {
     vt_version_t 
@@ -19,10 +19,10 @@ int main(void) {
     {   
         // vt_debug_disable_output(true);
 
-        TEST(test_custom);
+        // TEST(test_custom);
         // TEST(test_tensor);
         // TEST(test_activation);
-        // TEST(test_cost);
+        TEST(test_loss);
     }
     vt_mallocator_destroy(alloctr);
     return 0;
@@ -155,15 +155,27 @@ void test_activation(void) {
     assert((int32_t)(prsm_tensor_get_val(m0, 2)*100) == 10);
 }
 
-void test_cost(void) {
+void test_loss(void) {
     prsm_tensor_t *y = prsm_tensor_create_vec(alloctr, 4);
     VT_FOREACH(i, 0, prsm_tensor_size(y)) prsm_tensor_set_val(y, i, i);
     
     prsm_tensor_t *yhat = prsm_tensor_create_vec(alloctr, 4);
     VT_FOREACH(i, 0, prsm_tensor_size(yhat)) prsm_tensor_set_val(yhat, i, i+0.5);
 
-    assert(prsm_cost_mae(yhat, y) == (prsm_float)0.5);
-    assert(prsm_cost_mse(yhat, y) == (prsm_float)0.25);
+    // MAE, MSE
+    assert(prsm_loss_mae(yhat, y) == (prsm_float)0.5);
+    assert(prsm_loss_mse(yhat, y) == (prsm_float)0.25);
+
+    // Binary cross entropy
+    prsm_tensor_assign_array(y, (prsm_float[]){0, 1, 0, 0}, 4);
+    prsm_tensor_assign_array(yhat, (prsm_float[]){-18.6,  0.51,  2.94,  -12.8}, 4);
+    assert((int32_t)(prsm_loss_bce(yhat, y)*100) == 400);
+
+    prsm_tensor_resize(y, 1, 3);
+    prsm_tensor_resize(yhat, 1, 3);
+    prsm_tensor_assign_array(y, (prsm_float[]){1, 1, 1}, 3);
+    prsm_tensor_assign_array(yhat, (prsm_float[]){1, 1, 0}, 3);
+    assert((int32_t)(prsm_loss_bce(yhat, y)*10000) == 51416);
 }
 
 

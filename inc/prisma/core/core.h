@@ -28,6 +28,7 @@
     #define PRSM_MIN vt_cmp_mind
     #define PRSM_EXP exp
     #define PRSM_TANH tanh
+    #define PRSM_LOG log
 #elif defined(PRISMA_USE_TYPE_LONG_DOUBLE)
     #define PRSM_FLOAT double
     #define PRSM_ABS fabsl
@@ -41,6 +42,7 @@
     #define PRSM_MIN vt_cmp_minr
     #define PRSM_EXP expl
     #define PRSM_TANH tanhl
+    #define PRSM_LOG logl
 #else
     #define PRSM_FLOAT float
     #define PRSM_ABS fabsf
@@ -54,6 +56,7 @@
     #define PRSM_MIN vt_cmp_minf
     #define PRSM_EXP expf
     #define PRSM_TANH tanhf
+    #define PRSM_LOG logf
 #endif
 typedef PRSM_FLOAT prsm_float;
 

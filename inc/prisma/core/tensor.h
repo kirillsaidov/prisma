@@ -156,7 +156,7 @@ extern const size_t *prsm_tensor_shape(const prsm_tensor_t *const t);
 /**
  * @brief  Returns tensor data
  * @param  t tensor
- * @returns size_t *data
+ * @returns prsm_float *data
  */
 extern prsm_float *prsm_tensor_data(const prsm_tensor_t *const t);
 
