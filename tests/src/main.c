@@ -190,7 +190,7 @@ void test_loss(void) {
         prsm_tensor_t yhat_ = prsm_tensor_make_view_vec(yhat, i);
 
         prsm_float loss = prsm_loss_bce(&yhat_, &y_);
-        vt_math_is_close(loss, prsm_tensor_get_val(loss_results_target, i), 0.01);
+        assert(vt_math_is_close(loss, prsm_tensor_get_val(loss_results_target, i), 0.01));
     }
 
     // Categorical cross entropy
@@ -202,8 +202,8 @@ void test_loss(void) {
         prsm_tensor_t y_ = prsm_tensor_make_view_vec(y, i);
         prsm_tensor_t yhat_ = prsm_tensor_make_view_vec(yhat, i);
 
-        prsm_float loss = prsm_loss_cce(&yhat_, &y_);
-        vt_math_is_close(loss, prsm_tensor_get_val(loss_results_target, i), 0.01);
+        prsm_float loss = prsm_loss_cce(&yhat_, &y_); // TODO: ERROR fix
+        assert(vt_math_is_close(loss, prsm_tensor_get_val(loss_results_target, i), 0.01));
     }
 }
 
