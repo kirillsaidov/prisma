@@ -167,15 +167,44 @@ void test_loss(void) {
     assert(prsm_loss_mse(yhat, y) == (prsm_float)0.25);
 
     // Binary cross entropy
-    prsm_tensor_assign_array(y, (prsm_float[]){0, 1, 0, 0}, 4);
-    prsm_tensor_assign_array(yhat, (prsm_float[]){-18.6,  0.51,  2.94,  -12.8}, 4);
-    assert((int32_t)(prsm_loss_bce(yhat, y)*100) == 400);
+    prsm_tensor_resize(y, 2, 3, 6);
+    prsm_tensor_resize(yhat, 2, 3, 6);
+    prsm_tensor_assign_array(y, (prsm_float[]) {
+        1, 0, 1, 1, 0, 0, 
+        1, 1, 0, 1, 0, 0,
+        1, 0, 1, 1, 0, 0
+    }, prsm_tensor_size(yhat));
+    prsm_tensor_assign_array(yhat, (prsm_float[]) {
+        0.2, 0.1, 0.8, 0.7, 0.1, 0.2,
+        0.3, 0.4, 0.5, 0.6, 0.7, 0.7,
+        0.1, 0.2, 0.3, 0.4, 0.5, 0.6
+    }, prsm_tensor_size(yhat));
 
-    prsm_tensor_resize(y, 1, 3);
-    prsm_tensor_resize(yhat, 1, 3);
-    prsm_tensor_assign_array(y, (prsm_float[]){1, 1, 1}, 3);
-    prsm_tensor_assign_array(yhat, (prsm_float[]){1, 1, 0}, 3);
-    assert((int32_t)(prsm_loss_bce(yhat, y)*10000) == 51416);
+    prsm_tensor_t *loss_results_target = prsm_tensor_create_vec(alloctr, prsm_tensor_shape(y)[0]);
+    prsm_tensor_assign_array(loss_results_target, (prsm_float[]) {
+        0.4371866, 0.95536333, 1.0425713
+    }, prsm_tensor_size(loss_results_target));
+
+    VT_FOREACH(i, 0, prsm_tensor_shape(y)[0]) {
+        prsm_tensor_t y_ = prsm_tensor_make_view_vec(y, i);
+        prsm_tensor_t yhat_ = prsm_tensor_make_view_vec(yhat, i);
+
+        prsm_float loss = prsm_loss_bce(&yhat_, &y_);
+        vt_math_is_close(loss, prsm_tensor_get_val(loss_results_target, i), 0.01);
+    }
+
+    // Categorical cross entropy
+    prsm_tensor_assign_array(loss_results_target, (prsm_float[]) {
+        4.415068, 6.1205416, 6.64866
+    }, prsm_tensor_size(loss_results_target));
+
+    VT_FOREACH(i, 0, prsm_tensor_shape(y)[0]) {
+        prsm_tensor_t y_ = prsm_tensor_make_view_vec(y, i);
+        prsm_tensor_t yhat_ = prsm_tensor_make_view_vec(yhat, i);
+
+        prsm_float loss = prsm_loss_cce(&yhat_, &y_);
+        vt_math_is_close(loss, prsm_tensor_get_val(loss_results_target, i), 0.01);
+    }
 }
 
 
