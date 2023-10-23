@@ -41,11 +41,11 @@ void run_perceptron(vt_mallocator_t *alloctr) {
     prsm_tensor_display(y_train, NULL);
 
     VT_LOG_INFO("Initializing model parameters...");
-    const size_t epochs = 210;
+    const size_t epochs = 120;
     const prsm_float alpha = 0.09;
 
     VT_LOG_INFO("  alpha      = %.2f", alpha);
-    VT_LOG_INFO("  activation = %s", VT_STRING_OF(prsm_activation_sigmoid));
+    VT_LOG_INFO("  activation = %s", VT_STRING_OF(prsm_math_sigmoid));
     VT_LOG_INFO("  loss       = %s", VT_STRING_OF(prsm_loss_mse));
     VT_LOG_INFO("  epochs     = %zu", epochs);
 
@@ -53,8 +53,12 @@ void run_perceptron(vt_mallocator_t *alloctr) {
     prsm_tensor_t *z = prsm_tensor_dup(y_train);
     prsm_tensor_t *yhat = prsm_tensor_dup(y_train);
     prsm_tensor_t *error = prsm_tensor_dup(y_train);
-    prsm_tensor_t *costs = prsm_tensor_dup(y_train);
+    prsm_tensor_t *delta = prsm_tensor_dup(y_train);
     VT_FOREACH(epoch, 0, epochs) {
+        /* -----------------------
+         * FORWARD
+         */
+
         // zero out values
         prsm_tensor_set_zeros(z);
         prsm_tensor_set_zeros(yhat);
@@ -65,12 +69,20 @@ void run_perceptron(vt_mallocator_t *alloctr) {
 
         // yhat = activate(z)
         prsm_tensor_assign(yhat, z);
-        prsm_tensor_apply_func(yhat, prsm_activation_relu);
+        prsm_tensor_apply_func(yhat, prsm_math_relu);
+        // prsm_activate_relu(yhat, z);
 
-        // calculate error: (y - yhat) * activation_derrivative(yhat)
+        /* -----------------------
+         * BACKWARD
+         */
+
+        // calculate error: (y - yhat)
         prsm_tensor_sub(error, y_train, yhat);
+
+        // calculate deltas: error * activation_derrivative(yhat) / batch_size
         VT_FOREACH(i, 0, prsm_tensor_size(error)) {
-            error->data[i] *= 2 * prsm_activation_relu_d(yhat->data[i]) / prsm_tensor_size(error);
+            // error->data[i] *= 2 * prsm_math_relu_d(yhat->data[i]) / prsm_tensor_size(error);
+            delta->data[i] = error->data[i] * 2 * prsm_math_relu_d(yhat->data[i]) / prsm_tensor_size(error);
         }
         
         // learn
@@ -78,7 +90,8 @@ void run_perceptron(vt_mallocator_t *alloctr) {
         VT_FOREACH(i, 0, prsm_tensor_size(error)) {
             VT_FOREACH(j, 0, prsm_tensor_size(weights)) {
                 const prsm_float val = prsm_tensor_get_val(x_train, vt_index_2d_to_1d(i, j, x_train->shape[1]));
-                weights->data[j] += alpha * error->data[i] * val;
+                // weights->data[j] += alpha * error->data[i] * val;
+                weights->data[j] += alpha * delta->data[i] * val;
             }
         }
 

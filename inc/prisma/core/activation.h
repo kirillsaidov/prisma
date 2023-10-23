@@ -5,155 +5,217 @@
  * This module is a collection of common activation functions and its derivates.
 
  * Functions:
-    - prsm_activation_sigmoid
-    - prsm_activation_sigmoid_d
-    - prsm_activation_tanh
-    - prsm_activation_tanh_d
-    - prsm_activation_linear
-    - prsm_activation_linear_d
-    - prsm_activation_ramp
-    - prsm_activation_ramp_d
-    - prsm_activation_htanh
-    - prsm_activation_htanh_d
-    - prsm_activation_relu
-    - prsm_activation_relu_d
-    - prsm_activation_lrelu
-    - prsm_activation_lrelu_d
-    - prsm_activation_elu
-    - prsm_activation_elu_d
-    - prsm_activation_selu
-    - prsm_activation_selu_d
-    - prsm_activation_prelu
-    - prsm_activation_prelu_d    
+    - prsm_activate_sigmoid
+    // - prsm_activate_sigmoid_d
+    - prsm_activate_tanh
+    // - prsm_activate_tanh_d
+    - prsm_activate_linear
+    // - prsm_activate_linear_d
+    - prsm_activate_ramp
+    // - prsm_activate_ramp_d
+    - prsm_activate_htanh
+    // - prsm_activate_htanh_d
+    - prsm_activate_relu
+    // - prsm_activate_relu_d
+    // - prsm_activate_lrelu
+    // - prsm_activate_lrelu_d
+    - prsm_activate_elu
+    // - prsm_activate_elu_d
+    - prsm_activate_selu
+    // - prsm_activate_selu_d
+    - prsm_activate_prelu
+    // - prsm_activate_prelu_d  
+    - prsm_activate_softmax
+    // - prsm_activate_softmax_d   
+    - prsm_activate_ssoftmax
+    // - prsm_activate_softmax_d
+    - prsm_activate_lsoftmax
+    // - prsm_activate_softmax_d
 */
 
 #include "prisma/core/core.h"
+#include "prisma/core/math.h"
+#include "prisma/core/tensor.h"
 
 /**
  * @brief  Sigmoid activation
- * @param  x input value
- * @returns prsm_float
+ * @param  out output tensor
+ * @param  in input tensor
+ * @returns prsm_tensor_t*
+ * 
+ * @note if `out==NULL`, tensor is allocated
  */
-extern prsm_float prsm_activation_sigmoid(const prsm_float x);
+extern prsm_tensor_t *prsm_activate_sigmoid(prsm_tensor_t *out, const prsm_tensor_t *const in);
 
 /**
  * @brief  Derivative of sigmoid activation
- * @param  x input value
- * @returns prsm_float
+ * @param  out output tensor
+ * @param  in input tensor
+ * @returns prsm_tensor_t*
+ * 
+ * @note if `out==null`, tensor is allocated
  */
-extern prsm_float prsm_activation_sigmoid_d(const prsm_float x);
+// extern prsm_tensor_t *prsm_activate_sigmoid_d(prsm_tensor_t *out, const prsm_tensor_t *const in);
 
 /**
  * @brief  Tanh activation
- * @param  x input value
- * @returns prsm_float
+ * @param  out output tensor
+ * @param  in input tensor
+ * @returns prsm_tensor_t*
+ * 
+ * @note if `out==null`, tensor is allocated
  */
-extern prsm_float prsm_activation_tanh(const prsm_float x);
+extern prsm_tensor_t *prsm_activate_tanh(prsm_tensor_t *out, const prsm_tensor_t *const in);
 
 /**
  * @brief  Derivative of tanh activation
- * @param  x input value
- * @returns prsm_float
+ * @param  out output tensor
+ * @param  in input tensor
+ * @returns prsm_tensor_t*
+ * 
+ * @note if `out==null`, tensor is allocated
  */
-extern prsm_float prsm_activation_tahn_d(const prsm_float x);
+// extern prsm_tensor_t *prsm_activate_tahn_d(prsm_tensor_t *out, const prsm_tensor_t *const in);
 
 /**
  * @brief  Linear activation
- * @param  x input value
- * @returns prsm_float
+ * @param  out output tensor
+ * @param  in input tensor
+ * @returns prsm_tensor_t*
+ * 
+ * @note if `out==null`, tensor is allocated
  */
-extern prsm_float prsm_activation_linear(const prsm_float x);
+extern prsm_tensor_t *prsm_activate_linear(prsm_tensor_t *out, const prsm_tensor_t *const in);
 
 /**
  * @brief  Derivative of linear activation
- * @param  x input value
- * @returns prsm_float
+ * @param  out output tensor
+ * @param  in input tensor
+ * @returns prsm_tensor_t*
+ * 
+ * @note if `out==null`, tensor is allocated
  */
-extern prsm_float prsm_activation_linear_d(const prsm_float x);
+// extern prsm_tensor_t *prsm_activate_linear_d(prsm_tensor_t *out, const prsm_tensor_t *const in);
 
 /**
  * @brief  Ramp activation
- * @param  x input value
- * @returns prsm_float
+ * @param  out output tensor
+ * @param  in input tensor
+ * @returns prsm_tensor_t*
+ * 
+ * @note if `out==null`, tensor is allocated
  */
-extern prsm_float prsm_activation_ramp(prsm_float x);
+extern prsm_tensor_t *prsm_activate_ramp(prsm_tensor_t *out, const prsm_tensor_t *const in);
 
 /**
  * @brief  Derivative of ramp activation
- * @param  x input value
- * @returns prsm_float
+ * @param  out output tensor
+ * @param  in input tensor
+ * @returns prsm_tensor_t*
+ * 
+ * @note if `out==null`, tensor is allocated
  */
-extern prsm_float prsm_activation_ramp_d(prsm_float x);
+// extern prsm_tensor_t *prsm_activate_ramp_d(prsm_tensor_t *out, const prsm_tensor_t *const in);
 
 /**
  * @brief  Hard tanh activation
- * @param  x input value
- * @returns prsm_float
+ * @param  out output tensor
+ * @param  in input tensor
+ * @returns prsm_tensor_t*
+ * 
+ * @note if `out==null`, tensor is allocated
  */
-extern prsm_float prsm_activation_htanh(prsm_float x);
+extern prsm_tensor_t *prsm_activate_htanh(prsm_tensor_t *out, const prsm_tensor_t *const in);
 
 /**
  * @brief  Derivative of hard tanh activation
- * @param  x input value
- * @returns prsm_float
+ * @param  out output tensor
+ * @param  in input tensor
+ * @returns prsm_tensor_t*
+ * 
+ * @note if `out==null`, tensor is allocated
  */
-extern prsm_float prsm_activation_htanh_d(prsm_float x);
+// extern prsm_tensor_t *prsm_activate_htanh_d(prsm_tensor_t *out, const prsm_tensor_t *const in);
 
 /**
  * @brief  RELU activation
- * @param  x input value
- * @returns prsm_float
+ * @param  out output tensor
+ * @param  in input tensor
+ * @returns prsm_tensor_t*
+ * 
+ * @note if `out==null`, tensor is allocated
  */
-extern prsm_float prsm_activation_relu(const prsm_float x);
+extern prsm_tensor_t *prsm_activate_relu(prsm_tensor_t *out, const prsm_tensor_t *const in);
 
 /**
  * @brief  Derivative of RELU activation
- * @param  x input value
- * @returns prsm_float
+ * @param  out output tensor
+ * @param  in input tensor
+ * @returns prsm_tensor_t*
+ * 
+ * @note if `out==null`, tensor is allocated
  */
-extern prsm_float prsm_activation_relu_d(const prsm_float x);
+// extern prsm_tensor_t *prsm_activate_relu_d(prsm_tensor_t *out, const prsm_tensor_t *const in);
 
 /**
  * @brief  Leaky RELU activation
- * @param  x input value
- * @returns prsm_float
+ * @param  out output tensor
+ * @param  in input tensor
+ * @returns prsm_tensor_t*
+ * 
+ * @note if `out==null`, tensor is allocated
  */
-extern prsm_float prsm_activation_lrelu(const prsm_float x);
+extern prsm_tensor_t *prsm_activate_lrelu(prsm_tensor_t *out, const prsm_tensor_t *const in);
 
 /**
  * @brief  Derivative of Leaky RELU activation
- * @param  x input value
- * @returns prsm_float
+ * @param  out output tensor
+ * @param  in input tensor
+ * @returns prsm_tensor_t*
+ * 
+ * @note if `out==null`, tensor is allocated
  */
-extern prsm_float prsm_activation_lrelu_d(const prsm_float x);
+// extern prsm_tensor_t *prsm_activate_lrelu_d(prsm_tensor_t *out, const prsm_tensor_t *const in);
 
 /**
  * @brief  ELU activation
- * @param  x input value
- * @returns prsm_float
+ * @param  out output tensor
+ * @param  in input tensor
+ * @returns prsm_tensor_t*
+ * 
+ * @note if `out==null`, tensor is allocated
  */
-extern prsm_float prsm_activation_elu(const prsm_float x);
+extern prsm_tensor_t *prsm_activate_elu(prsm_tensor_t *out, const prsm_tensor_t *const in);
 
 /**
  * @brief  Derivative of ELU activation
- * @param  x input value
- * @returns prsm_float
+ * @param  out output tensor
+ * @param  in input tensor
+ * @returns prsm_tensor_t*
+ * 
+ * @note if `out==null`, tensor is allocated
  */
-extern prsm_float prsm_activation_elu_d(const prsm_float x);
+// extern prsm_tensor_t *prsm_activate_elu_d(prsm_tensor_t *out, const prsm_tensor_t *const in);
 
 /**
  * @brief  SELU activation
- * @param  x input value
- * @returns prsm_float
+ * @param  out output tensor
+ * @param  in input tensor
+ * @returns prsm_tensor_t*
+ * 
+ * @note if `out==null`, tensor is allocated
  */
-extern prsm_float prsm_activation_selu(const prsm_float x);
+extern prsm_tensor_t *prsm_activate_selu(prsm_tensor_t *out, const prsm_tensor_t *const in);
 
 /**
  * @brief  Derivative of SELU activation
- * @param  x input value
- * @returns prsm_float
+ * @param  out output tensor
+ * @param  in input tensor
+ * @returns prsm_tensor_t*
+ * 
+ * @note if `out==null`, tensor is allocated
  */
-extern prsm_float prsm_activation_selu_d(const prsm_float x);
+// extern prsm_tensor_t *prsm_activate_selu_d(prsm_tensor_t *out, const prsm_tensor_t *const in);
 
 /**
  * @brief  Parametric RELU activation
@@ -161,7 +223,7 @@ extern prsm_float prsm_activation_selu_d(const prsm_float x);
  * @param  a alpha learning rate
  * @returns prsm_float
  */
-extern prsm_float prsm_activation_prelu(const prsm_float x, const prsm_float a);
+extern prsm_tensor_t *prsm_activate_prelu(prsm_tensor_t *out, const prsm_tensor_t *const in, const prsm_float a);
 
 /**
  * @brief  Derivative of Parametric RELU activation
@@ -169,7 +231,37 @@ extern prsm_float prsm_activation_prelu(const prsm_float x, const prsm_float a);
  * @param  a alpha learning rate
  * @returns prsm_float
  */
-extern prsm_float prsm_activation_prelu_d(const prsm_float x, const prsm_float a);
+// extern prsm_tensor_t *prsm_activate_prelu_d(prsm_tensor_t *out, const prsm_tensor_t *const in, const prsm_float a);
+
+/**
+ * @brief  Softmax: Normalizes input to [0; 1] for multi-class classification
+ * @param  out output tensor
+ * @param  in input tensor
+ * @returns prsm_tensor_t*
+ * 
+ * @note if `out==NULL`, tensor is allocated
+ */
+extern prsm_tensor_t *prsm_activate_softmax(prsm_tensor_t *out, const prsm_tensor_t *const in);
+
+/**
+ * @brief  Stable softmax: shift-normalizes input to [0; 1] for multi-class classification for numerical stability
+ * @param  out output tensor
+ * @param  in input tensor
+ * @returns prsm_tensor_t*
+ * 
+ * @note if `out==NULL`, tensor is allocated
+ */
+extern prsm_tensor_t *prsm_activate_ssoftmax(prsm_tensor_t *out, const prsm_tensor_t *const in);
+
+/**
+ * @brief  Log softmax
+ * @param  out output tensor
+ * @param  in input tensor
+ * @returns prsm_tensor_t*
+ * 
+ * @note if `out==NULL`, tensor is allocated
+ */
+extern prsm_tensor_t *prsm_activate_lsoftmax(prsm_tensor_t *out, const prsm_tensor_t *const in);
 
 #endif // PRISMA_CORE_ACTIVATION_H
 

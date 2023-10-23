@@ -6,8 +6,10 @@ static int test_num = 0;
 
 void test_custom(void);
 void test_tensor(void);
+void test_math(void);
 void test_activation(void);
 void test_loss(void);
+void test_layers(void);
 
 int main(void) {
     vt_version_t 
@@ -21,8 +23,10 @@ int main(void) {
 
         // TEST(test_custom);
         // TEST(test_tensor);
-        // TEST(test_activation);
-        TEST(test_loss);
+        // TEST(test_math);
+        TEST(test_activation);
+        // TEST(test_loss);
+        // TEST(test_layers);
     }
     vt_mallocator_destroy(alloctr);
     return 0;
@@ -139,20 +143,48 @@ void test_tensor(void) {
     assert(prsm_tensor_get_val(mat_vm, 3) == (prsm_float)6.5);
 }
 
-void test_activation(void) {
+void test_math(void) {
     prsm_tensor_t *m0 = prsm_tensor_create_mat(alloctr, 3, 3);
 
     VT_FOREACH(i, 0, prsm_tensor_size(m0)) prsm_tensor_set_val(m0, i, i);
-    prsm_tensor_apply_func(m0, prsm_activation_sigmoid);
+    prsm_tensor_apply_func(m0, prsm_math_sigmoid);
     assert((int32_t)(prsm_tensor_get_val(m0, 0)*100) == 50);
     assert((int32_t)(prsm_tensor_get_val(m0, 1)*100) == 73);
     assert((int32_t)(prsm_tensor_get_val(m0, 2)*100) == 88);
 
     VT_FOREACH(i, 0, prsm_tensor_size(m0)) prsm_tensor_set_val(m0, i, i);
-    prsm_tensor_apply_func(m0, prsm_activation_sigmoid_d);
+    prsm_tensor_apply_func(m0, prsm_math_sigmoid_d);
     assert((int32_t)(prsm_tensor_get_val(m0, 0)*100) == 25);
     assert((int32_t)(prsm_tensor_get_val(m0, 1)*100) == 19);
     assert((int32_t)(prsm_tensor_get_val(m0, 2)*100) == 10);
+}
+
+void test_activation(void) {
+    prsm_tensor_t *data = prsm_tensor_create_vec(alloctr, 4);
+    prsm_tensor_t *expected_output = prsm_tensor_create_vec(alloctr, 4);
+    prsm_tensor_assign_array(data, (prsm_float[]) {
+        10, 2, 40, 4
+    }, prsm_tensor_size(data));
+    prsm_tensor_assign_array(expected_output, (prsm_float[]) {
+        0, 0, 1, 0
+    }, prsm_tensor_size(expected_output));
+
+    // softmax
+    prsm_tensor_t *output = prsm_activate_softmax(NULL, data);
+    prsm_tensor_apply_func(output, PRSM_ROUND);
+    assert(prsm_tensor_equals(output, expected_output));
+
+    // stable softmax
+    output = prsm_activate_ssoftmax(output, data);
+    prsm_tensor_apply_func(output, PRSM_ROUND);
+    assert(prsm_tensor_equals(output, expected_output));
+
+    // log softmax
+    prsm_tensor_assign_array(expected_output, (prsm_float[]) {
+        -30, -38, -0, -36
+    }, prsm_tensor_size(expected_output));
+    output = prsm_activate_lsoftmax(output, data);
+    assert(prsm_tensor_equals(output, expected_output));
 }
 
 void test_loss(void) {
@@ -205,6 +237,10 @@ void test_loss(void) {
         const prsm_float loss = prsm_loss_cce(&yhat_, &y_);
         assert(vt_math_is_close(loss, prsm_tensor_get_val(loss_results_target, i), 0.01));
     }
+}
+
+void test_layers(void) {
+    //
 }
 
 

@@ -373,7 +373,7 @@ extern prsm_float prsm_tensor_dot(const prsm_tensor_t *const lhs, const prsm_ten
  * @param  out output tensor
  * @param  lhs tensor
  * @param  rhs tensor
- * @returns prsm_tensor*
+ * @returns prsm_tensor_t*
  * 
  * @note if `out==NULL`, tensor is allocated
  * @note `out` is zero initialized
@@ -385,7 +385,7 @@ extern prsm_tensor_t *prsm_tensor_add(prsm_tensor_t *out, const prsm_tensor_t *c
  * @param  out output tensor
  * @param  lhs tensor
  * @param  rhs tensor
- * @returns prsm_tensor*
+ * @returns prsm_tensor_t*
  * 
  * @note if `out==NULL`, tensor is allocated
  * @note `out` is zero initialized
@@ -397,7 +397,7 @@ extern prsm_tensor_t *prsm_tensor_sub(prsm_tensor_t *out, const prsm_tensor_t *c
  * @param  out output tensor
  * @param  lhs tensor
  * @param  rhs tensor
- * @returns prsm_tensor*
+ * @returns prsm_tensor_t*
  * 
  * @note if `out==NULL`, tensor is allocated
  * @note `out` is zero initialized

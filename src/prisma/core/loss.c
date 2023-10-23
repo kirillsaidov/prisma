@@ -63,7 +63,7 @@ prsm_float prsm_loss_bce(const prsm_tensor_t *const input, const prsm_tensor_t *
 
     return -sum/size;
 }
-#include <math.h>
+
 prsm_float prsm_loss_cce(const prsm_tensor_t *const input, const prsm_tensor_t *const target) {
     // check for invalid input
     VT_DEBUG_ASSERT(!prsm_tensor_is_null(input), "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INVALID_ARGUMENTS));

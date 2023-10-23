@@ -558,25 +558,25 @@ prsm_tensor_t *prsm_tensor_add(prsm_tensor_t *out, const prsm_tensor_t *const lh
     VT_ENFORCE(prsm_tensor_match_shape(lhs, rhs), "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INCOMPATIBLE_SHAPES));
 
     // create tensor
-    prsm_tensor_t *tret = (out == NULL)
+    prsm_tensor_t *ret = (out == NULL)
         ? prsm_tensor_create_shape(lhs->alloctr, lhs->ndim, lhs->shape)
         : out;
 
     // check size
-    if (!prsm_tensor_match_shape(tret, lhs)) {
-        prsm_tensor_resize_shape(tret, lhs->ndim, lhs->shape);
+    if (!prsm_tensor_match_shape(ret, lhs)) {
+        prsm_tensor_resize_shape(ret, lhs->ndim, lhs->shape);
     }
 
     // zero out the values
-    prsm_tensor_set_all(tret, 0);
+    prsm_tensor_set_all(ret, 0);
 
     // add tensors
-    const size_t size = prsm_tensor_size(tret);
+    const size_t size = prsm_tensor_size(ret);
     VT_FOREACH(i, 0, size) {
-        tret->data[i] = lhs->data[i] + rhs->data[i];
+        ret->data[i] = lhs->data[i] + rhs->data[i];
     }
 
-    return tret;
+    return ret;
 }
 
 prsm_tensor_t *prsm_tensor_sub(prsm_tensor_t *out, const prsm_tensor_t *const lhs, const prsm_tensor_t *const rhs) {
@@ -586,25 +586,25 @@ prsm_tensor_t *prsm_tensor_sub(prsm_tensor_t *out, const prsm_tensor_t *const lh
     VT_ENFORCE(prsm_tensor_match_shape(lhs, rhs), "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INCOMPATIBLE_SHAPES));
 
     // create tensor
-    prsm_tensor_t *tret = (out == NULL)
+    prsm_tensor_t *ret = (out == NULL)
         ? prsm_tensor_create_shape(lhs->alloctr, lhs->ndim, lhs->shape)
         : out;
 
     // check size
-    if (!prsm_tensor_match_shape(tret, lhs)) {
-        prsm_tensor_resize_shape(tret, lhs->ndim, lhs->shape);
+    if (!prsm_tensor_match_shape(ret, lhs)) {
+        prsm_tensor_resize_shape(ret, lhs->ndim, lhs->shape);
     }
 
     // zero out the values
-    prsm_tensor_set_all(tret, 0);
+    prsm_tensor_set_all(ret, 0);
 
     // add tensors
-    const size_t size = prsm_tensor_size(tret);
+    const size_t size = prsm_tensor_size(ret);
     VT_FOREACH(i, 0, size) {
-        tret->data[i] = lhs->data[i] - rhs->data[i];
+        ret->data[i] = lhs->data[i] - rhs->data[i];
     }
 
-    return tret;
+    return ret;
 }
 
 prsm_tensor_t *prsm_tensor_mul(prsm_tensor_t *out, const prsm_tensor_t *const lhs, const prsm_tensor_t *const rhs) {
