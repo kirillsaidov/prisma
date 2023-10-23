@@ -6,7 +6,7 @@ prsm_float threshold05(const prsm_float x);
 void run_perceptron(void) {
     vt_debug_redirect_output("debug.log");
 
-    VT_LOG_INFO("Loading data.");
+    VT_LOG_INFO("Loading data...");
     prsm_tensor_t *data = perceptron_load_data("assets/perceptron_data_OR.txt");
 
     VT_LOG_INFO("Data loaded:");

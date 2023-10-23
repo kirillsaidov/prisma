@@ -1,5 +1,6 @@
 #include "main.h"
 #include "perceptron.c"
+#include "ann_mnist_digit_recognition.c"
 
 static int test_num = 0;
 #define TEST(func) { printf("(%d) ---> TESTING: %s\n", test_num, #func); func(); test_num++; }
@@ -35,7 +36,8 @@ int main(void) {
 /* ------ TESTS ------ */
 
 void test_custom(void) {
-    run_perceptron();
+    // run_perceptron();
+    run_ann_mnist_digit_recognition();
 }
 
 void test_tensor(void) {

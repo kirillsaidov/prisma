@@ -6,6 +6,8 @@
 #include "vita/vita.h"
 #include "prisma/prisma.h"
 
+#define CACHE_FOLDER "assets/cache/"
+
 static vt_mallocator_t *alloctr = NULL;
 
 #endif // TEST_MAIN_H
