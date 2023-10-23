@@ -16,7 +16,7 @@
 #include "vita/algorithm/comparison.h"
 
 #if defined(PRISMA_USE_TYPE_DOUBLE)
-    #define PRSM_FLOAT long double
+    #define PRSM_FLOAT double
     #define PRSM_ABS fabs
     #define PRSM_CEIL ceil
     #define PRSM_FLOOR floor
@@ -29,8 +29,9 @@
     #define PRSM_EXP exp
     #define PRSM_TANH tanh
     #define PRSM_LOG log
+    #define PRSM_CONST_EPSILON __DBL_EPSILON__
 #elif defined(PRISMA_USE_TYPE_LONG_DOUBLE)
-    #define PRSM_FLOAT double
+    #define PRSM_FLOAT long double
     #define PRSM_ABS fabsl
     #define PRSM_CEIL ceill
     #define PRSM_FLOOR floorl
@@ -43,6 +44,7 @@
     #define PRSM_EXP expl
     #define PRSM_TANH tanhl
     #define PRSM_LOG logl
+    #define PRSM_CONST_EPSILON __LDBL_EPSILON__
 #else
     #define PRSM_FLOAT float
     #define PRSM_ABS fabsf
@@ -57,6 +59,7 @@
     #define PRSM_EXP expf
     #define PRSM_TANH tanhf
     #define PRSM_LOG logf
+    #define PRSM_CONST_EPSILON __FLT_EPSILON__
 #endif
 typedef PRSM_FLOAT prsm_float;
 

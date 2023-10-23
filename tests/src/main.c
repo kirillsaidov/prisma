@@ -186,10 +186,10 @@ void test_loss(void) {
     }, prsm_tensor_size(loss_results_target));
 
     VT_FOREACH(i, 0, prsm_tensor_shape(y)[0]) {
-        prsm_tensor_t y_ = prsm_tensor_make_view_vec(y, i);
-        prsm_tensor_t yhat_ = prsm_tensor_make_view_vec(yhat, i);
+        const prsm_tensor_t y_ = prsm_tensor_make_view_vec(y, i);
+        const prsm_tensor_t yhat_ = prsm_tensor_make_view_vec(yhat, i);
 
-        prsm_float loss = prsm_loss_bce(&yhat_, &y_);
+        const prsm_float loss = prsm_loss_bce(&yhat_, &y_);
         assert(vt_math_is_close(loss, prsm_tensor_get_val(loss_results_target, i), 0.01));
     }
 
@@ -199,10 +199,10 @@ void test_loss(void) {
     }, prsm_tensor_size(loss_results_target));
 
     VT_FOREACH(i, 0, prsm_tensor_shape(y)[0]) {
-        prsm_tensor_t y_ = prsm_tensor_make_view_vec(y, i);
-        prsm_tensor_t yhat_ = prsm_tensor_make_view_vec(yhat, i);
+        const prsm_tensor_t y_ = prsm_tensor_make_view_vec(y, i);
+        const prsm_tensor_t yhat_ = prsm_tensor_make_view_vec(yhat, i);
 
-        prsm_float loss = prsm_loss_cce(&yhat_, &y_); // TODO: ERROR fix
+        const prsm_float loss = prsm_loss_cce(&yhat_, &y_);
         assert(vt_math_is_close(loss, prsm_tensor_get_val(loss_results_target, i), 0.01));
     }
 }

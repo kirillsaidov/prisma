@@ -57,13 +57,13 @@ prsm_float prsm_loss_bce(const prsm_tensor_t *const input, const prsm_tensor_t *
     const prsm_float *yhat = prsm_tensor_data(input);
     const size_t size = prsm_tensor_size(input);
     VT_FOREACH(i, 0, size) {
-        const prsm_float yhat_i = PRSM_CLAMP(yhat[i], 1e-7, 1 - 1e-7);
-        sum += y[i] * PRSM_LOG(yhat_i + 1e-7) + (1 - y[i]) * PRSM_LOG(1 - yhat_i + 1e-7);
+        const prsm_float yhat_i = PRSM_CLAMP(yhat[i], PRSM_CONST_EPSILON, 1 - PRSM_CONST_EPSILON);
+        sum += y[i] * PRSM_LOG(yhat_i) + (1 - y[i]) * PRSM_LOG(1 - yhat_i);
     }
 
     return -sum/size;
 }
-
+#include <math.h>
 prsm_float prsm_loss_cce(const prsm_tensor_t *const input, const prsm_tensor_t *const target) {
     // check for invalid input
     VT_DEBUG_ASSERT(!prsm_tensor_is_null(input), "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INVALID_ARGUMENTS));
@@ -74,9 +74,12 @@ prsm_float prsm_loss_cce(const prsm_tensor_t *const input, const prsm_tensor_t *
     prsm_float sum = 0;
     const prsm_float *y = prsm_tensor_data(target);
     const prsm_float *yhat = prsm_tensor_data(input);
+    const prsm_float scale_sum = prsm_tensor_calc_sum(input); // we need to scale the predicted input so it sums to 1: sum(input/scale) = 1
     const size_t size = prsm_tensor_size(input);
     VT_FOREACH(i, 0, size) {
-        sum += y[i] * PRSM_LOG(yhat[i]);
+        // scale and clip the value
+        const prsm_float yhat_i = PRSM_CLAMP(yhat[i]/scale_sum, PRSM_CONST_EPSILON, 1 - PRSM_CONST_EPSILON);
+        sum += y[i] * PRSM_LOG(yhat_i);
     }
 
     return -sum;
