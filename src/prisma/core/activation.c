@@ -296,6 +296,33 @@ prsm_tensor_t *prsm_activate_softmax(prsm_tensor_t *out, const prsm_tensor_t *co
     return ret;
 }
 
+prsm_tensor_t *prsm_activate_softmax_d(prsm_tensor_t *out, const prsm_tensor_t *const in) {
+    // check for invalid input
+    VT_DEBUG_ASSERT(!prsm_tensor_is_null(in), "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INVALID_ARGUMENTS));
+
+    // create tensor
+    prsm_tensor_t *ret = (out == NULL)
+        ? prsm_tensor_create_shape(in->alloctr, in->ndim, in->shape)
+        : out;
+
+    // check size
+    if (!prsm_tensor_match_shape(ret, in)) {
+        prsm_tensor_resize_shape(ret, in->ndim, in->shape);
+    }
+
+    // run softmax
+    ret = prsm_activate_softmax(ret, in);
+
+    // calculate derivative output
+    const size_t size = prsm_tensor_size(ret);
+    VT_FOREACH(i, 0, size) {
+        const prsm_float v = prsm_tensor_get_val(ret, i);
+        prsm_tensor_set_val(ret, i, v * (1 - v));
+    }
+
+    return ret;
+}
+
 prsm_tensor_t *prsm_activate_ssoftmax(prsm_tensor_t *out, const prsm_tensor_t *const in) {
     // check for invalid input
     VT_DEBUG_ASSERT(!prsm_tensor_is_null(in), "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INVALID_ARGUMENTS));

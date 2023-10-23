@@ -26,7 +26,7 @@
     - prsm_activate_prelu
     // - prsm_activate_prelu_d  
     - prsm_activate_softmax
-    // - prsm_activate_softmax_d   
+    - prsm_activate_softmax_d   
     - prsm_activate_ssoftmax
     // - prsm_activate_softmax_d
     - prsm_activate_lsoftmax
@@ -242,6 +242,16 @@ extern prsm_tensor_t *prsm_activate_prelu(prsm_tensor_t *out, const prsm_tensor_
  * @note if `out==NULL`, tensor is allocated
  */
 extern prsm_tensor_t *prsm_activate_softmax(prsm_tensor_t *out, const prsm_tensor_t *const in);
+
+/**
+ * @brief  Derivative of softmax funtion
+ * @param  out output tensor
+ * @param  in input tensor
+ * @returns prsm_tensor_t*
+ * 
+ * @note if `out==NULL`, tensor is allocated
+ */
+extern prsm_tensor_t *prsm_activate_softmax_d(prsm_tensor_t *out, const prsm_tensor_t *const in);
 
 /**
  * @brief  Stable softmax: shift-normalizes input to [0; 1] for multi-class classification for numerical stability
