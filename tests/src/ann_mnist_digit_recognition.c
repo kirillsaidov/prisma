@@ -65,43 +65,34 @@ void ann_download_csv(const char *const url, const char *const filepath) {
     fp = NULL;
 }
 
-const char* ann_get_field(char* line, int num);
 void ann_read_mnist_data(prsm_tensor_t *x_train, prsm_tensor_t *y_train, prsm_tensor_t *x_test, prsm_tensor_t *y_test) {
-    char buffer[2048];
-    size_t current_row = 0;
-    const size_t read_rows = prsm_tensor_shape(x_train)[0];
-    const size_t read_cols = prsm_tensor_shape(x_train)[1];
-    vt_str_t *line = vt_str_create_len(sizeof(buffer), alloctr);
+    // char buffer[2048];
+    // size_t current_row = 0;
+    // const size_t read_rows = prsm_tensor_shape(x_train)[0];
+    // const size_t read_cols = prsm_tensor_shape(x_train)[1];
+    // vt_str_t *line = vt_str_create_len(sizeof(buffer), alloctr);
 
-    /**
-     * READING TRAIN DATA
-     */
-    VT_LOG_INFO("Reading %s", MNIST_TRAIN);
-    FILE *fp = fopen(CACHE_FOLDER MNIST_TRAIN, "r"); 
-    {
-        while(current_row < read_rows && fgets(buffer, sizeof(buffer), fp)) {
-            current_row++;
+    // /**
+    //  * READING TRAIN DATA
+    //  */
+    // VT_LOG_INFO("Reading %s", MNIST_TRAIN);
+    // FILE *fp = fopen(CACHE_FOLDER MNIST_TRAIN, "r"); 
+    // {
+    //     while(current_row < read_rows && fgets(buffer, sizeof(buffer), fp)) {
+    //         current_row++;
 
-            // split
-            size_t current_col = 0;
-            const char *entry;
-            vt_str_set(line, buffer);
-            while((entry = vt_str_find(line, ","))) {
-                prsm_float val = -1;
-                sscanf(entry+1, " %f,", &val);
-                prsm_tensor_set_val(x_train, current_col++, val);
-                // printf("%s\n", entry+1);
-            }
-        }
-    } 
-    fclose(fp);
-}
-
-const char* ann_get_field(char *line, int num) {
-    const char* tok;
-    for (tok = strtok(line, ","); tok && *tok; tok = strtok(NULL, ",\n")) {
-        if (!--num) return tok;
-    }
-    return NULL;
+    //         // split
+    //         size_t current_col = 0;
+    //         const char *entry;
+    //         vt_str_set(line, buffer);
+    //         while((entry = vt_str_find(line, ","))) {
+    //             prsm_float val = -1;
+    //             sscanf(entry+1, " %f,", &val);
+    //             prsm_tensor_set_val(x_train, current_col++, val);
+    //             // printf("%s\n", entry+1);
+    //         }
+    //     }
+    // } 
+    // fclose(fp);
 }
 
