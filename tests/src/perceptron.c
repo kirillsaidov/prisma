@@ -3,7 +3,7 @@
 prsm_tensor_t *perceptron_load_data(const char *const filename);
 prsm_float threshold05(const prsm_float x);
 
-void run_perceptron(vt_mallocator_t *alloctr) {
+void run_perceptron(void) {
     vt_debug_redirect_output("debug.log");
 
     VT_LOG_INFO("Loading data.");
@@ -81,7 +81,7 @@ void run_perceptron(vt_mallocator_t *alloctr) {
 
         // calculate deltas: error * activation_derrivative(yhat) / batch_size
         VT_FOREACH(i, 0, prsm_tensor_size(error)) {
-            // error->data[i] *= 2 * prsm_math_relu_d(yhat->data[i]) / prsm_tensor_size(error);
+            // error->data[i] = 2 * error->data[i] * prsm_math_relu_d(yhat->data[i]) / prsm_tensor_size(error);
             delta->data[i] = error->data[i] * 2 * prsm_math_relu_d(yhat->data[i]) / prsm_tensor_size(error);
         }
         

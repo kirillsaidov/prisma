@@ -179,7 +179,7 @@ void prsm_tensor_resize(prsm_tensor_t *const t, const size_t ndim, ...) {
     }
     t->ndim = ndim;
 
-    // find new shape
+    // find new shape size
     size_t total_size = 1;
     va_list args; va_start(args, ndim);
     VT_FOREACH(i, 0, ndim) {
@@ -216,7 +216,7 @@ void prsm_tensor_resize_shape(prsm_tensor_t *const t, const size_t ndim, const s
     // copy shape
     vt_memcopy(t->shape, shape, ndim * sizeof(size_t));
 
-    // find new shape
+    // find new shape size
     size_t total_size = 1;
     VT_FOREACH(i, 0, ndim) {
         total_size *= t->shape[i];

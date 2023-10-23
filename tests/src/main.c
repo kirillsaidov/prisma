@@ -21,10 +21,10 @@ int main(void) {
     {   
         // vt_debug_disable_output(true);
 
-        // TEST(test_custom);
+        TEST(test_custom);
         // TEST(test_tensor);
         // TEST(test_math);
-        TEST(test_activation);
+        // TEST(test_activation);
         // TEST(test_loss);
         // TEST(test_layers);
     }
@@ -35,7 +35,7 @@ int main(void) {
 /* ------ TESTS ------ */
 
 void test_custom(void) {
-    run_perceptron(alloctr);
+    run_perceptron();
 }
 
 void test_tensor(void) {
