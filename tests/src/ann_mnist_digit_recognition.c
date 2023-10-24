@@ -5,7 +5,7 @@
 #define MNIST_TEST "mnist_test.csv"
 
 void ann_download_csv(const char *const url, const char *const filepath);
-void ann_read_mnist_data(prsm_tensor_t *x_train, prsm_tensor_t *y_train, prsm_tensor_t *x_test, prsm_tensor_t *y_test);
+void ann_read_mnist_data(const char *const file, prsm_tensor_t *x, prsm_tensor_t *y);
 
 void run_ann_mnist_digit_recognition(void) {
     vt_debug_redirect_output("debug.log");
@@ -31,16 +31,31 @@ void run_ann_mnist_digit_recognition(void) {
     }
 
     VT_LOG_INFO("Creating tensors...");
-    const size_t load_rows = 1;
+    const size_t load_rows = 100;
     prsm_tensor_t *x_train, *y_train, *x_test, *y_test;
     x_train = prsm_tensor_create_mat(alloctr, load_rows, 28*28 + 1); // +1 is for bias
     x_test = prsm_tensor_create_mat(alloctr, load_rows, 28*28 + 1);  // +1 is for bias
     y_train = prsm_tensor_create_vec(alloctr, load_rows);
     y_test = prsm_tensor_create_vec(alloctr, load_rows);
 
-    VT_LOG_INFO("Loading data into memory...");
-    ann_read_mnist_data(x_train, y_train, x_test, y_test);
-    prsm_tensor_display(x_train, NULL);
+    VT_LOG_INFO("Loading data into memory: %zu instances", load_rows);
+    ann_read_mnist_data(CACHE_FOLDER MNIST_TRAIN, x_train, y_train);
+    ann_read_mnist_data(CACHE_FOLDER MNIST_TEST, x_test, y_test);
+
+    // VT_FOREACH(k, 0, load_rows) {
+    //     printf("Label: %.0f\n", prsm_tensor_get_val(y_train, k));
+
+    //     prsm_tensor_t t = prsm_tensor_make_view_vec(x_train, k);
+    //     VT_FOREACH(i, 0, 28) {
+    //         VT_FOREACH(j, 0, 28) {
+    //             const prsm_float value = t.data[vt_index_2d_to_1d(i, j, 28)];
+    //             printf("%d", value == 0 ? 0 : 1);
+    //         }
+    //         printf("\n");
+    //     }
+    //     printf("\n");
+    // }
+    // prsm_tensor_display(x_train, NULL);
 }
 
 void ann_download_csv(const char *const url, const char *const filepath) {
@@ -65,34 +80,56 @@ void ann_download_csv(const char *const url, const char *const filepath) {
     fp = NULL;
 }
 
-void ann_read_mnist_data(prsm_tensor_t *x_train, prsm_tensor_t *y_train, prsm_tensor_t *x_test, prsm_tensor_t *y_test) {
-    // char buffer[2048];
-    // size_t current_row = 0;
-    // const size_t read_rows = prsm_tensor_shape(x_train)[0];
-    // const size_t read_cols = prsm_tensor_shape(x_train)[1];
-    // vt_str_t *line = vt_str_create_len(sizeof(buffer), alloctr);
+void ann_plist_str_destroy(vt_plist_t *p);
+void ann_read_mnist_data(const char *const file, prsm_tensor_t *x, prsm_tensor_t *y) {
+    char buffer[2048];
+    size_t current_row = 0;
+    const size_t read_rows = prsm_tensor_shape(x)[0];
+    const size_t read_cols = prsm_tensor_shape(x)[1];
+    vt_plist_t *line_items = vt_plist_create(read_cols, alloctr);
 
-    // /**
-    //  * READING TRAIN DATA
-    //  */
-    // VT_LOG_INFO("Reading %s", MNIST_TRAIN);
-    // FILE *fp = fopen(CACHE_FOLDER MNIST_TRAIN, "r"); 
-    // {
-    //     while(current_row < read_rows && fgets(buffer, sizeof(buffer), fp)) {
-    //         current_row++;
+    /**
+     * READING TRAIN DATA
+     */
+    VT_LOG_INFO("Reading %s", file);
+    FILE *fp = fopen(file, "r"); 
+    {
+        while(current_row < read_rows && fgets(buffer, sizeof(buffer), fp)) {
+            // split
+            vt_str_t line = vt_str_create_static(buffer);
 
-    //         // split
-    //         size_t current_col = 0;
-    //         const char *entry;
-    //         vt_str_set(line, buffer);
-    //         while((entry = vt_str_find(line, ","))) {
-    //             prsm_float val = -1;
-    //             sscanf(entry+1, " %f,", &val);
-    //             prsm_tensor_set_val(x_train, current_col++, val);
-    //             // printf("%s\n", entry+1);
-    //         }
-    //     }
-    // } 
-    // fclose(fp);
+            // ----------------
+            line_items = vt_str_split(line_items, &line, ",");
+            VT_FOREACH(i, 0, vt_plist_len(line_items)) {
+                // get item
+                const vt_str_t *item = (vt_str_t*)vt_plist_get(line_items, i);
+
+                // convert to prsm_float
+                const prsm_float value = vt_conv_str_to_f(vt_str_z(item));
+
+                if (i == 0) prsm_tensor_set_val(y, current_row, value);
+                if (i == read_rows-1) prsm_tensor_set_val(x, vt_index_2d_to_1d(current_row, i, read_cols), 1);
+                else prsm_tensor_set_val(x, vt_index_2d_to_1d(current_row, i-1, read_cols), value);
+            }
+            // ----------------
+
+            // ---------- note ----------
+            // const char *ptr = buffer;
+            // prsm_float value = 0;
+            // sscanf(ptr, "%f ", &value);
+            // printf("%.0f ", value);
+            // while((ptr = strstr(ptr, ","))) {
+            //     ptr += 1;
+            //     sscanf(ptr, "%f ", &value);
+            //     printf("%.0f ", value);
+            // }
+            // printf("\n");
+            // ---------- note ----------
+
+            // update
+            current_row++;
+        }
+    } 
+    fclose(fp);
 }
 

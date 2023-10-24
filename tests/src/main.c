@@ -29,6 +29,7 @@ int main(void) {
         // TEST(test_loss);
         // TEST(test_layers);
     }
+    vt_mallocator_print_stats(alloctr->stats);
     vt_mallocator_destroy(alloctr);
     return 0;
 }
