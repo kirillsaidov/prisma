@@ -31,20 +31,104 @@ void run_ann_mnist_digit_recognition(void) {
     }
 
     VT_LOG_INFO("Creating tensors...");
-    const size_t load_rows = 100;
+    const size_t num_rows = 10;
+    const size_t num_features = 28*28;
     prsm_tensor_t *x_train, *y_train, *x_test, *y_test;
-    x_train = prsm_tensor_create_mat(alloctr, load_rows, 28*28 + 1); // +1 is for bias
-    x_test = prsm_tensor_create_mat(alloctr, load_rows, 28*28 + 1);  // +1 is for bias
-    y_train = prsm_tensor_create_vec(alloctr, load_rows);
-    y_test = prsm_tensor_create_vec(alloctr, load_rows);
+    x_train = prsm_tensor_create_mat(alloctr, num_rows, num_features);
+    x_test = prsm_tensor_create_mat(alloctr, num_rows, num_features);
+    y_train = prsm_tensor_create_mat(alloctr, num_rows, 10);
+    y_test = prsm_tensor_create_mat(alloctr, num_rows, 10);
 
-    VT_LOG_INFO("Loading data into memory: %zu instances", load_rows);
+    VT_LOG_INFO("Loading data into memory: %zu instances", num_rows);
     ann_read_mnist_data(CACHE_FOLDER MNIST_TRAIN, x_train, y_train);
     ann_read_mnist_data(CACHE_FOLDER MNIST_TEST, x_test, y_test);
 
-    // VT_FOREACH(k, 0, load_rows) {
-    //     printf("Label: %.0f\n", prsm_tensor_get_val(y_train, k));
+    VT_LOG_INFO("Normalize the data...");
+    prsm_tensor_apply_scale_add(x_train, 1.0/255.0, 0);
+    prsm_tensor_apply_scale_add(x_test, 1.0/255.0, 0);
 
+    VT_LOG_INFO("Creating weights and biases...");
+    const size_t layer_output_size = 10;
+    const size_t layer_hidden_size = 100;
+    prsm_tensor_t *w1, *w2, *b1, *b2;
+    w1 = prsm_tensor_create_mat(alloctr, layer_hidden_size, num_features);
+    w2 = prsm_tensor_create_mat(alloctr, layer_output_size, layer_hidden_size);
+    b1 = prsm_tensor_create_vec(alloctr, layer_hidden_size);
+    b2 = prsm_tensor_create_vec(alloctr, layer_output_size);
+
+    VT_LOG_INFO("NN created: (768, 100, 10)");
+    VT_LOG_INFO("Randomizing weights...");
+    prsm_tensor_rand(w1);
+    prsm_tensor_rand(w2);
+    prsm_tensor_set_all(b1, 1);
+    prsm_tensor_set_all(b2, 1);
+
+    VT_LOG_INFO("Initializing model parameters...");
+    const size_t epochs = 1;
+    const prsm_float alpha = 0.05;
+
+    VT_LOG_INFO("  alpha         = %.2f", alpha);
+    VT_LOG_INFO("  activation l1 = %s", VT_STRING_OF(prsm_math_sigmoid));
+    VT_LOG_INFO("  activation l2 = %s", VT_STRING_OF(prsm_activate_softmax));
+    VT_LOG_INFO("  loss          = %s", VT_STRING_OF(prsm_loss_cce));
+    VT_LOG_INFO("  epochs        = %zu", epochs);
+
+    VT_LOG_INFO("Start training...");
+    // prsm_tensor_t *z1 = prsm_tensor_create_vec(alloctr, 10);
+    // prsm_tensor_t *z2 = prsm_tensor_create_vec(alloctr, 10);
+    // prsm_tensor_t *a1 = prsm_tensor_dup(z);
+    // prsm_tensor_t *a2 = prsm_tensor_dup(z);
+    // prsm_tensor_t *error = prsm_tensor_dup(z);
+    // prsm_tensor_t *delta = prsm_tensor_dup(z);
+    prsm_tensor_transpose(w1);
+    prsm_tensor_transpose(w2);
+    VT_FOREACH(epoch, 0, epochs) {
+        /* -----------------------
+        * FORWARD
+        */
+
+        // z1 = w*xT + b
+        prsm_tensor_t *a1 = prsm_tensor_mul(NULL, x_train, w1);
+
+        // add bias
+        VT_FOREACH(i, 0, prsm_tensor_shape(a1)[0]) {
+            prsm_tensor_t t = prsm_tensor_make_view_vec(a1, i);
+            VT_FOREACH(j, 0, prsm_tensor_size(&t)) t.data[j] += b1->data[j];
+        }
+
+        // activate
+        prsm_tensor_apply_func(a1, prsm_math_relu);
+
+        // z2 = w*xT + b
+        prsm_tensor_t *z2 = prsm_tensor_mul(NULL, a1, w2);
+
+        // add bias
+        VT_FOREACH(i, 0, prsm_tensor_shape(a1)[0]) {
+            prsm_tensor_t t = prsm_tensor_make_view_vec(a1, i);
+            VT_FOREACH(j, 0, prsm_tensor_size(&t)) t.data[j] += b1->data[j];
+        }
+
+        // activate
+        prsm_tensor_t *a2 = prsm_tensor_create_mat(alloctr, 10, 10);
+        VT_FOREACH(i, 0, prsm_tensor_shape(a2)[0]) {
+            prsm_tensor_t a2_i = prsm_tensor_make_view_vec(a2, i);
+            prsm_tensor_t z2_i = prsm_tensor_make_view_vec(z2, i);
+            prsm_activate_softmax(&a2_i, &z2_i);
+        }
+
+        prsm_tensor_display(a2, NULL);
+
+        prsm_tensor_destroy(a1);
+        prsm_tensor_destroy(z2);
+        prsm_tensor_destroy(a2);
+    }
+
+    // VT_FOREACH(k, 0, 5) {
+    //     // y (label) value
+    //     prsm_tensor_t yt = prsm_tensor_make_view_vec(y_train, k);
+    //     prsm_tensor_display(&yt, NULL);
+
+    //     // x value
     //     prsm_tensor_t t = prsm_tensor_make_view_vec(x_train, k);
     //     VT_FOREACH(i, 0, 28) {
     //         VT_FOREACH(j, 0, 28) {
@@ -55,7 +139,6 @@ void run_ann_mnist_digit_recognition(void) {
     //     }
     //     printf("\n");
     // }
-    // prsm_tensor_display(x_train, NULL);
 }
 
 void ann_download_csv(const char *const url, const char *const filepath) {
@@ -106,9 +189,9 @@ void ann_read_mnist_data(const char *const file, prsm_tensor_t *x, prsm_tensor_t
 
                 // convert to prsm_float
                 const prsm_float value = vt_conv_str_to_f(vt_str_z(item));
-
-                if (i == 0) prsm_tensor_set_val(y, current_row, value);
-                if (i == read_rows-1) prsm_tensor_set_val(x, vt_index_2d_to_1d(current_row, i, read_cols), 1);
+                
+                // save values
+                if (i == 0) prsm_tensor_set_val(y, vt_index_2d_to_1d(current_row, value, 10), 1);
                 else prsm_tensor_set_val(x, vt_index_2d_to_1d(current_row, i-1, read_cols), value);
             }
             // ----------------
