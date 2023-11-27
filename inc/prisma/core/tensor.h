@@ -375,7 +375,10 @@ extern prsm_float prsm_tensor_dot(const prsm_tensor_t *const lhs, const prsm_ten
  * @param  in tensor
  * @param  axis 0 - row-wise, 1 - column-wise
  * @returns prsm_tensor_t*
- */
+ * 
+ * @note if `out==NULL`, tensor is allocated
+ * @note `out` is zero initialized
+*/
 extern prsm_tensor_t *prsm_tensor_sum(prsm_tensor_t *out, const prsm_tensor_t *const in, const int8_t axis);
 
 /**
