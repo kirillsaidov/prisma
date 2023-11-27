@@ -67,7 +67,13 @@ void test_tensor(void) {
     prsm_tensor_t *v2 = prsm_tensor_add(NULL, v0, v1);
     assert(prsm_tensor_calc_sum(v2) == 14);
 
+    v2 = prsm_tensor_add(v2, v2, v1);
+    assert(prsm_tensor_calc_sum(v2) == 21);
+
     // sub
+    v2 = prsm_tensor_sub(v2, v2, v1);
+    assert(prsm_tensor_calc_sum(v2) == 14);
+
     prsm_tensor_t *v3 = prsm_tensor_sub(NULL, v2, v1);
     assert(prsm_tensor_calc_sum(v3) == 7);
 
@@ -144,6 +150,21 @@ void test_tensor(void) {
     assert(prsm_tensor_get_val(mat_vm, 1) == (prsm_float)2.5);
     assert(prsm_tensor_get_val(mat_vm, 2) == (prsm_float)4.5);
     assert(prsm_tensor_get_val(mat_vm, 3) == (prsm_float)6.5);
+
+    // sum along axis
+    prsm_tensor_t *sm = prsm_tensor_create_mat(alloctr, 2, 3);
+    VT_FOREACH(i, 0, prsm_tensor_size(sm)) prsm_tensor_set_val(sm, i, i+1);
+
+    // row-wise sum
+    prsm_tensor_t *_sm = prsm_tensor_sum(NULL, sm, 0);
+    assert(prsm_tensor_get_val(_sm, 0) == (prsm_float)5);
+    assert(prsm_tensor_get_val(_sm, 1) == (prsm_float)7);
+    assert(prsm_tensor_get_val(_sm, 2) == (prsm_float)9);
+
+    // col-wise sum
+    prsm_tensor_sum(_sm, sm, 1);
+    assert(prsm_tensor_get_val(_sm, 0) == (prsm_float)6);
+    assert(prsm_tensor_get_val(_sm, 1) == (prsm_float)15);
 }
 
 void test_math(void) {
