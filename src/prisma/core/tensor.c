@@ -567,9 +567,6 @@ prsm_tensor_t *prsm_tensor_add(prsm_tensor_t *out, const prsm_tensor_t *const lh
         prsm_tensor_resize_shape(ret, lhs->ndim, lhs->shape);
     }
 
-    // zero out the values
-    prsm_tensor_set_all(ret, 0);
-
     // add tensors
     const size_t size = prsm_tensor_size(ret);
     VT_FOREACH(i, 0, size) {
@@ -594,9 +591,6 @@ prsm_tensor_t *prsm_tensor_sub(prsm_tensor_t *out, const prsm_tensor_t *const lh
     if (!prsm_tensor_match_shape(ret, lhs)) {
         prsm_tensor_resize_shape(ret, lhs->ndim, lhs->shape);
     }
-
-    // zero out the values
-    prsm_tensor_set_all(ret, 0);
 
     // add tensors
     const size_t size = prsm_tensor_size(ret);
