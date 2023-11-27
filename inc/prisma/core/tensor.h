@@ -37,6 +37,7 @@
     - prsm_tensor_set_identity
     - prsm_tensor_set_from_array
     - prsm_tensor_dot
+    - prsm_tensor_sum
     - prsm_tensor_add
     - prsm_tensor_sub
     - prsm_tensor_mul
@@ -367,6 +368,15 @@ extern void prsm_tensor_set_identity(prsm_tensor_t *const t);
  * @returns prsm_float
  */
 extern prsm_float prsm_tensor_dot(const prsm_tensor_t *const lhs, const prsm_tensor_t *const rhs);
+
+/**
+ * @brief  Sum axis-wise
+ * @param  out output tensor
+ * @param  in tensor
+ * @param  axis 0 - row-wise, 1 - column-wise
+ * @returns prsm_tensor_t*
+ */
+extern prsm_tensor_t *prsm_tensor_sum(prsm_tensor_t *out, const prsm_tensor_t *const in, const int8_t axis);
 
 /**
  * @brief  Add tensors
