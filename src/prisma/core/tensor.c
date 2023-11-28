@@ -574,14 +574,16 @@ prsm_tensor_t *prsm_tensor_sum(prsm_tensor_t *out, const prsm_tensor_t *const in
         case 1:
             {   
                 // resize
-                if (!prsm_tensor_match_shape_ex(ret, 1, &(size_t[]) {1})) prsm_tensor_resize(ret, 1, 1);
+                if (!prsm_tensor_match_shape_ex(ret, 1, (size_t[]) {1})) prsm_tensor_resize(ret, 1, 1);
                 prsm_tensor_set_val(ret, 0, prsm_tensor_calc_sum(in));
             }
             break;
         case 2:
             {   
                 // resize
-                prsm_tensor_resize(ret, 1, in->shape[!axis]);
+                if (!prsm_tensor_match_shape_ex(ret, 1, (size_t[]) {in->shape[!axis]})) {
+                    prsm_tensor_resize(ret, 1, in->shape[!axis]);
+                }
                 
                 // transpose if sum along rows
                 if (!axis) prsm_tensor_transpose((prsm_tensor_t*)in);
@@ -602,7 +604,9 @@ prsm_tensor_t *prsm_tensor_sum(prsm_tensor_t *out, const prsm_tensor_t *const in
                 // z-axis
                 if (axis == 0) {
                     // resize
-                    prsm_tensor_resize(ret, 2, in->shape[1], in->shape[2]);
+                    if (!prsm_tensor_match_shape_ex(ret, 2, (size_t[]) {in->shape[1], in->shape[2]})) {
+                        prsm_tensor_resize(ret, 2, in->shape[1], in->shape[2]);
+                    }
 
                     // zero-init
                     prsm_tensor_set_all(ret, 0);
@@ -615,7 +619,9 @@ prsm_tensor_t *prsm_tensor_sum(prsm_tensor_t *out, const prsm_tensor_t *const in
                     }
                 } else if (axis == 1) { // row-wise summation
                     // resize
-                    prsm_tensor_resize(ret, 3, 1, in->shape[2]);
+                    if (!prsm_tensor_match_shape_ex(ret, 2, (size_t[]) {3, in->shape[2]})) {
+                        prsm_tensor_resize(ret, 2, 3, in->shape[2]);
+                    }
                     
                     // sum up values
                     const size_t ndim = in->shape[0];
@@ -623,14 +629,28 @@ prsm_tensor_t *prsm_tensor_sum(prsm_tensor_t *out, const prsm_tensor_t *const in
                         const prsm_tensor_t tmp = prsm_tensor_make_view_mat(in, i);
 
                         // extract row where to save the result
-                        prsm_tensor_t tmp_ret_mat = prsm_tensor_make_view_mat(ret, i);
-                        prsm_tensor_t tmp_ret_vec = prsm_tensor_make_view_vec(&tmp_ret_mat, 0);
+                        prsm_tensor_t ret_vec_view = prsm_tensor_make_view_vec(ret, i);
 
                         // calculate sum
-                        prsm_tensor_sum(&tmp_ret_vec, &tmp, 0);
+                        prsm_tensor_sum(&ret_vec_view, &tmp, 0);
                     }
                 } else { // col-wise summation
-                    VT_UNIMPLEMENTED("TODO: col-wise summation for 3d matrix");
+                    // resize
+                    if (!prsm_tensor_match_shape_ex(ret, 2, (size_t[]) {3, in->shape[1]})) {
+                        prsm_tensor_resize(ret, 2, 3, in->shape[1]);
+                    }
+                    
+                    // sum up values
+                    const size_t ndim = in->shape[0];
+                    VT_FOREACH(i, 0, ndim) {
+                        const prsm_tensor_t tmp = prsm_tensor_make_view_mat(in, i);
+
+                        // extract row where to save the result
+                        prsm_tensor_t ret_vec_view = prsm_tensor_make_view_vec(ret, i);
+
+                        // calculate sum
+                        prsm_tensor_sum(&ret_vec_view, &tmp, 1);
+                    }
                 }
             }
             break;
