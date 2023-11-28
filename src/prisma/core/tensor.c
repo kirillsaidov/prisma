@@ -554,31 +554,44 @@ prsm_float prsm_tensor_dot(const prsm_tensor_t *const lhs, const prsm_tensor_t *
 prsm_tensor_t *prsm_tensor_sum(prsm_tensor_t *out, const prsm_tensor_t *const in, const int8_t axis) {
     // check for invalid input
     VT_DEBUG_ASSERT(!prsm_tensor_is_null(in), "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INVALID_ARGUMENTS));
-    VT_ENFORCE(in->ndim != 1, "%s: Use 'prsm_tensor_calc_sum(tensor)' for vectors!\n", prsm_status_to_str(PRSM_STATUS_OPERATION_FAILURE));
     VT_ENFORCE(in->ndim < 3, "%s: Higher dimensions are not supported!\n", prsm_status_to_str(PRSM_STATUS_OPERATION_FAILURE));
 
     // create tensor
     prsm_tensor_t *ret = (out == NULL)
-        ? prsm_tensor_create_vec(in->alloctr, axis ? in->shape[0] : in->shape[1])
+        ? prsm_tensor_create_vec(in->alloctr, in->shape[0])
         : out;
-    
-    // check size
-    if (ret->ndim != 1 || ret->shape[0] != (axis ? in->shape[0] : in->shape[1])) {
-        prsm_tensor_resize(ret, 1, axis ? in->shape[0] : in->shape[1]);
+
+    // switch dimension
+    switch (in->ndim) {
+        case 1:
+            {   
+                // resize
+                prsm_tensor_resize(ret, 1, 1);
+                prsm_tensor_set_val(ret, 0, prsm_tensor_calc_sum(in));
+            }
+            break;
+        case 2:
+            {   
+                // resize
+                prsm_tensor_resize(ret, 1, in->shape[axis]);
+                
+                // transpose if sum along rows
+                if (axis) prsm_tensor_transpose((prsm_tensor_t*)in);
+
+                // sum up values
+                const size_t size = prsm_tensor_size(ret);
+                VT_FOREACH(i, 0, size) {
+                    const prsm_tensor_t tmp = prsm_tensor_make_view_vec(in, i);
+                    prsm_tensor_set_val(ret, i, prsm_tensor_calc_sum(&tmp));
+                }
+
+                // undo: transpose if sum along rows
+                if (axis) prsm_tensor_transpose((prsm_tensor_t*)in);
+            }
+            break;
+        default:
+            break;
     }
-
-    // transpose if sum along rows
-    if (axis == 0) prsm_tensor_transpose((prsm_tensor_t*)in); 
-
-    // sum up values along the axis
-    const size_t size = prsm_tensor_size(ret);
-    VT_FOREACH(i, 0, size) {
-        prsm_tensor_t t = prsm_tensor_make_view_vec(in, i);
-        prsm_tensor_set_val(ret, i, prsm_tensor_calc_sum(&t));
-    }
-
-    // undo: transpose if sum along rows
-    if (axis == 0) prsm_tensor_transpose((prsm_tensor_t*)in); 
 
     return ret;
 }

@@ -155,7 +155,7 @@ extern prsm_tensor_t *prsm_activate_relu(prsm_tensor_t *out, const prsm_tensor_t
  * 
  * @note if `out==null`, tensor is allocated
  */
-// extern prsm_tensor_t *prsm_activate_relu_d(prsm_tensor_t *out, const prsm_tensor_t *const in);
+extern prsm_tensor_t *prsm_activate_relu_d(prsm_tensor_t *out, const prsm_tensor_t *const in);
 
 /**
  * @brief  Leaky RELU activation

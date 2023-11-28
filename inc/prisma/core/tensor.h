@@ -370,10 +370,10 @@ extern void prsm_tensor_set_identity(prsm_tensor_t *const t);
 extern prsm_float prsm_tensor_dot(const prsm_tensor_t *const lhs, const prsm_tensor_t *const rhs);
 
 /**
- * @brief  Sum axis-wise
+ * @brief  Axis-wise summation
  * @param  out output tensor
  * @param  in tensor
- * @param  axis 0 - row-wise, 1 - column-wise
+ * @param  axis 0 - column-wise, 1 - row-wise
  * @returns prsm_tensor_t*
  * 
  * @note if `out==NULL`, tensor is allocated
@@ -389,7 +389,6 @@ extern prsm_tensor_t *prsm_tensor_sum(prsm_tensor_t *out, const prsm_tensor_t *c
  * @returns prsm_tensor_t*
  * 
  * @note if `out==NULL`, tensor is allocated
- * @note `out` is zero initialized
  */
 extern prsm_tensor_t *prsm_tensor_add(prsm_tensor_t *out, const prsm_tensor_t *const lhs, const prsm_tensor_t *const rhs);
 
@@ -401,12 +400,23 @@ extern prsm_tensor_t *prsm_tensor_add(prsm_tensor_t *out, const prsm_tensor_t *c
  * @returns prsm_tensor_t*
  * 
  * @note if `out==NULL`, tensor is allocated
- * @note `out` is zero initialized
  */
 extern prsm_tensor_t *prsm_tensor_sub(prsm_tensor_t *out, const prsm_tensor_t *const lhs, const prsm_tensor_t *const rhs);
 
 /**
  * @brief  Multiply tensors
+ * @param  out output tensor
+ * @param  lhs tensor
+ * @param  rhs tensor
+ * @returns prsm_tensor_t*
+ * 
+ * @note if `out==NULL`, tensor is allocated
+ * @note `out` is zero initialized
+ */
+extern prsm_tensor_t *prsm_tensor_mul(prsm_tensor_t *out, const prsm_tensor_t *const lhs, const prsm_tensor_t *const rhs);
+
+/**
+ * @brief  Element-wise multiplication (hadamard product)
  * @param  out output tensor
  * @param  lhs tensor
  * @param  rhs tensor
