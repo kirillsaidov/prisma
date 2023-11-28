@@ -22,12 +22,12 @@ int main(void) {
     {   
         // vt_debug_disable_output(true);
 
-        TEST(test_custom);
-        // TEST(test_tensor);
-        // TEST(test_math);
-        // TEST(test_activation);
-        // TEST(test_loss);
-        // TEST(test_layers);
+        // TEST(test_custom);
+        TEST(test_tensor);
+        TEST(test_math);
+        TEST(test_activation);
+        TEST(test_loss);
+        TEST(test_layers);
     }
     vt_mallocator_print_stats(alloctr->stats);
     vt_mallocator_destroy(alloctr);
@@ -184,6 +184,20 @@ void test_tensor(void) {
 
     prsm_tensor_t *elm3 = prsm_tensor_mul_elwise(NULL, elm1, elm2);
     assert(prsm_tensor_equals(elm3, elm_expected));
+
+    // 3D summation
+    prsm_tensor_t *nd3m = prsm_tensor_create(alloctr, 3, 3, 2, 2);
+    prsm_tensor_assign_array(nd3m, (prsm_float[]) {
+        1, 2,
+        3, 4,
+        
+        5, 6,
+        7, 8,
+
+        9, 0,
+        1, 2
+    }, prsm_tensor_size(nd3m));
+    prsm_tensor_display(nd3m, NULL);
 }
 
 void test_math(void) {

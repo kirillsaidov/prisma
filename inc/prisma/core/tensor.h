@@ -373,7 +373,7 @@ extern prsm_float prsm_tensor_dot(const prsm_tensor_t *const lhs, const prsm_ten
  * @brief  Axis-wise summation
  * @param  out output tensor
  * @param  in tensor
- * @param  axis 0: row-wise, 1: column-wise
+ * @param  axis 2D { 0: row-wise, 1: column-wise }, 3D { 0: z-axis, 1: row-wise, 2: column-wise }
  * @returns prsm_tensor_t*
  * 
  * @note if `out==NULL`, tensor is allocated
