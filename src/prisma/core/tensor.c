@@ -574,7 +574,7 @@ prsm_tensor_t *prsm_tensor_sum(prsm_tensor_t *out, const prsm_tensor_t *const in
         case 1:
             {   
                 // resize
-                prsm_tensor_resize(ret, 1, 1);
+                if (!prsm_tensor_match_shape_ex(ret, 1, &(size_t[]) {1})) prsm_tensor_resize(ret, 1, 1);
                 prsm_tensor_set_val(ret, 0, prsm_tensor_calc_sum(in));
             }
             break;
