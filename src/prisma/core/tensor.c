@@ -554,7 +554,7 @@ prsm_float prsm_tensor_dot(const prsm_tensor_t *const lhs, const prsm_tensor_t *
 prsm_tensor_t *prsm_tensor_sum(prsm_tensor_t *out, const prsm_tensor_t *const in, const uint8_t axis) {
     // check for invalid input
     VT_DEBUG_ASSERT(!prsm_tensor_is_null(in), "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INVALID_ARGUMENTS));
-    VT_ENFORCE(in->ndim < 3, "%s: Higher dimensions are not supported!\n", prsm_status_to_str(PRSM_STATUS_OPERATION_FAILURE));
+    VT_ENFORCE(in->ndim < 4, "%s: Higher dimensions are not supported!\n", prsm_status_to_str(PRSM_STATUS_OPERATION_FAILURE));
 
     // create tensor
     prsm_tensor_t *ret = (out == NULL)
@@ -562,7 +562,7 @@ prsm_tensor_t *prsm_tensor_sum(prsm_tensor_t *out, const prsm_tensor_t *const in
         : out;
 
     // switch dimension
-    switch (in->ndim) {
+    switch (in->ndim) { // TODO: check if ret needs resizing (out may be just the right size-shape)
         case 1:
             {   
                 // resize

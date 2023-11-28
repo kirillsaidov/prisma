@@ -197,7 +197,28 @@ void test_tensor(void) {
         9, 0,
         1, 2
     }, prsm_tensor_size(nd3m));
-    prsm_tensor_display(nd3m, NULL);
+
+    // expected output
+    prsm_tensor_t *nd3m_msum_expected = prsm_tensor_create_mat(alloctr, 2, 2);
+    prsm_tensor_assign_array(nd3m_msum_expected, (prsm_float[]) {
+        15, 8, 
+        11, 14
+    }, prsm_tensor_size(nd3m_msum_expected));
+    // prsm_tensor_t *nd3m_rsum_expected = prsm_tensor_create_mat(alloctr, 2, 2);
+    // prsm_tensor_assign_array(nd3m_msum_expected, (prsm_float[]) {
+    //     15, 8, 
+    //     11, 14
+    // }, prsm_tensor_size(nd3m_msum_expected));
+
+    // z-wise sum
+    prsm_tensor_t *nd3m_sum = prsm_tensor_sum(NULL, nd3m, 0);
+    assert(prsm_tensor_equals(nd3m_sum, nd3m_msum_expected));
+
+    // row-wise sum for 3D matrix
+    prsm_tensor_sum(nd3m_sum, nd3m, 1);
+    // assert(prsm_tensor_equals(nd3m_sum, nd3m_msum_expected));
+
+    prsm_tensor_display(nd3m_sum, NULL);
 }
 
 void test_math(void) {
