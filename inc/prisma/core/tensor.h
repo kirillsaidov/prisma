@@ -425,7 +425,7 @@ extern prsm_tensor_t *prsm_tensor_mul(prsm_tensor_t *out, const prsm_tensor_t *c
  * @note if `out==NULL`, tensor is allocated
  * @note `out` is zero initialized
  */
-extern prsm_tensor_t *prsm_tensor_mul(prsm_tensor_t *out, const prsm_tensor_t *const lhs, const prsm_tensor_t *const rhs);
+extern prsm_tensor_t *prsm_tensor_mul_elwise(prsm_tensor_t *out, const prsm_tensor_t *const lhs, const prsm_tensor_t *const rhs);
 
 /* 
     Tensor element-wise operations
