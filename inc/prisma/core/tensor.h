@@ -225,6 +225,15 @@ extern void prsm_tensor_transpose(prsm_tensor_t *const t);
 extern bool prsm_tensor_match_shape(const prsm_tensor_t *const lhs, const prsm_tensor_t *const rhs);
 
 /**
+ * @brief  Checks if shapes and dimensions match from specified arguments
+ * @param  t tensor
+ * @param  ndim dimension
+ * @param  shape shape
+ * @returns true if `t.ndim==ndim` and `t.shape==shape`
+ */
+extern bool prsm_tensor_match_shape_ex(const prsm_tensor_t *const t, const size_t ndim, const size_t shape[]);
+
+/**
  * @brief  Checks if tensors are equal
  * @param  lhs tensor
  * @param  rhs tensor

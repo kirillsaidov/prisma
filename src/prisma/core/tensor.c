@@ -305,6 +305,14 @@ bool prsm_tensor_match_shape(const prsm_tensor_t *const lhs, const prsm_tensor_t
     return (lhs->ndim == rhs->ndim) && vt_memcmp(lhs->shape, rhs->shape, lhs->ndim * sizeof(size_t));
 }
 
+bool prsm_tensor_match_shape_ex(const prsm_tensor_t *const t, const size_t ndim, const size_t shape[]) {
+    // check for invalid input
+    VT_DEBUG_ASSERT(!prsm_tensor_is_null(t), "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INVALID_ARGUMENTS));
+    VT_DEBUG_ASSERT(shape != NULL, "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INVALID_ARGUMENTS));
+
+    return (t->ndim == ndim) && vt_memcmp(t->shape, shape, t->ndim * sizeof(size_t));
+}
+
 bool prsm_tensor_equals(const prsm_tensor_t *const lhs, const prsm_tensor_t *const rhs) {
     // check for invalid input
     VT_DEBUG_ASSERT(!prsm_tensor_is_null(lhs), "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INVALID_ARGUMENTS));
