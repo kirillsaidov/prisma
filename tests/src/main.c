@@ -165,6 +165,25 @@ void test_tensor(void) {
     prsm_tensor_sum(_sm, sm, 1);
     assert(prsm_tensor_get_val(_sm, 0) == (prsm_float)6);
     assert(prsm_tensor_get_val(_sm, 1) == (prsm_float)15);
+
+    // element-wise multiplication
+    prsm_tensor_t *elm1 = prsm_tensor_create_mat(alloctr, 2, 2);
+    prsm_tensor_assign_array(elm1, (prsm_float[]) {
+        10, 2, 40, 4
+    }, prsm_tensor_size(elm1));
+    
+    prsm_tensor_t *elm2 = prsm_tensor_create_mat(alloctr, 2, 2);
+    prsm_tensor_assign_array(elm1, (prsm_float[]) {
+        1, 2, 3, 4
+    }, prsm_tensor_size(elm1));
+    
+    prsm_tensor_t *elm_expected = prsm_tensor_create_mat(alloctr, 2, 2);
+    prsm_tensor_assign_array(elm1, (prsm_float[]) {
+        10, 4, 120, 16
+    }, prsm_tensor_size(elm1));
+
+    prsm_tensor_t *elm3 = prsm_tensor_mul_elwise(NULL, elm1, elm2);
+    assert(prsm_tensor_equals(elm3, elm_expected));
 }
 
 void test_math(void) {
