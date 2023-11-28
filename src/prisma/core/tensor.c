@@ -551,7 +551,7 @@ prsm_float prsm_tensor_dot(const prsm_tensor_t *const lhs, const prsm_tensor_t *
     return result;
 }
 
-prsm_tensor_t *prsm_tensor_sum(prsm_tensor_t *out, const prsm_tensor_t *const in, const int8_t axis) {
+prsm_tensor_t *prsm_tensor_sum(prsm_tensor_t *out, const prsm_tensor_t *const in, const uint8_t axis) {
     // check for invalid input
     VT_DEBUG_ASSERT(!prsm_tensor_is_null(in), "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INVALID_ARGUMENTS));
     VT_ENFORCE(in->ndim < 3, "%s: Higher dimensions are not supported!\n", prsm_status_to_str(PRSM_STATUS_OPERATION_FAILURE));
@@ -573,10 +573,10 @@ prsm_tensor_t *prsm_tensor_sum(prsm_tensor_t *out, const prsm_tensor_t *const in
         case 2:
             {   
                 // resize
-                prsm_tensor_resize(ret, 1, in->shape[axis]);
+                prsm_tensor_resize(ret, 1, in->shape[!axis]);
                 
                 // transpose if sum along rows
-                if (axis) prsm_tensor_transpose((prsm_tensor_t*)in);
+                if (!axis) prsm_tensor_transpose((prsm_tensor_t*)in);
 
                 // sum up values
                 const size_t size = prsm_tensor_size(ret);
@@ -586,7 +586,7 @@ prsm_tensor_t *prsm_tensor_sum(prsm_tensor_t *out, const prsm_tensor_t *const in
                 }
 
                 // undo: transpose if sum along rows
-                if (axis) prsm_tensor_transpose((prsm_tensor_t*)in);
+                if (!axis) prsm_tensor_transpose((prsm_tensor_t*)in);
             }
             break;
         default:
