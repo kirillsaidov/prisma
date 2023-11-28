@@ -21,6 +21,7 @@
     - prsm_tensor_dup_into
     - prsm_tensor_transpose
     - prsm_tensor_match_shape
+    - prsm_tensor_match_shape_ex
     - prsm_tensor_equals
     - prsm_tensor_assign
     - prsm_tensor_swap
