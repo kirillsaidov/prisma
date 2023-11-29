@@ -6,12 +6,12 @@ prsm_tensor_t *prsm_activate_sigmoid(prsm_tensor_t *out, const prsm_tensor_t *co
 
     // create tensor
     prsm_tensor_t *ret = (out == NULL)
-        ? prsm_tensor_create_shape(in->alloctr, in->ndim, in->shape)
+        ? prsm_tensor_create_ex(in->alloctr, in->ndim, in->shape)
         : out;
 
     // check size
-    if (!prsm_tensor_match_shape(ret, in)) {
-        prsm_tensor_resize_shape(ret, in->ndim, in->shape);
+    if (!prsm_tensor_shapes_match(ret, in)) {
+        prsm_tensor_resize_ex(ret, in->ndim, in->shape);
     }
 
     // copy over the values 
@@ -29,12 +29,12 @@ prsm_tensor_t *prsm_activate_sigmoid_d(prsm_tensor_t *out, const prsm_tensor_t *
 
     // create tensor
     prsm_tensor_t *ret = (out == NULL)
-        ? prsm_tensor_create_shape(in->alloctr, in->ndim, in->shape)
+        ? prsm_tensor_create_ex(in->alloctr, in->ndim, in->shape)
         : out;
 
     // check size
-    if (!prsm_tensor_match_shape(ret, in)) {
-        prsm_tensor_resize_shape(ret, in->ndim, in->shape);
+    if (!prsm_tensor_shapes_match(ret, in)) {
+        prsm_tensor_resize_ex(ret, in->ndim, in->shape);
     }
 
     // copy over the values 
@@ -52,12 +52,12 @@ prsm_tensor_t *prsm_activate_tanh(prsm_tensor_t *out, const prsm_tensor_t *const
 
     // create tensor
     prsm_tensor_t *ret = (out == NULL)
-        ? prsm_tensor_create_shape(in->alloctr, in->ndim, in->shape)
+        ? prsm_tensor_create_ex(in->alloctr, in->ndim, in->shape)
         : out;
 
     // check size
-    if (!prsm_tensor_match_shape(ret, in)) {
-        prsm_tensor_resize_shape(ret, in->ndim, in->shape);
+    if (!prsm_tensor_shapes_match(ret, in)) {
+        prsm_tensor_resize_ex(ret, in->ndim, in->shape);
     }
 
     // copy over the values 
@@ -75,12 +75,12 @@ prsm_tensor_t *prsm_activate_tahn_d(prsm_tensor_t *out, const prsm_tensor_t *con
 
     // create tensor
     prsm_tensor_t *ret = (out == NULL)
-        ? prsm_tensor_create_shape(in->alloctr, in->ndim, in->shape)
+        ? prsm_tensor_create_ex(in->alloctr, in->ndim, in->shape)
         : out;
 
     // check size
-    if (!prsm_tensor_match_shape(ret, in)) {
-        prsm_tensor_resize_shape(ret, in->ndim, in->shape);
+    if (!prsm_tensor_shapes_match(ret, in)) {
+        prsm_tensor_resize_ex(ret, in->ndim, in->shape);
     }
 
     // copy over the values 
@@ -98,12 +98,12 @@ prsm_tensor_t *prsm_activate_linear(prsm_tensor_t *out, const prsm_tensor_t *con
 
     // create tensor
     prsm_tensor_t *ret = (out == NULL)
-        ? prsm_tensor_create_shape(in->alloctr, in->ndim, in->shape)
+        ? prsm_tensor_create_ex(in->alloctr, in->ndim, in->shape)
         : out;
 
     // check size
-    if (!prsm_tensor_match_shape(ret, in)) {
-        prsm_tensor_resize_shape(ret, in->ndim, in->shape);
+    if (!prsm_tensor_shapes_match(ret, in)) {
+        prsm_tensor_resize_ex(ret, in->ndim, in->shape);
     }
 
     // copy over the values 
@@ -118,12 +118,12 @@ prsm_tensor_t *prsm_activate_linear_d(prsm_tensor_t *out, const prsm_tensor_t *c
 
     // create tensor
     prsm_tensor_t *ret = (out == NULL)
-        ? prsm_tensor_create_shape(in->alloctr, in->ndim, in->shape)
+        ? prsm_tensor_create_ex(in->alloctr, in->ndim, in->shape)
         : out;
 
     // check size
-    if (!prsm_tensor_match_shape(ret, in)) {
-        prsm_tensor_resize_shape(ret, in->ndim, in->shape);
+    if (!prsm_tensor_shapes_match(ret, in)) {
+        prsm_tensor_resize_ex(ret, in->ndim, in->shape);
     }
 
     // copy over the values 
@@ -138,12 +138,12 @@ prsm_tensor_t *prsm_activate_ramp(prsm_tensor_t *out, const prsm_tensor_t *const
 
     // create tensor
     prsm_tensor_t *ret = (out == NULL)
-        ? prsm_tensor_create_shape(in->alloctr, in->ndim, in->shape)
+        ? prsm_tensor_create_ex(in->alloctr, in->ndim, in->shape)
         : out;
 
     // check size
-    if (!prsm_tensor_match_shape(ret, in)) {
-        prsm_tensor_resize_shape(ret, in->ndim, in->shape);
+    if (!prsm_tensor_shapes_match(ret, in)) {
+        prsm_tensor_resize_ex(ret, in->ndim, in->shape);
     }
 
     // copy over the values 
@@ -161,12 +161,12 @@ prsm_tensor_t *prsm_activate_ramp_d(prsm_tensor_t *out, const prsm_tensor_t *con
 
     // create tensor
     prsm_tensor_t *ret = (out == NULL)
-        ? prsm_tensor_create_shape(in->alloctr, in->ndim, in->shape)
+        ? prsm_tensor_create_ex(in->alloctr, in->ndim, in->shape)
         : out;
 
     // check size
-    if (!prsm_tensor_match_shape(ret, in)) {
-        prsm_tensor_resize_shape(ret, in->ndim, in->shape);
+    if (!prsm_tensor_shapes_match(ret, in)) {
+        prsm_tensor_resize_ex(ret, in->ndim, in->shape);
     }
 
     // copy over the values 
@@ -184,12 +184,12 @@ prsm_tensor_t *prsm_activate_htanh(prsm_tensor_t *out, const prsm_tensor_t *cons
 
     // create tensor
     prsm_tensor_t *ret = (out == NULL)
-        ? prsm_tensor_create_shape(in->alloctr, in->ndim, in->shape)
+        ? prsm_tensor_create_ex(in->alloctr, in->ndim, in->shape)
         : out;
 
     // check size
-    if (!prsm_tensor_match_shape(ret, in)) {
-        prsm_tensor_resize_shape(ret, in->ndim, in->shape);
+    if (!prsm_tensor_shapes_match(ret, in)) {
+        prsm_tensor_resize_ex(ret, in->ndim, in->shape);
     }
 
     // copy over the values 
@@ -207,12 +207,12 @@ prsm_tensor_t *prsm_activate_htanh_d(prsm_tensor_t *out, const prsm_tensor_t *co
 
     // create tensor
     prsm_tensor_t *ret = (out == NULL)
-        ? prsm_tensor_create_shape(in->alloctr, in->ndim, in->shape)
+        ? prsm_tensor_create_ex(in->alloctr, in->ndim, in->shape)
         : out;
 
     // check size
-    if (!prsm_tensor_match_shape(ret, in)) {
-        prsm_tensor_resize_shape(ret, in->ndim, in->shape);
+    if (!prsm_tensor_shapes_match(ret, in)) {
+        prsm_tensor_resize_ex(ret, in->ndim, in->shape);
     }
 
     // copy over the values 
@@ -230,12 +230,12 @@ prsm_tensor_t *prsm_activate_relu(prsm_tensor_t *out, const prsm_tensor_t *const
 
     // create tensor
     prsm_tensor_t *ret = (out == NULL)
-        ? prsm_tensor_create_shape(in->alloctr, in->ndim, in->shape)
+        ? prsm_tensor_create_ex(in->alloctr, in->ndim, in->shape)
         : out;
 
     // check size
-    if (!prsm_tensor_match_shape(ret, in)) {
-        prsm_tensor_resize_shape(ret, in->ndim, in->shape);
+    if (!prsm_tensor_shapes_match(ret, in)) {
+        prsm_tensor_resize_ex(ret, in->ndim, in->shape);
     }
 
     // copy over the values 
@@ -253,12 +253,12 @@ prsm_tensor_t *prsm_activate_relu_d(prsm_tensor_t *out, const prsm_tensor_t *con
 
     // create tensor
     prsm_tensor_t *ret = (out == NULL)
-        ? prsm_tensor_create_shape(in->alloctr, in->ndim, in->shape)
+        ? prsm_tensor_create_ex(in->alloctr, in->ndim, in->shape)
         : out;
 
     // check size
-    if (!prsm_tensor_match_shape(ret, in)) {
-        prsm_tensor_resize_shape(ret, in->ndim, in->shape);
+    if (!prsm_tensor_shapes_match(ret, in)) {
+        prsm_tensor_resize_ex(ret, in->ndim, in->shape);
     }
 
     // copy over the values 
@@ -276,12 +276,12 @@ prsm_tensor_t *prsm_activate_lrelu(prsm_tensor_t *out, const prsm_tensor_t *cons
 
     // create tensor
     prsm_tensor_t *ret = (out == NULL)
-        ? prsm_tensor_create_shape(in->alloctr, in->ndim, in->shape)
+        ? prsm_tensor_create_ex(in->alloctr, in->ndim, in->shape)
         : out;
 
     // check size
-    if (!prsm_tensor_match_shape(ret, in)) {
-        prsm_tensor_resize_shape(ret, in->ndim, in->shape);
+    if (!prsm_tensor_shapes_match(ret, in)) {
+        prsm_tensor_resize_ex(ret, in->ndim, in->shape);
     }
 
     // copy over the values 
@@ -299,12 +299,12 @@ prsm_tensor_t *prsm_activate_lrelu_d(prsm_tensor_t *out, const prsm_tensor_t *co
 
     // create tensor
     prsm_tensor_t *ret = (out == NULL)
-        ? prsm_tensor_create_shape(in->alloctr, in->ndim, in->shape)
+        ? prsm_tensor_create_ex(in->alloctr, in->ndim, in->shape)
         : out;
 
     // check size
-    if (!prsm_tensor_match_shape(ret, in)) {
-        prsm_tensor_resize_shape(ret, in->ndim, in->shape);
+    if (!prsm_tensor_shapes_match(ret, in)) {
+        prsm_tensor_resize_ex(ret, in->ndim, in->shape);
     }
 
     // copy over the values 
@@ -322,12 +322,12 @@ prsm_tensor_t *prsm_activate_elu(prsm_tensor_t *out, const prsm_tensor_t *const 
 
     // create tensor
     prsm_tensor_t *ret = (out == NULL)
-        ? prsm_tensor_create_shape(in->alloctr, in->ndim, in->shape)
+        ? prsm_tensor_create_ex(in->alloctr, in->ndim, in->shape)
         : out;
 
     // check size
-    if (!prsm_tensor_match_shape(ret, in)) {
-        prsm_tensor_resize_shape(ret, in->ndim, in->shape);
+    if (!prsm_tensor_shapes_match(ret, in)) {
+        prsm_tensor_resize_ex(ret, in->ndim, in->shape);
     }
 
     // copy over the values 
@@ -345,12 +345,12 @@ prsm_tensor_t *prsm_activate_elu_d(prsm_tensor_t *out, const prsm_tensor_t *cons
 
     // create tensor
     prsm_tensor_t *ret = (out == NULL)
-        ? prsm_tensor_create_shape(in->alloctr, in->ndim, in->shape)
+        ? prsm_tensor_create_ex(in->alloctr, in->ndim, in->shape)
         : out;
 
     // check size
-    if (!prsm_tensor_match_shape(ret, in)) {
-        prsm_tensor_resize_shape(ret, in->ndim, in->shape);
+    if (!prsm_tensor_shapes_match(ret, in)) {
+        prsm_tensor_resize_ex(ret, in->ndim, in->shape);
     }
 
     // copy over the values 
@@ -368,12 +368,12 @@ prsm_tensor_t *prsm_activate_selu(prsm_tensor_t *out, const prsm_tensor_t *const
 
     // create tensor
     prsm_tensor_t *ret = (out == NULL)
-        ? prsm_tensor_create_shape(in->alloctr, in->ndim, in->shape)
+        ? prsm_tensor_create_ex(in->alloctr, in->ndim, in->shape)
         : out;
 
     // check size
-    if (!prsm_tensor_match_shape(ret, in)) {
-        prsm_tensor_resize_shape(ret, in->ndim, in->shape);
+    if (!prsm_tensor_shapes_match(ret, in)) {
+        prsm_tensor_resize_ex(ret, in->ndim, in->shape);
     }
 
     // copy over the values 
@@ -391,12 +391,12 @@ prsm_tensor_t *prsm_activate_selu_d(prsm_tensor_t *out, const prsm_tensor_t *con
 
     // create tensor
     prsm_tensor_t *ret = (out == NULL)
-        ? prsm_tensor_create_shape(in->alloctr, in->ndim, in->shape)
+        ? prsm_tensor_create_ex(in->alloctr, in->ndim, in->shape)
         : out;
 
     // check size
-    if (!prsm_tensor_match_shape(ret, in)) {
-        prsm_tensor_resize_shape(ret, in->ndim, in->shape);
+    if (!prsm_tensor_shapes_match(ret, in)) {
+        prsm_tensor_resize_ex(ret, in->ndim, in->shape);
     }
 
     // copy over the values 
@@ -414,12 +414,12 @@ prsm_tensor_t *prsm_activate_prelu(prsm_tensor_t *out, const prsm_tensor_t *cons
 
     // create tensor
     prsm_tensor_t *ret = (out == NULL)
-        ? prsm_tensor_create_shape(in->alloctr, in->ndim, in->shape)
+        ? prsm_tensor_create_ex(in->alloctr, in->ndim, in->shape)
         : out;
 
     // check size
-    if (!prsm_tensor_match_shape(ret, in)) {
-        prsm_tensor_resize_shape(ret, in->ndim, in->shape);
+    if (!prsm_tensor_shapes_match(ret, in)) {
+        prsm_tensor_resize_ex(ret, in->ndim, in->shape);
     }
 
     // copy over the values 
@@ -438,12 +438,12 @@ prsm_tensor_t *prsm_activate_prelu_d(prsm_tensor_t *out, const prsm_tensor_t *co
 
     // create tensor
     prsm_tensor_t *ret = (out == NULL)
-        ? prsm_tensor_create_shape(in->alloctr, in->ndim, in->shape)
+        ? prsm_tensor_create_ex(in->alloctr, in->ndim, in->shape)
         : out;
 
     // check size
-    if (!prsm_tensor_match_shape(ret, in)) {
-        prsm_tensor_resize_shape(ret, in->ndim, in->shape);
+    if (!prsm_tensor_shapes_match(ret, in)) {
+        prsm_tensor_resize_ex(ret, in->ndim, in->shape);
     }
 
     // copy over the values 
@@ -462,12 +462,12 @@ prsm_tensor_t *prsm_activate_softmax(prsm_tensor_t *out, const prsm_tensor_t *co
 
     // create tensor
     prsm_tensor_t *ret = (out == NULL)
-        ? prsm_tensor_create_shape(in->alloctr, in->ndim, in->shape)
+        ? prsm_tensor_create_ex(in->alloctr, in->ndim, in->shape)
         : out;
 
     // check size
-    if (!prsm_tensor_match_shape(ret, in)) {
-        prsm_tensor_resize_shape(ret, in->ndim, in->shape);
+    if (!prsm_tensor_shapes_match(ret, in)) {
+        prsm_tensor_resize_ex(ret, in->ndim, in->shape);
     }
 
     // copy over the values
@@ -486,12 +486,12 @@ prsm_tensor_t *prsm_activate_softmax_d(prsm_tensor_t *out, const prsm_tensor_t *
 
     // create tensor
     prsm_tensor_t *ret = (out == NULL)
-        ? prsm_tensor_create_shape(in->alloctr, in->ndim, in->shape)
+        ? prsm_tensor_create_ex(in->alloctr, in->ndim, in->shape)
         : out;
 
     // check size
-    if (!prsm_tensor_match_shape(ret, in)) {
-        prsm_tensor_resize_shape(ret, in->ndim, in->shape);
+    if (!prsm_tensor_shapes_match(ret, in)) {
+        prsm_tensor_resize_ex(ret, in->ndim, in->shape);
     }
 
     // run softmax
@@ -513,12 +513,12 @@ prsm_tensor_t *prsm_activate_ssoftmax(prsm_tensor_t *out, const prsm_tensor_t *c
 
     // create tensor
     prsm_tensor_t *ret = (out == NULL)
-        ? prsm_tensor_create_shape(in->alloctr, in->ndim, in->shape)
+        ? prsm_tensor_create_ex(in->alloctr, in->ndim, in->shape)
         : out;
 
     // check size
-    if (!prsm_tensor_match_shape(ret, in)) {
-        prsm_tensor_resize_shape(ret, in->ndim, in->shape);
+    if (!prsm_tensor_shapes_match(ret, in)) {
+        prsm_tensor_resize_ex(ret, in->ndim, in->shape);
     }
 
     // copy over the values
@@ -538,12 +538,12 @@ prsm_tensor_t *prsm_activate_ssoftmax_d(prsm_tensor_t *out, const prsm_tensor_t 
 
     // create tensor
     prsm_tensor_t *ret = (out == NULL)
-        ? prsm_tensor_create_shape(in->alloctr, in->ndim, in->shape)
+        ? prsm_tensor_create_ex(in->alloctr, in->ndim, in->shape)
         : out;
 
     // check size
-    if (!prsm_tensor_match_shape(ret, in)) {
-        prsm_tensor_resize_shape(ret, in->ndim, in->shape);
+    if (!prsm_tensor_shapes_match(ret, in)) {
+        prsm_tensor_resize_ex(ret, in->ndim, in->shape);
     }
 
     // run softmax
@@ -565,12 +565,12 @@ prsm_tensor_t *prsm_activate_lsoftmax(prsm_tensor_t *out, const prsm_tensor_t *c
 
     // create tensor
     prsm_tensor_t *ret = (out == NULL)
-        ? prsm_tensor_create_shape(in->alloctr, in->ndim, in->shape)
+        ? prsm_tensor_create_ex(in->alloctr, in->ndim, in->shape)
         : out;
 
     // check size
-    if (!prsm_tensor_match_shape(ret, in)) {
-        prsm_tensor_resize_shape(ret, in->ndim, in->shape);
+    if (!prsm_tensor_shapes_match(ret, in)) {
+        prsm_tensor_resize_ex(ret, in->ndim, in->shape);
     }
 
     // copy over the values
@@ -597,12 +597,12 @@ prsm_tensor_t *prsm_activate_lsoftmax_d(prsm_tensor_t *out, const prsm_tensor_t 
 
     // create tensor
     prsm_tensor_t *ret = (out == NULL)
-        ? prsm_tensor_create_shape(in->alloctr, in->ndim, in->shape)
+        ? prsm_tensor_create_ex(in->alloctr, in->ndim, in->shape)
         : out;
 
     // check size
-    if (!prsm_tensor_match_shape(ret, in)) {
-        prsm_tensor_resize_shape(ret, in->ndim, in->shape);
+    if (!prsm_tensor_shapes_match(ret, in)) {
+        prsm_tensor_resize_ex(ret, in->ndim, in->shape);
     }
 
     // run softmax

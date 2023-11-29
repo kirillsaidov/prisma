@@ -77,9 +77,9 @@ void test_tensor(void) {
     prsm_tensor_t *v3 = prsm_tensor_sub(NULL, v2, v1);
     assert(prsm_tensor_calc_sum(v3) == 7);
 
-    // prsm_tensor_t *v4 = prsm_tensor_mul(NULL, v0, v1); // should fail: use prsm_tensor_dot for vectors
-    prsm_float dotprod = prsm_tensor_dot(v1, v2);
-    assert(dotprod == 38);
+    // vector dot product
+    prsm_tensor_t *dotprod = prsm_tensor_dot(NULL, v1, v2);
+    assert(prsm_tensor_get_val(dotprod, 0) == 38);
 
     /*
      * MATRIX
@@ -105,7 +105,7 @@ void test_tensor(void) {
     printf("INCREMENTAL:\n"); prsm_tensor_display(mat1, NULL);
 
     // multiplication
-    prsm_tensor_t *mat2 = prsm_tensor_mul(NULL, mat1, mat0);
+    prsm_tensor_t *mat2 = prsm_tensor_dot(NULL, mat1, mat0);
     assert(prsm_tensor_get_val(mat2, vt_index_2d_to_1d(0, 0, mat2->shape[1])) == 14);
     assert(prsm_tensor_get_val(mat2, vt_index_2d_to_1d(1, 0, mat2->shape[1])) == 38);
 
@@ -137,7 +137,7 @@ void test_tensor(void) {
     prsm_tensor_set_all(mat_w, 0.5);
 
     // mat by vec
-    prsm_tensor_t *mat_mv = prsm_tensor_mul(NULL, mat_x, mat_w);
+    prsm_tensor_t *mat_mv = prsm_tensor_dot(NULL, mat_x, mat_w);
     assert(prsm_tensor_get_val(mat_mv, 0) == (prsm_float)0.5);
     assert(prsm_tensor_get_val(mat_mv, 1) == (prsm_float)2.5);
     assert(prsm_tensor_get_val(mat_mv, 2) == (prsm_float)4.5);
@@ -145,7 +145,7 @@ void test_tensor(void) {
     
     // vec by mat
     prsm_tensor_transpose(mat_x);
-    prsm_tensor_t *mat_vm = prsm_tensor_mul(NULL, mat_w, mat_x);
+    prsm_tensor_t *mat_vm = prsm_tensor_dot(NULL, mat_w, mat_x);
     assert(prsm_tensor_get_val(mat_vm, 0) == (prsm_float)0.5);
     assert(prsm_tensor_get_val(mat_vm, 1) == (prsm_float)2.5);
     assert(prsm_tensor_get_val(mat_vm, 2) == (prsm_float)4.5);
@@ -182,7 +182,7 @@ void test_tensor(void) {
         10, 4, 120, 16
     }, prsm_tensor_size(elm1));
 
-    prsm_tensor_t *elm3 = prsm_tensor_mul_elwise(NULL, elm1, elm2);
+    prsm_tensor_t *elm3 = prsm_tensor_mul(NULL, elm1, elm2);
     assert(prsm_tensor_equals(elm3, elm_expected));
 
     // 3D summation

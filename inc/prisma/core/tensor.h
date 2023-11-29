@@ -6,7 +6,7 @@
 
  * Functions:
     - prsm_tensor_create
-    - prsm_tensor_create_shape
+    - prsm_tensor_create_ex
     - prsm_tensor_create_vec
     - prsm_tensor_create_mat
     - prsm_tensor_destroy
@@ -16,12 +16,12 @@
     - prsm_tensor_data
     - prsm_tensor_size
     - prsm_tensor_resize
-    - prsm_tensor_resize_shape
+    - prsm_tensor_resize_ex
     - prsm_tensor_dup
     - prsm_tensor_dup_into
     - prsm_tensor_transpose
-    - prsm_tensor_match_shape
-    - prsm_tensor_match_shape_ex
+    - prsm_tensor_shapes_match
+    - prsm_tensor_shapes_match_ex
     - prsm_tensor_equals
     - prsm_tensor_assign
     - prsm_tensor_swap
@@ -37,8 +37,8 @@
     - prsm_tensor_set_zeros
     - prsm_tensor_set_identity
     - prsm_tensor_set_from_array
-    - prsm_tensor_dot
     - prsm_tensor_sum
+    - prsm_tensor_dot
     - prsm_tensor_add
     - prsm_tensor_sub
     - prsm_tensor_mul
@@ -104,7 +104,7 @@ extern prsm_tensor_t *prsm_tensor_create(struct VitaBaseAllocatorType *const all
  * @param  shape tensor shape
  * @returns valid `prsm_tensor_t*` or asserts on failure
  */
-extern prsm_tensor_t *prsm_tensor_create_shape(struct VitaBaseAllocatorType *const alloctr, const size_t ndim, const size_t shape[]);
+extern prsm_tensor_t *prsm_tensor_create_ex(struct VitaBaseAllocatorType *const alloctr, const size_t ndim, const size_t shape[]);
 
 /**
  * @brief  Creates a tensor vector
@@ -189,7 +189,7 @@ extern void prsm_tensor_resize(prsm_tensor_t *const t, const size_t ndim, ...);
  * @param  shape tensor shape
  * @returns None
  */
-extern void prsm_tensor_resize_shape(prsm_tensor_t *const t, const size_t ndim, const size_t shape[]);
+extern void prsm_tensor_resize_ex(prsm_tensor_t *const t, const size_t ndim, const size_t shape[]);
 
 /**
  * @brief  Duplicates tensor
@@ -223,7 +223,7 @@ extern void prsm_tensor_transpose(prsm_tensor_t *const t);
  * @param  rhs tensor
  * @returns true if `lhs.ndim==rhs.ndim` and `lhs.shape==rhs.shape`
  */
-extern bool prsm_tensor_match_shape(const prsm_tensor_t *const lhs, const prsm_tensor_t *const rhs);
+extern bool prsm_tensor_shapes_match(const prsm_tensor_t *const lhs, const prsm_tensor_t *const rhs);
 
 /**
  * @brief  Checks if shapes and dimensions match from specified arguments
@@ -232,7 +232,7 @@ extern bool prsm_tensor_match_shape(const prsm_tensor_t *const lhs, const prsm_t
  * @param  shape shape
  * @returns true if `t.ndim==ndim` and `t.shape==shape`
  */
-extern bool prsm_tensor_match_shape_ex(const prsm_tensor_t *const t, const size_t ndim, const size_t shape[]);
+extern bool prsm_tensor_shapes_match_ex(const prsm_tensor_t *const t, const size_t ndim, const size_t shape[]);
 
 /**
  * @brief  Checks if tensors are equal
@@ -372,14 +372,6 @@ extern void prsm_tensor_set_identity(prsm_tensor_t *const t);
 */
 
 /**
- * @brief  Dot product
- * @param  lhs tensor vector
- * @param  rhs tensor vector
- * @returns prsm_float
- */
-extern prsm_float prsm_tensor_dot(const prsm_tensor_t *const lhs, const prsm_tensor_t *const rhs);
-
-/**
  * @brief  Axis-wise summation
  * @param  out output tensor
  * @param  in tensor
@@ -414,7 +406,7 @@ extern prsm_tensor_t *prsm_tensor_add(prsm_tensor_t *out, const prsm_tensor_t *c
 extern prsm_tensor_t *prsm_tensor_sub(prsm_tensor_t *out, const prsm_tensor_t *const lhs, const prsm_tensor_t *const rhs);
 
 /**
- * @brief  Multiply tensors
+ * @brief  Tensor dot product
  * @param  out output tensor
  * @param  lhs tensor
  * @param  rhs tensor
@@ -423,7 +415,7 @@ extern prsm_tensor_t *prsm_tensor_sub(prsm_tensor_t *out, const prsm_tensor_t *c
  * @note if `out==NULL`, tensor is allocated
  * @note `out` is zero initialized
  */
-extern prsm_tensor_t *prsm_tensor_mul(prsm_tensor_t *out, const prsm_tensor_t *const lhs, const prsm_tensor_t *const rhs);
+extern prsm_tensor_t *prsm_tensor_dot(prsm_tensor_t *out, const prsm_tensor_t *const lhs, const prsm_tensor_t *const rhs);
 
 /**
  * @brief  Element-wise multiplication (hadamard product)
@@ -435,7 +427,7 @@ extern prsm_tensor_t *prsm_tensor_mul(prsm_tensor_t *out, const prsm_tensor_t *c
  * @note if `out==NULL`, tensor is allocated
  * @note `out` is zero initialized
  */
-extern prsm_tensor_t *prsm_tensor_mul_elwise(prsm_tensor_t *out, const prsm_tensor_t *const lhs, const prsm_tensor_t *const rhs);
+extern prsm_tensor_t *prsm_tensor_mul(prsm_tensor_t *out, const prsm_tensor_t *const lhs, const prsm_tensor_t *const rhs);
 
 /* 
     Tensor element-wise operations

@@ -65,7 +65,7 @@ void run_perceptron(void) {
         prsm_tensor_set_zeros(error);
 
         // z = w*xT + b
-        z = prsm_tensor_mul(z, x_train, weights);
+        z = prsm_tensor_dot(z, x_train, weights);
 
         // yhat = activate(z)
         prsm_tensor_assign(yhat, z);
@@ -119,7 +119,7 @@ void run_perceptron(void) {
     prsm_tensor_display(x_test, NULL);
 
     VT_LOG_INFO("Running predictions...");
-    yhat = prsm_tensor_mul(yhat, x_test, weights);
+    yhat = prsm_tensor_dot(yhat, x_test, weights);
     prsm_tensor_apply_func(yhat, threshold05);
     prsm_tensor_display(yhat, NULL);
 

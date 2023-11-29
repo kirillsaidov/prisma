@@ -1,8 +1,9 @@
 #include "prisma/core/tensor.h"
 
-static prsm_tensor_t *prsm_tensor_mul_vec_by_mat(prsm_tensor_t *const out, const prsm_tensor_t *const lhs, const prsm_tensor_t *const rhs);
-static prsm_tensor_t *prsm_tensor_mul_mat_by_vec(prsm_tensor_t *const out, const prsm_tensor_t *const lhs, const prsm_tensor_t *const rhs);
-static prsm_tensor_t *prsm_tensor_mul_mat_by_mat(prsm_tensor_t *const out, const prsm_tensor_t *const lhs, const prsm_tensor_t *const rhs);
+static prsm_tensor_t *prsm_tensor_dot_vec_by_vec(prsm_tensor_t *const out, const prsm_tensor_t *const lhs, const prsm_tensor_t *const rhs);
+static prsm_tensor_t *prsm_tensor_dot_vec_by_mat(prsm_tensor_t *const out, const prsm_tensor_t *const lhs, const prsm_tensor_t *const rhs);
+static prsm_tensor_t *prsm_tensor_dot_mat_by_vec(prsm_tensor_t *const out, const prsm_tensor_t *const lhs, const prsm_tensor_t *const rhs);
+static prsm_tensor_t *prsm_tensor_dot_mat_by_mat(prsm_tensor_t *const out, const prsm_tensor_t *const lhs, const prsm_tensor_t *const rhs);
 
 /* 
     Tensor creation/destruction
@@ -48,7 +49,7 @@ prsm_tensor_t *prsm_tensor_create(struct VitaBaseAllocatorType *const alloctr, c
     return t;
 }
 
-prsm_tensor_t *prsm_tensor_create_shape(struct VitaBaseAllocatorType *const alloctr, const size_t ndim, const size_t shape[]) {
+prsm_tensor_t *prsm_tensor_create_ex(struct VitaBaseAllocatorType *const alloctr, const size_t ndim, const size_t shape[]) {
     // check for invalid input
     VT_DEBUG_ASSERT(ndim > 0, "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INVALID_ARGUMENTS));
 
@@ -196,7 +197,7 @@ void prsm_tensor_resize(prsm_tensor_t *const t, const size_t ndim, ...) {
     }
 }
 
-void prsm_tensor_resize_shape(prsm_tensor_t *const t, const size_t ndim, const size_t shape[])  {
+void prsm_tensor_resize_ex(prsm_tensor_t *const t, const size_t ndim, const size_t shape[])  {
     // check for invalid input
     VT_DEBUG_ASSERT(!prsm_tensor_is_null(t), "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INVALID_ARGUMENTS));
     VT_DEBUG_ASSERT(ndim > 0, "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INVALID_ARGUMENTS));
@@ -235,7 +236,7 @@ prsm_tensor_t *prsm_tensor_dup(const prsm_tensor_t *const t) {
     VT_DEBUG_ASSERT(!prsm_tensor_is_null(t), "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INVALID_ARGUMENTS));
 
     // duplicate tensor
-    prsm_tensor_t *tdup = prsm_tensor_create_shape(t->alloctr, t->ndim, t->shape);
+    prsm_tensor_t *tdup = prsm_tensor_create_ex(t->alloctr, t->ndim, t->shape);
     vt_memcopy(tdup->data, t->data, prsm_tensor_size(tdup) * sizeof(prsm_float));
 
     return tdup;
@@ -245,7 +246,7 @@ void prsm_tensor_dup_into(prsm_tensor_t *const out, const prsm_tensor_t *const i
     // check for invalid input
     VT_DEBUG_ASSERT(!prsm_tensor_is_null(out), "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INVALID_ARGUMENTS));
     VT_DEBUG_ASSERT(!prsm_tensor_is_null(in), "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INVALID_ARGUMENTS));
-    VT_ENFORCE(prsm_tensor_match_shape(out, in), "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INCOMPATIBLE_SHAPES));
+    VT_ENFORCE(prsm_tensor_shapes_match(out, in), "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INCOMPATIBLE_SHAPES));
     
     // copy data
     vt_memcopy(out->data, in->data, prsm_tensor_size(out) * sizeof(prsm_float));
@@ -297,7 +298,7 @@ void prsm_tensor_transpose(prsm_tensor_t *const t) {
     Tensor data operations
 */
 
-bool prsm_tensor_match_shape(const prsm_tensor_t *const lhs, const prsm_tensor_t *const rhs) {
+bool prsm_tensor_shapes_match(const prsm_tensor_t *const lhs, const prsm_tensor_t *const rhs) {
     // check for invalid input
     VT_DEBUG_ASSERT(!prsm_tensor_is_null(lhs), "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INVALID_ARGUMENTS));
     VT_DEBUG_ASSERT(!prsm_tensor_is_null(rhs), "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INVALID_ARGUMENTS));
@@ -305,7 +306,7 @@ bool prsm_tensor_match_shape(const prsm_tensor_t *const lhs, const prsm_tensor_t
     return (lhs->ndim == rhs->ndim) && vt_memcmp(lhs->shape, rhs->shape, lhs->ndim * sizeof(size_t));
 }
 
-bool prsm_tensor_match_shape_ex(const prsm_tensor_t *const t, const size_t ndim, const size_t shape[]) {
+bool prsm_tensor_shapes_match_ex(const prsm_tensor_t *const t, const size_t ndim, const size_t shape[]) {
     // check for invalid input
     VT_DEBUG_ASSERT(!prsm_tensor_is_null(t), "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INVALID_ARGUMENTS));
     VT_DEBUG_ASSERT(shape != NULL, "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INVALID_ARGUMENTS));
@@ -333,7 +334,7 @@ void prsm_tensor_assign(prsm_tensor_t *const lhs, const prsm_tensor_t *const rhs
     // check for invalid input
     VT_DEBUG_ASSERT(!prsm_tensor_is_null(lhs), "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INVALID_ARGUMENTS));
     VT_DEBUG_ASSERT(!prsm_tensor_is_null(rhs), "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INVALID_ARGUMENTS));
-    VT_ENFORCE(prsm_tensor_match_shape(lhs, rhs), "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INCOMPATIBLE_SHAPES));
+    VT_ENFORCE(prsm_tensor_shapes_match(lhs, rhs), "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INCOMPATIBLE_SHAPES));
 
     // copy data
     vt_memcopy(lhs->data, rhs->data, prsm_tensor_size(lhs) * sizeof(prsm_float));
@@ -543,22 +544,6 @@ void prsm_tensor_set_identity(prsm_tensor_t *const t) {
     Tensor-wise operations
 */
 
-prsm_float prsm_tensor_dot(const prsm_tensor_t *const lhs, const prsm_tensor_t *const rhs) {
-    // check for invalid input
-    VT_DEBUG_ASSERT(!prsm_tensor_is_null(lhs), "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INVALID_ARGUMENTS));
-    VT_DEBUG_ASSERT(!prsm_tensor_is_null(rhs), "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INVALID_ARGUMENTS));
-    VT_ENFORCE(lhs->ndim == 1 && rhs->ndim == 1, "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INCOMPATIBLE_DIMENSIONS));
-
-    // calculate result
-    prsm_float result = 0;
-    const size_t size = prsm_tensor_size(lhs);
-    VT_FOREACH(i, 0, size) {
-        result += lhs->data[i] * rhs->data[i];
-    }
-
-    return result;
-}
-
 prsm_tensor_t *prsm_tensor_sum(prsm_tensor_t *out, const prsm_tensor_t *const in, const uint8_t axis) {
     // check for invalid input
     VT_DEBUG_ASSERT(!prsm_tensor_is_null(in), "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INVALID_ARGUMENTS));
@@ -570,18 +555,18 @@ prsm_tensor_t *prsm_tensor_sum(prsm_tensor_t *out, const prsm_tensor_t *const in
         : out;
 
     // switch dimension
-    switch (in->ndim) { // TODO: check if ret needs resizing (out may be just the right size-shape)
+    switch (in->ndim) {
         case 1:
             {   
                 // resize
-                if (!prsm_tensor_match_shape_ex(ret, 1, (size_t[]) {1})) prsm_tensor_resize(ret, 1, 1);
+                if (!prsm_tensor_shapes_match_ex(ret, 1, (size_t[]) {1})) prsm_tensor_resize(ret, 1, 1);
                 prsm_tensor_set_val(ret, 0, prsm_tensor_calc_sum(in));
             }
             break;
         case 2:
             {   
                 // resize
-                if (!prsm_tensor_match_shape_ex(ret, 1, (size_t[]) {in->shape[!axis]})) {
+                if (!prsm_tensor_shapes_match_ex(ret, 1, (size_t[]) {in->shape[!axis]})) {
                     prsm_tensor_resize(ret, 1, in->shape[!axis]);
                 }
                 
@@ -604,12 +589,12 @@ prsm_tensor_t *prsm_tensor_sum(prsm_tensor_t *out, const prsm_tensor_t *const in
                 // z-axis
                 if (axis == 0) {
                     // resize
-                    if (!prsm_tensor_match_shape_ex(ret, 2, (size_t[]) {in->shape[1], in->shape[2]})) {
+                    if (!prsm_tensor_shapes_match_ex(ret, 2, (size_t[]) {in->shape[1], in->shape[2]})) {
                         prsm_tensor_resize(ret, 2, in->shape[1], in->shape[2]);
                     }
 
                     // zero-init
-                    prsm_tensor_set_all(ret, 0);
+                    prsm_tensor_set_zeros(ret);
 
                     // sum up values
                     const size_t ndim = in->shape[0];
@@ -619,7 +604,7 @@ prsm_tensor_t *prsm_tensor_sum(prsm_tensor_t *out, const prsm_tensor_t *const in
                     }
                 } else if (axis == 1) { // row-wise summation
                     // resize
-                    if (!prsm_tensor_match_shape_ex(ret, 2, (size_t[]) {3, in->shape[2]})) {
+                    if (!prsm_tensor_shapes_match_ex(ret, 2, (size_t[]) {3, in->shape[2]})) {
                         prsm_tensor_resize(ret, 2, 3, in->shape[2]);
                     }
                     
@@ -636,7 +621,7 @@ prsm_tensor_t *prsm_tensor_sum(prsm_tensor_t *out, const prsm_tensor_t *const in
                     }
                 } else { // col-wise summation
                     // resize
-                    if (!prsm_tensor_match_shape_ex(ret, 2, (size_t[]) {3, in->shape[1]})) {
+                    if (!prsm_tensor_shapes_match_ex(ret, 2, (size_t[]) {3, in->shape[1]})) {
                         prsm_tensor_resize(ret, 2, 3, in->shape[1]);
                     }
                     
@@ -665,16 +650,16 @@ prsm_tensor_t *prsm_tensor_add(prsm_tensor_t *out, const prsm_tensor_t *const lh
     // check for invalid input
     VT_DEBUG_ASSERT(!prsm_tensor_is_null(lhs), "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INVALID_ARGUMENTS));
     VT_DEBUG_ASSERT(!prsm_tensor_is_null(rhs), "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INVALID_ARGUMENTS));
-    VT_ENFORCE(prsm_tensor_match_shape(lhs, rhs), "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INCOMPATIBLE_SHAPES));
+    VT_ENFORCE(prsm_tensor_shapes_match(lhs, rhs), "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INCOMPATIBLE_SHAPES));
 
     // create tensor
     prsm_tensor_t *ret = (out == NULL)
-        ? prsm_tensor_create_shape(lhs->alloctr, lhs->ndim, lhs->shape)
+        ? prsm_tensor_create_ex(lhs->alloctr, lhs->ndim, lhs->shape)
         : out;
 
     // check size
-    if (!prsm_tensor_match_shape(ret, lhs)) {
-        prsm_tensor_resize_shape(ret, lhs->ndim, lhs->shape);
+    if (!prsm_tensor_shapes_match(ret, lhs)) {
+        prsm_tensor_resize_ex(ret, lhs->ndim, lhs->shape);
     }
 
     // add tensors
@@ -690,16 +675,16 @@ prsm_tensor_t *prsm_tensor_sub(prsm_tensor_t *out, const prsm_tensor_t *const lh
     // check for invalid input
     VT_DEBUG_ASSERT(!prsm_tensor_is_null(lhs), "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INVALID_ARGUMENTS));
     VT_DEBUG_ASSERT(!prsm_tensor_is_null(rhs), "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INVALID_ARGUMENTS));
-    VT_ENFORCE(prsm_tensor_match_shape(lhs, rhs), "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INCOMPATIBLE_SHAPES));
+    VT_ENFORCE(prsm_tensor_shapes_match(lhs, rhs), "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INCOMPATIBLE_SHAPES));
 
     // create tensor
     prsm_tensor_t *ret = (out == NULL)
-        ? prsm_tensor_create_shape(lhs->alloctr, lhs->ndim, lhs->shape)
+        ? prsm_tensor_create_ex(lhs->alloctr, lhs->ndim, lhs->shape)
         : out;
 
     // check size
-    if (!prsm_tensor_match_shape(ret, lhs)) {
-        prsm_tensor_resize_shape(ret, lhs->ndim, lhs->shape);
+    if (!prsm_tensor_shapes_match(ret, lhs)) {
+        prsm_tensor_resize_ex(ret, lhs->ndim, lhs->shape);
     }
 
     // add tensors
@@ -711,47 +696,49 @@ prsm_tensor_t *prsm_tensor_sub(prsm_tensor_t *out, const prsm_tensor_t *const lh
     return ret;
 }
 
-prsm_tensor_t *prsm_tensor_mul(prsm_tensor_t *out, const prsm_tensor_t *const lhs, const prsm_tensor_t *const rhs) {
+prsm_tensor_t *prsm_tensor_dot(prsm_tensor_t *out, const prsm_tensor_t *const lhs, const prsm_tensor_t *const rhs) {
     // check for invalid input
     VT_DEBUG_ASSERT(!prsm_tensor_is_null(lhs), "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INVALID_ARGUMENTS));
     VT_DEBUG_ASSERT(!prsm_tensor_is_null(rhs), "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INVALID_ARGUMENTS));
     VT_ENFORCE(lhs->ndim < 3 && rhs->ndim < 3, "%s: Higher dimensions are not supported!\n", prsm_status_to_str(PRSM_STATUS_OPERATION_FAILURE));
-    VT_ENFORCE(!(lhs->ndim == 1 && rhs->ndim == 1), "%s: Use 'prsm_tensor_dot(lhs, rhs)' for vectors!\n", prsm_status_to_str(PRSM_STATUS_OPERATION_FAILURE));
 
     /*
-     * v - vector
+     * v - vector (1d)
      * m - matrix (2d)
      * 
-     * There are 3 cases:
-     *  1. v * m
-     *  2. m * v
-     *  3. m * m
+     * There are 4 cases:
+     *  1. v * v
+     *  2. v * m
+     *  3. m * v
+     *  4. m * m
      */
 
-    // calculate multiplication
-    if (lhs->ndim == 1 && rhs->ndim == 2) {                   // case 2: v * m
-        return prsm_tensor_mul_vec_by_mat(out, lhs, rhs);
+    // calculate dot product
+    if (lhs->ndim == 1 && rhs->ndim == 1) {                   // case 1: v * v
+        return prsm_tensor_dot_vec_by_vec(out, lhs, rhs);
+    } else if (lhs->ndim == 1 && rhs->ndim == 2) {            // case 2: v * m
+        return prsm_tensor_dot_vec_by_mat(out, lhs, rhs);
     } else if (lhs->ndim == 2 && rhs->ndim == 1) {            // case 3: m * v
-        return prsm_tensor_mul_mat_by_vec(out, lhs, rhs);
+        return prsm_tensor_dot_mat_by_vec(out, lhs, rhs);
     } else { // if (lhs->ndim == 2 && rhs->ndim == 2) {       // case 4: m * m
-        return prsm_tensor_mul_mat_by_mat(out, lhs, rhs);
+        return prsm_tensor_dot_mat_by_mat(out, lhs, rhs);
     }
 }
 
-prsm_tensor_t *prsm_tensor_mul_elwise(prsm_tensor_t *out, const prsm_tensor_t *const lhs, const prsm_tensor_t *const rhs) {
+prsm_tensor_t *prsm_tensor_mul(prsm_tensor_t *out, const prsm_tensor_t *const lhs, const prsm_tensor_t *const rhs) {
     // check for invalid input
     VT_DEBUG_ASSERT(!prsm_tensor_is_null(lhs), "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INVALID_ARGUMENTS));
     VT_DEBUG_ASSERT(!prsm_tensor_is_null(rhs), "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INVALID_ARGUMENTS));
-    VT_ENFORCE(prsm_tensor_match_shape(lhs, rhs), "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INCOMPATIBLE_SHAPES));
+    VT_ENFORCE(prsm_tensor_shapes_match(lhs, rhs), "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INCOMPATIBLE_SHAPES));
 
     // create tensor
     prsm_tensor_t *ret = (out == NULL)
-        ? prsm_tensor_create_shape(lhs->alloctr, lhs->ndim, lhs->shape)
+        ? prsm_tensor_create_ex(lhs->alloctr, lhs->ndim, lhs->shape)
         : out;
 
     // check size
-    if (!prsm_tensor_match_shape(ret, lhs)) {
-        prsm_tensor_resize_shape(ret, lhs->ndim, lhs->shape);
+    if (!prsm_tensor_shapes_match(ret, lhs)) {
+        prsm_tensor_resize_ex(ret, lhs->ndim, lhs->shape);
     }
 
     // perform element-wise multiplication
@@ -1092,15 +1079,59 @@ void prsm_tensor_display(const prsm_tensor_t *const t, const size_t range[]) {
 // -------------------------- PRIVATE -------------------------- //
 
 /**
- * @brief  Multiplies vector by matrix
+ * @brief  Dot product between two vectors
+ * @param  out output tensor
+ * @param  lhs input vector tensor
+ * @param  rhs input vector tensor
+ * @returns vector tensor
+ * 
+ * @note if `out==NULL`, tensor is allocated
+ * @note `out` is zero initialized
+ */
+static prsm_tensor_t *prsm_tensor_dot_vec_by_vec(prsm_tensor_t *const out, const prsm_tensor_t *const lhs, const prsm_tensor_t *const rhs) {
+    // check for invalid input
+    VT_DEBUG_ASSERT(!prsm_tensor_is_null(lhs), "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INVALID_ARGUMENTS));
+    VT_DEBUG_ASSERT(!prsm_tensor_is_null(rhs), "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INVALID_ARGUMENTS));
+    VT_ENFORCE(lhs->ndim == 1 && rhs->ndim == 1, "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INCOMPATIBLE_DIMENSIONS));
+    VT_ENFORCE(lhs->shape[0] == rhs->shape[0], "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INCOMPATIBLE_SHAPES));
+
+    // create tensor
+    prsm_tensor_t *ret = (out == NULL) 
+        ? prsm_tensor_create_vec(lhs->alloctr, 1)
+        : out;
+
+    // check size
+    if (!prsm_tensor_shapes_match_ex(ret, 1, (size_t[]){1})) {
+        prsm_tensor_resize(ret, 1, 1);
+    }
+
+    // zero out the values
+    prsm_tensor_set_zeros(ret);
+
+    // calculate vector dot product
+    prsm_float result = 0;
+    const size_t size = prsm_tensor_size(lhs);
+    VT_FOREACH(i, 0, size) {
+        result += lhs->data[i] * rhs->data[i];
+    }
+
+    // save dot product
+    prsm_tensor_set_val(ret, 0, result);
+
+    return ret;
+}
+
+/**
+ * @brief  Vector-matrix dot product
  * @param  out output tensor
  * @param  lhs input vector tensor
  * @param  rhs input matrix tensor
  * @returns vector tensor
  * 
  * @note if `out==NULL`, tensor is allocated
+ * @note `out` is zero initialized
  */
-static prsm_tensor_t *prsm_tensor_mul_vec_by_mat(prsm_tensor_t *const out, const prsm_tensor_t *const lhs, const prsm_tensor_t *const rhs) {
+static prsm_tensor_t *prsm_tensor_dot_vec_by_mat(prsm_tensor_t *const out, const prsm_tensor_t *const lhs, const prsm_tensor_t *const rhs) {
     // check for invalid input
     VT_DEBUG_ASSERT(!prsm_tensor_is_null(lhs), "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INVALID_ARGUMENTS));
     VT_DEBUG_ASSERT(!prsm_tensor_is_null(rhs), "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INVALID_ARGUMENTS));
@@ -1109,39 +1140,40 @@ static prsm_tensor_t *prsm_tensor_mul_vec_by_mat(prsm_tensor_t *const out, const
 
     // create tensor
     const size_t size = rhs->shape[1];
-    prsm_tensor_t *tresult = (out == NULL) 
+    prsm_tensor_t *ret = (out == NULL) 
         ? prsm_tensor_create(lhs->alloctr, 1, size)
         : out;
 
     // check size
-    if (tresult->ndim != 1 || prsm_tensor_size(tresult) != size) {
-        prsm_tensor_resize(tresult, 1, size);
+    if (!prsm_tensor_shapes_match_ex(ret, 1, (size_t[]){size})) {
+        prsm_tensor_resize(ret, 1, size);
     }
 
     // zero out the values
-    prsm_tensor_set_all(tresult, 0);
+    prsm_tensor_set_zeros(ret);
 
-    // calculate multiplication
+    // calculate vector-matrix dot product
     const size_t lhs_size = prsm_tensor_size(lhs);
     VT_FOREACH(i, 0, size) {
         VT_FOREACH(j, 0, lhs_size) {
-            tresult->data[i] += lhs->data[j] * rhs->data[vt_index_2d_to_1d(j, i, size)];
+            ret->data[i] += lhs->data[j] * rhs->data[vt_index_2d_to_1d(j, i, size)];
         }
     }
 
-    return tresult;
+    return ret;
 }
 
 /**
- * @brief  Multiplies matrix by vector
+ * @brief  Matrix-vector dot product
  * @param  out output tensor
  * @param  lhs input matrix tensor
  * @param  rhs input vector tensor
- * @returns matrix tensor
+ * @returns vector tensor
  * 
  * @note if `out==NULL`, tensor is allocated
+ * @note `out` is zero initialized
  */
-static prsm_tensor_t *prsm_tensor_mul_mat_by_vec(prsm_tensor_t *const out, const prsm_tensor_t *const lhs, const prsm_tensor_t *const rhs) {
+static prsm_tensor_t *prsm_tensor_dot_mat_by_vec(prsm_tensor_t *const out, const prsm_tensor_t *const lhs, const prsm_tensor_t *const rhs) {
     // check for invalid input
     VT_DEBUG_ASSERT(!prsm_tensor_is_null(lhs), "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INVALID_ARGUMENTS));
     VT_DEBUG_ASSERT(!prsm_tensor_is_null(rhs), "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INVALID_ARGUMENTS));
@@ -1150,39 +1182,40 @@ static prsm_tensor_t *prsm_tensor_mul_mat_by_vec(prsm_tensor_t *const out, const
 
     // create tensor
     const size_t size = lhs->shape[0];
-    prsm_tensor_t *tresult = (out == NULL) 
+    prsm_tensor_t *ret = (out == NULL) 
         ? prsm_tensor_create(lhs->alloctr, 1, size)
         : out;
 
     // check size
-    if (tresult->ndim != 1 || prsm_tensor_size(tresult) != size) {
-        prsm_tensor_resize(tresult, 1, size);
+    if (!prsm_tensor_shapes_match_ex(ret, 1, (size_t[]){size})) {
+        prsm_tensor_resize(ret, 1, size);
     }
 
     // zero out the values
-    prsm_tensor_set_all(tresult, 0);
+    prsm_tensor_set_zeros(ret);
 
-    // calculate multiplication
+    // calculate matrix-vector dot product
     const size_t rhs_size = prsm_tensor_size(rhs);
     VT_FOREACH(i, 0, size) {
         VT_FOREACH(j, 0, rhs_size) {
-            tresult->data[i] += lhs->data[vt_index_2d_to_1d(i, j, rhs_size)] * rhs->data[j];
+            ret->data[i] += lhs->data[vt_index_2d_to_1d(i, j, rhs_size)] * rhs->data[j];
         }
     }
 
-    return tresult;
+    return ret;
 }
 
 /**
- * @brief  Multiplies matrix by matrix
+ * @brief  Dot product between two matrices
  * @param  out output tensor
  * @param  lhs input vector tensor
  * @param  rhs input vector tensor
  * @returns matrix tensor
  * 
  * @note if `out==NULL`, tensor is allocated
+ * @note `out` is zero initialized
  */
-static prsm_tensor_t *prsm_tensor_mul_mat_by_mat(prsm_tensor_t *const out, const prsm_tensor_t *const lhs, const prsm_tensor_t *const rhs) {
+static prsm_tensor_t *prsm_tensor_dot_mat_by_mat(prsm_tensor_t *const out, const prsm_tensor_t *const lhs, const prsm_tensor_t *const rhs) {
     // check for invalid input
     VT_DEBUG_ASSERT(!prsm_tensor_is_null(lhs), "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INVALID_ARGUMENTS));
     VT_DEBUG_ASSERT(!prsm_tensor_is_null(rhs), "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INVALID_ARGUMENTS));
@@ -1192,28 +1225,28 @@ static prsm_tensor_t *prsm_tensor_mul_mat_by_mat(prsm_tensor_t *const out, const
     // create tensor
     const size_t rows = lhs->shape[0];
     const size_t cols = rhs->shape[1];
-    prsm_tensor_t *tresult = (out == NULL) 
+    prsm_tensor_t *ret = (out == NULL) 
         ? prsm_tensor_create(lhs->alloctr, 2, rows, cols)
         : out;
 
     // check size
-    if (tresult->ndim != 2 || prsm_tensor_size(tresult) != rows * cols) {
-        prsm_tensor_resize(tresult, 2, rows, cols);
+    if (!prsm_tensor_shapes_match_ex(ret, 2, (size_t[]){rows, cols})) {
+        prsm_tensor_resize(ret, 2, rows, cols);
     }
 
     // zero out the values
-    prsm_tensor_set_all(tresult, 0);
+    prsm_tensor_set_zeros(ret);
 
     // calculate multiplication
     VT_FOREACH(i, 0, rows) {
         VT_FOREACH(j, 0, cols) {
             VT_FOREACH(k, 0, rhs->shape[0]) {
-                tresult->data[vt_index_2d_to_1d(i, j, cols)] += lhs->data[vt_index_2d_to_1d(i, k, cols)] * rhs->data[vt_index_2d_to_1d(k, j, cols)];
+                ret->data[vt_index_2d_to_1d(i, j, cols)] += lhs->data[vt_index_2d_to_1d(i, k, cols)] * rhs->data[vt_index_2d_to_1d(k, j, cols)];
             }
         }
     }
 
-    return tresult;
+    return ret;
 }
 
 

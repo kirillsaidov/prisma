@@ -216,7 +216,7 @@ vt_vec_t *ann_model_forward(prsm_tensor_t *x, vt_vec_t *params, vt_vec_t *forwar
 
     // z1 = x * w1_T + b1
     if (prsm_tensor_shape(x)[1] != prsm_tensor_shape(w1)[0]) prsm_tensor_transpose(w1);
-    prsm_tensor_t *z1 = prsm_tensor_mul(NULL, x, w1);
+    prsm_tensor_t *z1 = prsm_tensor_dot(NULL, x, w1);
 
     // add bias
     VT_FOREACH(i, 0, prsm_tensor_shape(z1)[0]) {
@@ -238,7 +238,7 @@ vt_vec_t *ann_model_forward(prsm_tensor_t *x, vt_vec_t *params, vt_vec_t *forwar
 
     // z2 = z1 * w2_T + b2
     if (prsm_tensor_shape(z1)[1] != prsm_tensor_shape(w2)[0]) prsm_tensor_transpose(w2);
-    prsm_tensor_t *z2 = prsm_tensor_mul(NULL, z1, w2);
+    prsm_tensor_t *z2 = prsm_tensor_dot(NULL, z1, w2);
 
     // add bias
     VT_FOREACH(i, 0, prsm_tensor_shape(z2)[0]) {
@@ -300,7 +300,7 @@ vt_vec_t *ann_model_backward(prsm_tensor_t *x, prsm_tensor_t *y, vt_vec_t *param
     printf("shape of dz2: (%zu, %zu)\n", prsm_tensor_shape(dz2)[0], prsm_tensor_shape(dz2)[1]);
     printf("shape of  a1: (%zu, %zu)\n", prsm_tensor_shape(a1)[0], prsm_tensor_shape(a1)[1]);
     prsm_tensor_transpose(dz2);
-    prsm_tensor_t *dw2 = prsm_tensor_mul(NULL, dz2, a1);
+    prsm_tensor_t *dw2 = prsm_tensor_dot(NULL, dz2, a1);
     prsm_tensor_apply_scale_add(dw2, 1.0/m, 0);
     printf("here: done\n");
 
@@ -318,15 +318,15 @@ vt_vec_t *ann_model_backward(prsm_tensor_t *x, prsm_tensor_t *y, vt_vec_t *param
      */
     
     // dz1 = w2 * dz2 * acrivation_derivative(a1)
-    prsm_tensor_t *dz1_tmp1 = prsm_tensor_mul(NULL, w2, dz2); 
+    prsm_tensor_t *dz1_tmp1 = prsm_tensor_dot(NULL, w2, dz2); 
     prsm_tensor_t *dz1_tmp2 = prsm_activate_relu_d(NULL, a1);
     prsm_tensor_transpose(dz1_tmp2);
-    prsm_tensor_t *dz1 = prsm_tensor_mul_elwise(NULL, dz1_tmp1, dz1_tmp2);
+    prsm_tensor_t *dz1 = prsm_tensor_mul(NULL, dz1_tmp1, dz1_tmp2);
     prsm_tensor_destroy(dz1_tmp1);
     prsm_tensor_destroy(dz1_tmp2);
 
     // dw1 = 1/m * dz1 * x
-    prsm_tensor_t *dw1 = prsm_tensor_mul(NULL, dz1, x);
+    prsm_tensor_t *dw1 = prsm_tensor_dot(NULL, dz1, x);
     prsm_tensor_apply_scale_add(dw1, 1.0/m, 0);
 
     // db1 = 1/m * sum(dz1, 1)
