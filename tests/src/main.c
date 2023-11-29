@@ -22,12 +22,12 @@ int main(void) {
     {   
         // vt_debug_disable_output(true);
 
-        TEST(test_custom);
-        // TEST(test_tensor);
-        // TEST(test_math);
-        // TEST(test_activation);
-        // TEST(test_loss);
-        // TEST(test_layers);
+        // TEST(test_custom);
+        TEST(test_tensor);
+        TEST(test_math);
+        TEST(test_activation);
+        TEST(test_loss);
+        TEST(test_layers);
     }
     vt_mallocator_print_stats(alloctr->stats);
     vt_mallocator_destroy(alloctr);
@@ -279,6 +279,24 @@ void test_loss(void) {
     // MAE, MSE
     assert(prsm_loss_mae(yhat, y) == (prsm_float)0.5);
     assert(prsm_loss_mse(yhat, y) == (prsm_float)0.25);
+    assert(prsm_loss_rmse(yhat, y) == (prsm_float)0.5);
+
+    // MAE derivative (gradients)
+    prsm_tensor_t *grad_expected = prsm_tensor_dup(yhat);
+    prsm_tensor_assign_array(grad_expected, (prsm_float[]) {
+        0.25, 0.25, 0.25, 0.25
+    }, prsm_tensor_size(grad_expected));
+
+    prsm_tensor_t *grad = prsm_loss_mae_d(NULL, yhat, y);
+    assert(prsm_tensor_equals(grad_expected, grad));
+
+    // MSE derivative (gradients)
+    grad = prsm_loss_mse_d(grad, yhat, y);
+    assert(prsm_tensor_equals(grad_expected, grad));
+
+    // MSE derivative (gradients)
+    grad = prsm_loss_rmse_d(grad, yhat, y);
+    assert(prsm_tensor_equals(grad_expected, grad));
 
     // Binary cross entropy
     prsm_tensor_resize(y, 2, 3, 6);
@@ -289,7 +307,7 @@ void test_loss(void) {
         1, 0, 1, 1, 0, 0
     }, prsm_tensor_size(yhat));
     prsm_tensor_assign_array(yhat, (prsm_float[]) {
-        0.2, 0.1, 0.8, 0.7, 0.1, 0.2,
+        0.2, 0.1, 0.8, 0.7, 0.1, 0.2, 
         0.3, 0.4, 0.5, 0.6, 0.7, 0.7,
         0.1, 0.2, 0.3, 0.4, 0.5, 0.6
     }, prsm_tensor_size(yhat));
@@ -299,12 +317,27 @@ void test_loss(void) {
         0.4371866, 0.95536333, 1.0425713
     }, prsm_tensor_size(loss_results_target));
 
+    prsm_tensor_t *bce_grads_expected = prsm_tensor_dup(yhat);
+    prsm_tensor_assign_array(bce_grads_expected, (prsm_float[]) {
+        -0.8333,  0.1852, -0.2083, -0.2381,  0.1852,  0.2083,
+        -0.5556, -0.4167,  0.3333, -0.2778,  0.5556,  0.5556,
+        -1.6667,  0.2083, -0.5556, -0.4167,  0.3333,  0.4167
+    }, prsm_tensor_size(bce_grads_expected));
+
     VT_FOREACH(i, 0, prsm_tensor_shape(y)[0]) {
         const prsm_tensor_t y_ = prsm_tensor_make_view_vec(y, i);
         const prsm_tensor_t yhat_ = prsm_tensor_make_view_vec(yhat, i);
+        const prsm_tensor_t loss_grads_ = prsm_tensor_make_view_vec(bce_grads_expected, i);
 
+        // loss
         const prsm_float loss = prsm_loss_bce(&yhat_, &y_);
         assert(vt_math_is_close(loss, prsm_tensor_get_val(loss_results_target, i), 0.01));
+
+        // loss grad
+        grad = prsm_loss_bce_d(grad, &yhat_, &y_);
+        VT_FOREACH(j, 0, prsm_tensor_shape(grad)[0]) {
+            assert(vt_math_is_close(grad->data[i], loss_grads_.data[i], 0.01));
+        }
     }
 
     // Categorical cross entropy
@@ -312,12 +345,31 @@ void test_loss(void) {
         4.415068, 6.1205416, 6.64866
     }, prsm_tensor_size(loss_results_target));
 
+    prsm_tensor_t *cce_grads_expected = prsm_tensor_dup(yhat);
+    prsm_tensor_assign_array(cce_grads_expected, (prsm_float[]) {
+        -0.8333,  0.1852, -0.2083, -0.2381,  0.1852,  0.2083,
+        -0.5556, -0.4167,  0.3333, -0.2778,  0.5556,  0.5556,
+        -1.6667,  0.2083, -0.5556, -0.4167,  0.3333,  0.4167
+    }, prsm_tensor_size(cce_grads_expected));
+
     VT_FOREACH(i, 0, prsm_tensor_shape(y)[0]) {
         const prsm_tensor_t y_ = prsm_tensor_make_view_vec(y, i);
         const prsm_tensor_t yhat_ = prsm_tensor_make_view_vec(yhat, i);
+        const prsm_tensor_t loss_grads_ = prsm_tensor_make_view_vec(cce_grads_expected, i);
 
+        // loss
         const prsm_float loss = prsm_loss_cce(&yhat_, &y_);
         assert(vt_math_is_close(loss, prsm_tensor_get_val(loss_results_target, i), 0.01));
+
+        // loss grad
+        grad = prsm_loss_cce_d(grad, &yhat_, &y_); // TODO: does not work as expected when compared to pytorch
+        prsm_tensor_display(&y_, NULL);
+        prsm_tensor_display(&yhat_, NULL);
+        prsm_tensor_display(grad, NULL);
+        break;
+        // VT_FOREACH(j, 0, prsm_tensor_shape(grad)[0]) {
+        //     assert(vt_math_is_close(grad->data[i], loss_grads_.data[i], 0.01));
+        // }
     }
 }
 
