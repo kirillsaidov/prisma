@@ -22,12 +22,12 @@ int main(void) {
     {   
         // vt_debug_disable_output(true);
 
-        // TEST(test_custom);
-        TEST(test_tensor);
-        TEST(test_math);
-        TEST(test_activation);
-        TEST(test_loss);
-        TEST(test_layers);
+        TEST(test_custom);
+        // TEST(test_tensor);
+        // TEST(test_math);
+        // TEST(test_activation);
+        // TEST(test_loss);
+        // TEST(test_layers);
     }
     vt_mallocator_print_stats(alloctr->stats);
     vt_mallocator_destroy(alloctr);

@@ -14,19 +14,41 @@ static vt_mallocator_t *alloctr = NULL;
 typedef struct {
     char key[256];
     void *value;
-} h_keyval_t;
+} dict_keyval_t;
 
-/// @brief Finds the value given key by iteration over a list
-/// @param list plist_t
-/// @param key c string
+/// @brief Finds the value given key by iterating over a list
+/// @param list vt_vec_t
+/// @param key string key
 /// @return void*
-void *h_find_val(vt_vec_t *list, char *key) {
+void *dict_find_val(vt_vec_t *list, char *key) {
     const size_t len = vt_vec_len(list);
     VT_FOREACH(i, 0, len) {
-        h_keyval_t *keyval = vt_vec_get(list, i);
+        dict_keyval_t *keyval = vt_vec_get(list, i);
         if (vt_str_equals_z(key, keyval->key)) return keyval->value;
     }
-    assert(0 && "h_find_val could not find key!");
+    assert(0 && "dict_find_val could not find key!");
+}
+
+/// @brief Updates the value given key by iterating over a list
+/// @param list vt_vec_t
+/// @param key string key
+/// @param value value
+/// @return None
+void dict_update_val(vt_vec_t *list, char *key, void *value) {
+    // find value and update; return;
+    const size_t len = vt_vec_len(list);
+    VT_FOREACH(i, 0, len) {
+        dict_keyval_t *keyval = vt_vec_get(list, i);
+        if (vt_str_equals_z(key, keyval->key)) {
+            keyval->value = value;
+            return;
+        }
+    }
+    
+    // add to dict
+    dict_keyval_t item = {.value = value};
+    strncpy(item.key, key, sizeof(item.key));
+    vt_vec_push(list, &item);
 }
 
 #endif // TEST_MAIN_H

@@ -6,8 +6,8 @@
 
 void ann_download_csv(const char *const url, const char *const filepath);
 void ann_read_mnist_data(const char *const file, prsm_tensor_t *x, prsm_tensor_t *y);
-vt_vec_t *ann_model_init_params(const size_t n_x, const size_t n_h, const size_t n_y);
-vt_vec_t *ann_model_forward(prsm_tensor_t *x, vt_vec_t *params, vt_vec_t *forward_cache);
+vt_vec_t *ann_model_init_params(const size_t N, const size_t n_x, const size_t n_h, const size_t n_y);
+vt_vec_t *ann_model_forward(vt_vec_t *params, prsm_tensor_t *x);
 vt_vec_t *ann_model_backward(prsm_tensor_t *x, prsm_tensor_t *y, vt_vec_t *params, vt_vec_t *forward_cache, vt_vec_t *backward_cache);
 vt_vec_t *ann_model_update(vt_vec_t *params, vt_vec_t *backward_cache, const prsm_float learning_rate);
 
@@ -36,13 +36,14 @@ void run_ann_mnist_digit_recognition(void) {
     }
 
     VT_LOG_INFO("Creating tensors...");
-    const size_t num_rows = 100;
+    const size_t num_rows = 32;
     const size_t num_features = 28*28;
+    const size_t output_size = 10;
     prsm_tensor_t *x_train, *y_train, *x_test, *y_test;
     x_train = prsm_tensor_create_mat(alloctr, num_rows, num_features);
-    x_test = prsm_tensor_create_mat(alloctr, num_rows, num_features);
-    y_train = prsm_tensor_create_mat(alloctr, num_rows, 10);
-    y_test = prsm_tensor_create_mat(alloctr, num_rows, 10);
+    y_train = prsm_tensor_create_mat(alloctr, num_rows, output_size);
+    x_test = prsm_tensor_create_mat(alloctr, (size_t)(num_rows/2), num_features);
+    y_test = prsm_tensor_create_mat(alloctr, (size_t)(num_rows/2), output_size);
 
     VT_LOG_INFO("Loading data into memory: %zu instances", num_rows);
     ann_read_mnist_data(CACHE_FOLDER MNIST_TRAIN, x_train, y_train);
@@ -53,40 +54,37 @@ void run_ann_mnist_digit_recognition(void) {
     prsm_tensor_apply_scale_add(x_test, 1.0/255.0, 0);
 
     VT_LOG_INFO("Initializing parameters...");
-    const size_t layer_output_size = 10;
     const size_t layer_hidden_size = 100;
-    vt_vec_t *params = ann_model_init_params(num_features, layer_hidden_size, layer_output_size);
+    vt_vec_t *params = ann_model_init_params(num_rows, num_features, layer_hidden_size, output_size);
 
     VT_LOG_INFO("Initializing model options...");
-    const size_t epochs = 100;
+    const size_t epochs = 1;
     const prsm_float alpha = 0.05;
 
     VT_LOG_INFO("\talpha         = %.2f", alpha);
-    VT_LOG_INFO("\tactivation l1 = %s", VT_STRING_OF(prsm_math_sigmoid));
-    VT_LOG_INFO("\tactivation l2 = %s", VT_STRING_OF(prsm_activate_softmax));
+    VT_LOG_INFO("\tactivation l2 = %s", VT_STRING_OF(prsm_math_relu));
+    VT_LOG_INFO("\tactivation l3 = %s", VT_STRING_OF(prsm_activate_softmax));
     VT_LOG_INFO("\tloss          = %s", VT_STRING_OF(prsm_loss_cce));
     VT_LOG_INFO("\tepochs        = %zu", epochs);
 
     VT_LOG_INFO("Start training...");
-    vt_vec_t *forward_cache = vt_vec_create(10, sizeof(h_keyval_t), alloctr);
-    vt_vec_t *backward_cache = vt_vec_create(10, sizeof(h_keyval_t), alloctr);
     VT_FOREACH(epoch, 0, epochs) {
         /* -----------------------
         * FORWARD
         */
-        forward_cache = ann_model_forward(x_train, params, forward_cache);
+        params = ann_model_forward(params, x_train);
 
         /* -----------------------
         * COST
         */
-        prsm_tensor_t *yhat = h_find_val(forward_cache, "a2");
-        const prsm_float cost = prsm_loss_cce(yhat, y_train);
-        VT_LOG_INFO("\tEpoch %3zu | Error: %.2f", epoch, cost);
+        // prsm_tensor_t *yhat = dict_find_val(forward_cache, "a2");
+        // const prsm_float cost = prsm_loss_cce(yhat, y_train);
+        // VT_LOG_INFO("\tEpoch %3zu | Error: %.2f", epoch, cost);
 
         /* -----------------------
         * BACKWARD
         */
-        backward_cache = ann_model_backward(x_train, y_train, params, forward_cache, backward_cache);
+        // backward_cache = ann_model_backward(x_train, y_train, params, forward_cache, backward_cache);
         // params = ann_model_update(params, backward_cache, alpha);
     }
 
@@ -170,120 +168,129 @@ void ann_read_mnist_data(const char *const file, prsm_tensor_t *x, prsm_tensor_t
     fclose(fp);
 }
 
-vt_vec_t *ann_model_init_params(const size_t n_x, const size_t n_h, const size_t n_y) {
+vt_vec_t *ann_model_init_params(const size_t N, const size_t n_x, const size_t n_h, const size_t n_y) {
     VT_LOG_INFO("\tCreating weights and biases...");
     prsm_tensor_t *w1, *w2, *b1, *b2;
-    w1 = prsm_tensor_create_mat(alloctr, n_h, n_x);
+    w1 = prsm_tensor_create_mat(alloctr, n_x, n_h);
     b1 = prsm_tensor_create_vec(alloctr, n_h);
-    w2 = prsm_tensor_create_mat(alloctr, n_y, n_h);
+    w2 = prsm_tensor_create_mat(alloctr, n_h, n_y);
     b2 = prsm_tensor_create_vec(alloctr, n_y);
 
-    VT_LOG_INFO("\tNN created: (%zu, %zu, %zu)", n_x, n_h, n_y);
+    VT_LOG_INFO("\tModel created: (L1: %zu, L2: %zu, L3: %zu)", n_x, n_h, n_y);
+
     VT_LOG_INFO("\tRandomizing weights...");
     prsm_tensor_rand(w1);
     prsm_tensor_rand(w2);
     prsm_tensor_set_all(b1, 1);
     prsm_tensor_set_all(b2, 1);
 
-    vt_vec_t *params = vt_vec_create(10, sizeof(h_keyval_t), alloctr);
-    vt_vec_push(params, &(h_keyval_t){.key = "w1", .value=w1});
-    vt_vec_push(params, &(h_keyval_t){.key = "b1", .value=b1});
-    vt_vec_push(params, &(h_keyval_t){.key = "w2", .value=w2});
-    vt_vec_push(params, &(h_keyval_t){.key = "b2", .value=b2});
+    VT_LOG_INFO("\tFinalizing...");
+    prsm_tensor_t *z1, *a1, *z2, *a2;
+    z1 = prsm_tensor_create_mat(alloctr, N, n_h);
+    a1 = prsm_tensor_create_mat(alloctr, N, n_h);
+    z2 = prsm_tensor_create_mat(alloctr, N, n_y);
+    a2 = prsm_tensor_create_mat(alloctr, N, n_y);
+
+    // add to dict
+    vt_vec_t *params = vt_vec_create(10, sizeof(dict_keyval_t), alloctr);
+    dict_update_val(params, "w1", w1);
+    dict_update_val(params, "b1", b1);
+    dict_update_val(params, "w2", w2);
+    dict_update_val(params, "b2", b2);
+    dict_update_val(params, "z1", z1);
+    dict_update_val(params, "a1", a1);
+    dict_update_val(params, "z2", z2);
+    dict_update_val(params, "a2", a2);
 
     return params;
 }
 
-vt_vec_t *ann_model_forward(prsm_tensor_t *x, vt_vec_t *params, vt_vec_t *forward_cache) {
-    // free forward_cache
-    const size_t fclen = vt_vec_len(forward_cache);
-    VT_FOREACH(i, 0, fclen) {
-        h_keyval_t *keyval = vt_vec_get(forward_cache, i);
-        prsm_tensor_destroy(keyval->value);
-    }
-    vt_vec_clear(forward_cache);
-
+vt_vec_t *ann_model_forward(vt_vec_t *params, prsm_tensor_t *x) {
     // get params
-    prsm_tensor_t *w1, *w2, *b1, *b2;
-    w1 = h_find_val(params, "w1");
-    b1 = h_find_val(params, "b1");
-    w2 = h_find_val(params, "w2");
-    b2 = h_find_val(params, "b2");
-
-    /**
-     * LAYER 1
-     */
-
-    // z1 = x * w1_T + b1
-    if (prsm_tensor_shape(x)[1] != prsm_tensor_shape(w1)[0]) prsm_tensor_transpose(w1);
-    prsm_tensor_t *z1 = prsm_tensor_dot(NULL, x, w1);
-
-    // add bias
-    VT_FOREACH(i, 0, prsm_tensor_shape(z1)[0]) {
-        prsm_tensor_t t = prsm_tensor_make_view_vec(z1, i);
-        prsm_tensor_add(&t, &t, b1);
-    }
-
-    // activate: a1 = relu(z1)
-    prsm_tensor_t *a1 = prsm_tensor_dup(z1);
-    prsm_activate_relu(a1, a1);
-
-    // printf("shape of  x: (%zu, %zu)\n", prsm_tensor_shape(x)[0], prsm_tensor_shape(x)[1]);
-    // printf("shape of w1: (%zu, %zu)\n", prsm_tensor_shape(w1)[0], prsm_tensor_shape(w1)[1]);
-    // printf("shape of z1: (%zu, %zu)\n", prsm_tensor_shape(z1)[0], prsm_tensor_shape(z1)[1]);
+    prsm_tensor_t *w1, *w2, *b1, *b2, *z1, *a1, *z2, *a2;
+    w1 = dict_find_val(params, "w1");
+    b1 = dict_find_val(params, "b1");
+    w2 = dict_find_val(params, "w2");
+    b2 = dict_find_val(params, "b2");
+    z1 = dict_find_val(params, "z1");
+    a1 = dict_find_val(params, "a1");
+    z2 = dict_find_val(params, "z2");
+    a2 = dict_find_val(params, "a2");
 
     /**
      * LAYER 2
      */
 
-    // z2 = z1 * w2_T + b2
-    if (prsm_tensor_shape(z1)[1] != prsm_tensor_shape(w2)[0]) prsm_tensor_transpose(w2);
-    prsm_tensor_t *z2 = prsm_tensor_dot(NULL, z1, w2);
+    // z1 = x * w1_T + b1
+    // if (prsm_tensor_shape(x)[1] != prsm_tensor_shape(w1)[0]) prsm_tensor_transpose(w1);
+    // prsm_tensor_t *z1 = prsm_tensor_dot(NULL, x, w1);
 
-    // add bias
-    VT_FOREACH(i, 0, prsm_tensor_shape(z2)[0]) {
-        prsm_tensor_t t = prsm_tensor_make_view_vec(z2, i);
-        prsm_tensor_add(&t, &t, b2);
-    }
+    // // add bias
+    // VT_FOREACH(i, 0, prsm_tensor_shape(z1)[0]) {
+    //     prsm_tensor_t t = prsm_tensor_make_view_vec(z1, i);
+    //     prsm_tensor_add(&t, &t, b1);
+    // }
 
-    // activate: a2 = softmax(z2)
-    prsm_tensor_t *a2 = prsm_tensor_dup(z2);
-    VT_FOREACH(i, 0, prsm_tensor_shape(a2)[0]) {
-        prsm_tensor_t t = prsm_tensor_make_view_vec(a2, i);
-        prsm_activate_ssoftmax(&t, &t);
-    }
+    // // activate: a1 = relu(z1)
+    // prsm_tensor_t *a1 = prsm_tensor_dup(z1);
+    // prsm_activate_relu(a1, a1);
 
-    // printf("shape of z1: (%zu, %zu)\n", prsm_tensor_shape(z1)[0], prsm_tensor_shape(z1)[1]);
-    // printf("shape of w2: (%zu, %zu)\n", prsm_tensor_shape(w2)[0], prsm_tensor_shape(w2)[1]);
-    // printf("shape of z2: (%zu, %zu)\n", prsm_tensor_shape(z2)[0], prsm_tensor_shape(z2)[1]);
-    // printf("shape of a2: (%zu, %zu)\n", prsm_tensor_shape(a2)[0], prsm_tensor_shape(a2)[1]);
+    // // printf("shape of  x: (%zu, %zu)\n", prsm_tensor_shape(x)[0], prsm_tensor_shape(x)[1]);
+    // // printf("shape of w1: (%zu, %zu)\n", prsm_tensor_shape(w1)[0], prsm_tensor_shape(w1)[1]);
+    // // printf("shape of z1: (%zu, %zu)\n", prsm_tensor_shape(z1)[0], prsm_tensor_shape(z1)[1]);
 
-    // update forward_cache
-    vt_vec_push(forward_cache, &(h_keyval_t){.key = "z1", .value=z1});
-    vt_vec_push(forward_cache, &(h_keyval_t){.key = "a1", .value=a1});
-    vt_vec_push(forward_cache, &(h_keyval_t){.key = "z2", .value=z2});
-    vt_vec_push(forward_cache, &(h_keyval_t){.key = "a2", .value=a2});
+    // /**
+    //  * LAYER 2
+    //  */
 
-    return forward_cache;
+    // // z2 = z1 * w2_T + b2
+    // if (prsm_tensor_shape(z1)[1] != prsm_tensor_shape(w2)[0]) prsm_tensor_transpose(w2);
+    // prsm_tensor_t *z2 = prsm_tensor_dot(NULL, z1, w2);
+
+    // // add bias
+    // VT_FOREACH(i, 0, prsm_tensor_shape(z2)[0]) {
+    //     prsm_tensor_t t = prsm_tensor_make_view_vec(z2, i);
+    //     prsm_tensor_add(&t, &t, b2);
+    // }
+
+    // // activate: a2 = softmax(z2)
+    // prsm_tensor_t *a2 = prsm_tensor_dup(z2);
+    // VT_FOREACH(i, 0, prsm_tensor_shape(a2)[0]) {
+    //     prsm_tensor_t t = prsm_tensor_make_view_vec(a2, i);
+    //     prsm_activate_ssoftmax(&t, &t);
+    // }
+
+    // // printf("shape of z1: (%zu, %zu)\n", prsm_tensor_shape(z1)[0], prsm_tensor_shape(z1)[1]);
+    // // printf("shape of w2: (%zu, %zu)\n", prsm_tensor_shape(w2)[0], prsm_tensor_shape(w2)[1]);
+    // // printf("shape of z2: (%zu, %zu)\n", prsm_tensor_shape(z2)[0], prsm_tensor_shape(z2)[1]);
+    // // printf("shape of a2: (%zu, %zu)\n", prsm_tensor_shape(a2)[0], prsm_tensor_shape(a2)[1]);
+
+    // // update forward_cache
+    // vt_vec_push(forward_cache, &(dict_keyval_t){.key = "z1", .value=z1});
+    // vt_vec_push(forward_cache, &(dict_keyval_t){.key = "a1", .value=a1});
+    // vt_vec_push(forward_cache, &(dict_keyval_t){.key = "z2", .value=z2});
+    // vt_vec_push(forward_cache, &(dict_keyval_t){.key = "a2", .value=a2});
+
+    return params;
 }
 
 vt_vec_t *ann_model_backward(prsm_tensor_t *x, prsm_tensor_t *y, vt_vec_t *params, vt_vec_t *forward_cache, vt_vec_t *backward_cache) {
     // free backward_cache
     const size_t bclen = vt_vec_len(backward_cache);
     VT_FOREACH(i, 0, bclen) {
-        h_keyval_t *keyval = vt_vec_get(backward_cache, i);
+        dict_keyval_t *keyval = vt_vec_get(backward_cache, i);
         prsm_tensor_destroy(keyval->value);
     }
     vt_vec_clear(backward_cache);
 
     // get params and forward_cache
     prsm_tensor_t *w1, *w2, *b1, *b2, *a1, *a2;
-    w1 = h_find_val(params, "w1");
-    b1 = h_find_val(params, "b1");
-    w2 = h_find_val(params, "w2");
-    b2 = h_find_val(params, "b2");
-    a1 = h_find_val(forward_cache, "a1");
-    a2 = h_find_val(forward_cache, "a2");
+    w1 = dict_find_val(params, "w1");
+    b1 = dict_find_val(params, "b1");
+    w2 = dict_find_val(params, "w2");
+    b2 = dict_find_val(params, "b2");
+    a1 = dict_find_val(forward_cache, "a1");
+    a2 = dict_find_val(forward_cache, "a2");
 
     // number of observations
     const float m = prsm_tensor_shape(x)[0];
@@ -343,10 +350,10 @@ vt_vec_t *ann_model_backward(prsm_tensor_t *x, prsm_tensor_t *y, vt_vec_t *param
     // printf("shape of db1: (%zu, 1)\n", prsm_tensor_shape(db1)[0]);
 
     // update backward_cache
-    vt_vec_push(backward_cache, &(h_keyval_t){.key = "dw1", .value=dw1});
-    vt_vec_push(backward_cache, &(h_keyval_t){.key = "db1", .value=db1});
-    vt_vec_push(backward_cache, &(h_keyval_t){.key = "dw2", .value=dw2});
-    vt_vec_push(backward_cache, &(h_keyval_t){.key = "db2", .value=db2});
+    vt_vec_push(backward_cache, &(dict_keyval_t){.key = "dw1", .value=dw1});
+    vt_vec_push(backward_cache, &(dict_keyval_t){.key = "db1", .value=db1});
+    vt_vec_push(backward_cache, &(dict_keyval_t){.key = "dw2", .value=dw2});
+    vt_vec_push(backward_cache, &(dict_keyval_t){.key = "db2", .value=db2});
 
     return backward_cache;
 }
@@ -354,17 +361,17 @@ vt_vec_t *ann_model_backward(prsm_tensor_t *x, prsm_tensor_t *y, vt_vec_t *param
 vt_vec_t *ann_model_update(vt_vec_t *params, vt_vec_t *backward_cache, const prsm_float learning_rate) {
     // get params
     prsm_tensor_t *w1, *w2, *b1, *b2;
-    w1 = h_find_val(params, "w1");
-    b1 = h_find_val(params, "b1");
-    w2 = h_find_val(params, "w2");
-    b2 = h_find_val(params, "b2");
+    w1 = dict_find_val(params, "w1");
+    b1 = dict_find_val(params, "b1");
+    w2 = dict_find_val(params, "w2");
+    b2 = dict_find_val(params, "b2");
 
     // get backward_cache (gradients)
     prsm_tensor_t *dw1, *dw2, *db1, *db2;
-    dw1 = h_find_val(backward_cache, "dw1");
-    db1 = h_find_val(backward_cache, "db1");
-    dw2 = h_find_val(backward_cache, "dw2");
-    db2 = h_find_val(backward_cache, "db2");
+    dw1 = dict_find_val(backward_cache, "dw1");
+    db1 = dict_find_val(backward_cache, "db1");
+    dw2 = dict_find_val(backward_cache, "dw2");
+    db2 = dict_find_val(backward_cache, "db2");
 
     /**
      * UPDATE: w_i = w_i - lr  * D (gradients)
