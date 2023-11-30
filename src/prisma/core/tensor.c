@@ -319,12 +319,20 @@ bool prsm_tensor_equals(const prsm_tensor_t *const lhs, const prsm_tensor_t *con
     VT_DEBUG_ASSERT(!prsm_tensor_is_null(lhs), "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INVALID_ARGUMENTS));
     VT_DEBUG_ASSERT(!prsm_tensor_is_null(rhs), "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INVALID_ARGUMENTS));
 
-    if (lhs->ndim != rhs->ndim) return false;
-    if (prsm_tensor_size(lhs) != prsm_tensor_size(rhs)) return false;
+    return prsm_tensor_shapes_match(lhs, rhs) && vt_memcmp(lhs->data, rhs->data, prsm_tensor_size(lhs));
+}
+
+bool prsm_tensor_equals_approx(const prsm_tensor_t *const lhs, const prsm_tensor_t *const rhs, const prsm_float rtol) {
+    // check for invalid input
+    VT_DEBUG_ASSERT(!prsm_tensor_is_null(lhs), "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INVALID_ARGUMENTS));
+    VT_DEBUG_ASSERT(!prsm_tensor_is_null(rhs), "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INVALID_ARGUMENTS));
+
+    // check shapes
+    if (!prsm_tensor_shapes_match(lhs, rhs)) return false;
 
     // check values
     VT_FOREACH(i, 0, prsm_tensor_size(lhs)) {
-        if (lhs->data[i] != rhs->data[i]) return false;
+        if (!vt_math_is_close(lhs->data[i], rhs->data[i], rtol)) return false;
     }
 
     return true;

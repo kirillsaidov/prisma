@@ -331,13 +331,11 @@ void test_loss(void) {
 
         // loss
         const prsm_float loss = prsm_loss_bce(&yhat_, &y_);
-        assert(vt_math_is_close(loss, prsm_tensor_get_val(loss_results_target, i), 0.01));
+        assert(vt_math_is_close(loss, prsm_tensor_get_val(loss_results_target, i), 0.001));
 
         // loss grad
         grad = prsm_loss_bce_d(grad, &yhat_, &y_);
-        VT_FOREACH(j, 0, prsm_tensor_shape(grad)[0]) {
-            assert(vt_math_is_close(grad->data[i], loss_grads_.data[i], 0.01));
-        }
+        assert(prsm_tensor_equals_approx(grad, &loss_grads_, 0.001));
     }
 
     // Categorical cross entropy
@@ -347,9 +345,9 @@ void test_loss(void) {
 
     prsm_tensor_t *cce_grads_expected = prsm_tensor_dup(yhat);
     prsm_tensor_assign_array(cce_grads_expected, (prsm_float[]) {
-        -0.8333,  0.1852, -0.2083, -0.2381,  0.1852,  0.2083,
-        -0.5556, -0.4167,  0.3333, -0.2778,  0.5556,  0.5556,
-        -1.6667,  0.2083, -0.5556, -0.4167,  0.3333,  0.4167
+        -3.5714,  1.4285,  0.1785,  0.0000,  1.4285,  1.4285,
+        -2.3958, -1.5625,  0.9375, -0.7291,  0.9375,  0.9375,
+        -8.5714,  1.4285, -1.9047, -1.0714,  1.4285,  1.4285
     }, prsm_tensor_size(cce_grads_expected));
 
     VT_FOREACH(i, 0, prsm_tensor_shape(y)[0]) {
@@ -359,17 +357,11 @@ void test_loss(void) {
 
         // loss
         const prsm_float loss = prsm_loss_cce(&yhat_, &y_);
-        assert(vt_math_is_close(loss, prsm_tensor_get_val(loss_results_target, i), 0.01));
+        assert(vt_math_is_close(loss, prsm_tensor_get_val(loss_results_target, i), 0.001));
 
         // loss grad
-        grad = prsm_loss_cce_d(grad, &yhat_, &y_); // TODO: does not work as expected when compared to pytorch
-        prsm_tensor_display(&y_, NULL);
-        prsm_tensor_display(&yhat_, NULL);
-        prsm_tensor_display(grad, NULL);
-        break;
-        // VT_FOREACH(j, 0, prsm_tensor_shape(grad)[0]) {
-        //     assert(vt_math_is_close(grad->data[i], loss_grads_.data[i], 0.01));
-        // }
+        grad = prsm_loss_cce_d(grad, &yhat_, &y_);
+        assert(prsm_tensor_equals_approx(grad, &loss_grads_, 0.001));
     }
 }
 

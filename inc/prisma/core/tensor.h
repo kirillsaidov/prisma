@@ -23,6 +23,7 @@
     - prsm_tensor_shapes_match
     - prsm_tensor_shapes_match_ex
     - prsm_tensor_equals
+    - prsm_tensor_equals_approx
     - prsm_tensor_assign
     - prsm_tensor_swap
     - prsm_tensor_is_view
@@ -241,6 +242,17 @@ extern bool prsm_tensor_shapes_match_ex(const prsm_tensor_t *const t, const size
  * @returns true if `lhs==rhs`
  */
 extern bool prsm_tensor_equals(const prsm_tensor_t *const lhs, const prsm_tensor_t *const rhs);
+
+/**
+ * @brief  Checks if tensors are approximately equal
+ * @param  lhs tensor
+ * @param  rhs tensor
+ * @param  rtol relative tolerance value (-1 for automatic selection)
+ * @returns true if `lhs==rhs`
+ * 
+ * @note if `rtol<0`, then `__FLT_EPSILON__` is used
+ */
+extern bool prsm_tensor_equals_approx(const prsm_tensor_t *const lhs, const prsm_tensor_t *const rhs, const prsm_float rtol);
 
 /**
  * @brief  Assigns values to `lhs` from `rhs`
