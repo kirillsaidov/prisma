@@ -166,14 +166,14 @@ size_t prsm_tensor_size(const prsm_tensor_t *const t) {
 void prsm_tensor_resize(prsm_tensor_t *const t, const size_t ndim, ...) {
     // check for invalid input
     VT_DEBUG_ASSERT(!prsm_tensor_is_null(t), "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INVALID_ARGUMENTS));
-    VT_DEBUG_ASSERT(ndim > 0, "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INVALID_ARGUMENTS));
     VT_ENFORCE(!t->is_view, "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_IS_VIEW));
 
     // calculate old tensor size
     const size_t total_size_old = prsm_tensor_size(t);
 
     // reallocate shape
-    if (t->ndim > ndim) {
+    // if (t->ndim > ndim) {
+    if (ndim > t->ndim) {
         t->shape = (t->alloctr == NULL)
             ? VT_REALLOC(t->shape, ndim * sizeof(size_t))
             : VT_ALLOCATOR_REALLOC(t->alloctr, t->shape, ndim * sizeof(size_t));
@@ -192,8 +192,11 @@ void prsm_tensor_resize(prsm_tensor_t *const t, const size_t ndim, ...) {
     // reallocate data
     if (total_size > total_size_old) {
         t->data = (t->alloctr == NULL)
-            ? VT_CALLOC(total_size * sizeof(prsm_float))
-            : VT_ALLOCATOR_ALLOC(t->alloctr, total_size * sizeof(prsm_float));
+            ? VT_REALLOC(t->data, total_size * sizeof(prsm_float))
+            : VT_ALLOCATOR_REALLOC(t->alloctr, t->data, total_size * sizeof(prsm_float));
+
+        // zero-init everything beyond total_size_old
+        vt_memset(t->data + total_size_old, 0, (total_size - total_size_old) * sizeof(*t->data));
     }
 }
 
@@ -207,7 +210,8 @@ void prsm_tensor_resize_ex(prsm_tensor_t *const t, const size_t ndim, const size
     const size_t total_size_old = prsm_tensor_size(t);
 
     // reallocate shape
-    if (t->ndim > ndim) {
+    // if (t->ndim > ndim) {
+    if (ndim > t->ndim) {
         t->shape = (t->alloctr == NULL)
             ? VT_REALLOC(t->shape, ndim * sizeof(size_t))
             : VT_ALLOCATOR_REALLOC(t->alloctr, t->shape, ndim * sizeof(size_t));
@@ -226,8 +230,11 @@ void prsm_tensor_resize_ex(prsm_tensor_t *const t, const size_t ndim, const size
     // reallocate data
     if (total_size > total_size_old) {
         t->data = (t->alloctr == NULL)
-            ? VT_CALLOC(total_size * sizeof(prsm_float))
-            : VT_ALLOCATOR_ALLOC(t->alloctr, total_size * sizeof(prsm_float));
+            ? VT_REALLOC(t->data, total_size * sizeof(prsm_float))
+            : VT_ALLOCATOR_REALLOC(t->alloctr, t->data, total_size * sizeof(prsm_float));
+
+        // zero-init everything beyond total_size_old
+        vt_memset(t->data + total_size_old, 0, (total_size - total_size_old) * sizeof(*t->data));
     }
 }
 
@@ -351,7 +358,7 @@ bool prsm_tensor_equals(const prsm_tensor_t *const lhs, const prsm_tensor_t *con
     VT_DEBUG_ASSERT(!prsm_tensor_is_null(lhs), "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INVALID_ARGUMENTS));
     VT_DEBUG_ASSERT(!prsm_tensor_is_null(rhs), "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INVALID_ARGUMENTS));
 
-    return prsm_tensor_shapes_match(lhs, rhs) && vt_memcmp(lhs->data, rhs->data, prsm_tensor_size(lhs) * sizeof(size_t));
+    return prsm_tensor_shapes_match(lhs, rhs) && vt_memcmp(lhs->data, rhs->data, prsm_tensor_size(lhs) * sizeof(prsm_float));
 }
 
 bool prsm_tensor_equals_approx(const prsm_tensor_t *const lhs, const prsm_tensor_t *const rhs, const prsm_float rtol) {
