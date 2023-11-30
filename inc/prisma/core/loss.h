@@ -1,8 +1,8 @@
 #ifndef PRISMA_CORE_LOSS_H
 #define PRISMA_CORE_LOSS_H
 
-/** COST MODULE
- * This module contains popular cost functions.
+/** LOSS MODULE
+ * This module contains popular loss functions.
 
  * Functions:
     - prsm_loss_mae
@@ -14,6 +14,7 @@
     - prsm_loss_bce
     - prsm_loss_bce_d
     - prsm_loss_cce
+    - prsm_loss_cce_d
 */
 
 #include "prisma/core/core.h"

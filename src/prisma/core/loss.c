@@ -188,7 +188,7 @@ prsm_float prsm_loss_cce(const prsm_tensor_t *const input, const prsm_tensor_t *
     VT_DEBUG_ASSERT(!prsm_tensor_is_null(target), "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INVALID_ARGUMENTS));
     VT_ENFORCE(prsm_tensor_shapes_match(input, target), "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INCOMPATIBLE_SHAPES));
 
-    // calculate bce
+    // calculate cce
     prsm_float sum = 0;
     const prsm_float *y = prsm_tensor_data(target);
     const prsm_float *yhat = prsm_tensor_data(input);
@@ -223,11 +223,11 @@ prsm_tensor_t *prsm_loss_cce_d(prsm_tensor_t *out, const prsm_tensor_t *const in
     prsm_float *delta = prsm_tensor_data(ret);
     const prsm_float *y = prsm_tensor_data(target);
     const prsm_float *yhat = prsm_tensor_data(input);
+    const prsm_float coef = prsm_tensor_calc_sum(target)/prsm_tensor_calc_sum(input);
     const size_t size = prsm_tensor_size(input);
-    // const prsm_float coef = 1.0/((prsm_float)size); // TODO: do we need this?
     VT_FOREACH(i, 0, size) {
         const prsm_float yhat_i = PRSM_CLAMP(yhat[i], PRSM_CONST_EPSILON, 1 - PRSM_CONST_EPSILON);
-        delta[i] = (-y[i] / (yhat_i));
+        delta[i] = coef - (y[i] / (yhat_i));
     }
 
     return ret;
