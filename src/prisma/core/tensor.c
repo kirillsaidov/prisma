@@ -57,7 +57,7 @@ prsm_tensor_t *prsm_tensor_create_ex(struct VitaBaseAllocatorType *const alloctr
     size_t *shape_ = (alloctr == NULL)
         ? VT_CALLOC(ndim * sizeof(size_t))
         : VT_ALLOCATOR_ALLOC(alloctr, ndim * sizeof(size_t));
-    vt_memcopy(shape_, shape, ndim * sizeof(size_t));
+    vt_memcopy(shape_, shape, ndim * sizeof(*shape_));
     
     // find total size
     size_t total_size = 1;
@@ -175,8 +175,8 @@ void prsm_tensor_resize(prsm_tensor_t *const t, const size_t ndim, ...) {
     // if (t->ndim > ndim) {
     if (ndim > t->ndim) {
         t->shape = (t->alloctr == NULL)
-            ? VT_REALLOC(t->shape, ndim * sizeof(size_t))
-            : VT_ALLOCATOR_REALLOC(t->alloctr, t->shape, ndim * sizeof(size_t));
+            ? VT_REALLOC(t->shape, ndim * sizeof(*t->shape))
+            : VT_ALLOCATOR_REALLOC(t->alloctr, t->shape, ndim * sizeof(*t->shape));
     }
     t->ndim = ndim;
 
@@ -192,8 +192,8 @@ void prsm_tensor_resize(prsm_tensor_t *const t, const size_t ndim, ...) {
     // reallocate data
     if (total_size > total_size_old) {
         t->data = (t->alloctr == NULL)
-            ? VT_REALLOC(t->data, total_size * sizeof(prsm_float))
-            : VT_ALLOCATOR_REALLOC(t->alloctr, t->data, total_size * sizeof(prsm_float));
+            ? VT_REALLOC(t->data, total_size * sizeof(*t->data))
+            : VT_ALLOCATOR_REALLOC(t->alloctr, t->data, total_size * sizeof(*t->data));
 
         // zero-init everything beyond total_size_old
         vt_memset(t->data + total_size_old, 0, (total_size - total_size_old) * sizeof(*t->data));
@@ -213,13 +213,13 @@ void prsm_tensor_resize_ex(prsm_tensor_t *const t, const size_t ndim, const size
     // if (t->ndim > ndim) {
     if (ndim > t->ndim) {
         t->shape = (t->alloctr == NULL)
-            ? VT_REALLOC(t->shape, ndim * sizeof(size_t))
-            : VT_ALLOCATOR_REALLOC(t->alloctr, t->shape, ndim * sizeof(size_t));
+            ? VT_REALLOC(t->shape, ndim * sizeof(*t->shape))
+            : VT_ALLOCATOR_REALLOC(t->alloctr, t->shape, ndim * sizeof(*t->shape));
     }
     t->ndim = ndim;
 
     // copy shape
-    vt_memcopy(t->shape, shape, ndim * sizeof(size_t));
+    vt_memcopy(t->shape, shape, ndim * sizeof(*t->shape));
 
     // find new shape size
     size_t total_size = 1;
@@ -230,8 +230,8 @@ void prsm_tensor_resize_ex(prsm_tensor_t *const t, const size_t ndim, const size
     // reallocate data
     if (total_size > total_size_old) {
         t->data = (t->alloctr == NULL)
-            ? VT_REALLOC(t->data, total_size * sizeof(prsm_float))
-            : VT_ALLOCATOR_REALLOC(t->alloctr, t->data, total_size * sizeof(prsm_float));
+            ? VT_REALLOC(t->data, total_size * sizeof(*t->data))
+            : VT_ALLOCATOR_REALLOC(t->alloctr, t->data, total_size * sizeof(*t->data));
 
         // zero-init everything beyond total_size_old
         vt_memset(t->data + total_size_old, 0, (total_size - total_size_old) * sizeof(*t->data));
@@ -244,7 +244,7 @@ prsm_tensor_t *prsm_tensor_dup(const prsm_tensor_t *const t) {
 
     // duplicate tensor
     prsm_tensor_t *tdup = prsm_tensor_create_ex(t->alloctr, t->ndim, t->shape);
-    vt_memcopy(tdup->data, t->data, prsm_tensor_size(tdup) * sizeof(prsm_float));
+    vt_memcopy(tdup->data, t->data, prsm_tensor_size(tdup) * sizeof(*tdup->data));
 
     return tdup;
 }
@@ -256,7 +256,7 @@ void prsm_tensor_dup_into(prsm_tensor_t *const out, const prsm_tensor_t *const i
     VT_ENFORCE(prsm_tensor_shapes_match(out, in), "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INCOMPATIBLE_SHAPES));
     
     // copy data
-    vt_memcopy(out->data, in->data, prsm_tensor_size(out) * sizeof(prsm_float));
+    vt_memcopy(out->data, in->data, prsm_tensor_size(out) * sizeof(*out->data));
 }
 
 void prsm_tensor_transpose(prsm_tensor_t *const t) {
@@ -342,7 +342,7 @@ bool prsm_tensor_shapes_match(const prsm_tensor_t *const lhs, const prsm_tensor_
     VT_DEBUG_ASSERT(!prsm_tensor_is_null(lhs), "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INVALID_ARGUMENTS));
     VT_DEBUG_ASSERT(!prsm_tensor_is_null(rhs), "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INVALID_ARGUMENTS));
 
-    return (lhs->ndim == rhs->ndim) && vt_memcmp(lhs->shape, rhs->shape, lhs->ndim * sizeof(size_t));
+    return (lhs->ndim == rhs->ndim) && vt_memcmp(lhs->shape, rhs->shape, lhs->ndim * sizeof(*lhs->shape));
 }
 
 bool prsm_tensor_shapes_match_ex(const prsm_tensor_t *const t, const size_t ndim, const size_t shape[]) {
@@ -350,7 +350,7 @@ bool prsm_tensor_shapes_match_ex(const prsm_tensor_t *const t, const size_t ndim
     VT_DEBUG_ASSERT(!prsm_tensor_is_null(t), "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INVALID_ARGUMENTS));
     VT_DEBUG_ASSERT(shape != NULL, "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INVALID_ARGUMENTS));
 
-    return (t->ndim == ndim) && vt_memcmp(t->shape, shape, t->ndim * sizeof(size_t));
+    return (t->ndim == ndim) && vt_memcmp(t->shape, shape, t->ndim * sizeof(*t->shape));
 }
 
 bool prsm_tensor_equals(const prsm_tensor_t *const lhs, const prsm_tensor_t *const rhs) {
@@ -358,7 +358,7 @@ bool prsm_tensor_equals(const prsm_tensor_t *const lhs, const prsm_tensor_t *con
     VT_DEBUG_ASSERT(!prsm_tensor_is_null(lhs), "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INVALID_ARGUMENTS));
     VT_DEBUG_ASSERT(!prsm_tensor_is_null(rhs), "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INVALID_ARGUMENTS));
 
-    return prsm_tensor_shapes_match(lhs, rhs) && vt_memcmp(lhs->data, rhs->data, prsm_tensor_size(lhs) * sizeof(prsm_float));
+    return prsm_tensor_shapes_match(lhs, rhs) && vt_memcmp(lhs->data, rhs->data, prsm_tensor_size(lhs) * sizeof(*lhs->data));
 }
 
 bool prsm_tensor_equals_approx(const prsm_tensor_t *const lhs, const prsm_tensor_t *const rhs, const prsm_float rtol) {
@@ -383,7 +383,7 @@ bool prsm_tensor_equals_array(prsm_tensor_t *t, const prsm_float arr[], const si
     VT_DEBUG_ASSERT(arr != NULL, "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INVALID_ARGUMENTS));
     VT_DEBUG_ASSERT(arr_size == prsm_tensor_size(t), "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INCOMPATIBLE_SHAPES));
 
-    return vt_memcmp(t->data, arr, arr_size * sizeof(prsm_float));
+    return vt_memcmp(t->data, arr, arr_size * sizeof(*t->data));
 }
 
 void prsm_tensor_assign(prsm_tensor_t *const lhs, const prsm_tensor_t *const rhs) {
@@ -393,7 +393,7 @@ void prsm_tensor_assign(prsm_tensor_t *const lhs, const prsm_tensor_t *const rhs
     VT_ENFORCE(prsm_tensor_shapes_match(lhs, rhs), "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INCOMPATIBLE_SHAPES));
 
     // copy data
-    vt_memcopy(lhs->data, rhs->data, prsm_tensor_size(lhs) * sizeof(prsm_float));
+    vt_memcopy(lhs->data, rhs->data, prsm_tensor_size(lhs) * sizeof(*lhs->data));
 }
 
 void prsm_tensor_assign_array(prsm_tensor_t *t, const prsm_float arr[], const size_t arr_size) {
@@ -403,7 +403,7 @@ void prsm_tensor_assign_array(prsm_tensor_t *t, const prsm_float arr[], const si
     VT_DEBUG_ASSERT(arr_size == prsm_tensor_size(t), "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INCOMPATIBLE_SHAPES));
 
     // copy data
-    vt_memcopy(t->data, arr, arr_size * sizeof(prsm_float));
+    vt_memcopy(t->data, arr, arr_size * sizeof(*t->data));
 }
 
 void prsm_tensor_swap(prsm_tensor_t *const lhs, prsm_tensor_t *const rhs) {
