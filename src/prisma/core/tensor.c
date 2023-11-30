@@ -809,6 +809,24 @@ prsm_tensor_t *prsm_tensor_dot(prsm_tensor_t *out, const prsm_tensor_t *const lh
     }
 }
 
+prsm_float prsm_tensor_vdot(const prsm_tensor_t *const lhs, const prsm_tensor_t *const rhs) {
+    // check for invalid input
+    VT_DEBUG_ASSERT(!prsm_tensor_is_null(lhs), "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INVALID_ARGUMENTS));
+    VT_DEBUG_ASSERT(!prsm_tensor_is_null(rhs), "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INVALID_ARGUMENTS));
+
+    // enforce equal sizes
+    const size_t lhs_size = prsm_tensor_size(lhs);
+    VT_ENFORCE(lhs_size == prsm_tensor_size(rhs), "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INCOMPATIBLE_SHAPES));
+
+    // calculate vector dot product
+    prsm_float result = 0;
+    VT_FOREACH(i, 0, lhs_size) {
+        result += lhs->data[i] * rhs->data[i];
+    }
+
+    return result;
+}
+
 prsm_tensor_t *prsm_tensor_mul(prsm_tensor_t *out, const prsm_tensor_t *const lhs, const prsm_tensor_t *const rhs) {
     // check for invalid input
     VT_DEBUG_ASSERT(!prsm_tensor_is_null(lhs), "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INVALID_ARGUMENTS));
@@ -1180,27 +1198,25 @@ static prsm_tensor_t *prsm_tensor_dot_vec_by_vec(prsm_tensor_t *const out, const
     VT_ENFORCE(lhs->shape[0] == rhs->shape[0], "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INCOMPATIBLE_SHAPES));
 
     // create tensor
+    const size_t size = lhs->shape[0];
     prsm_tensor_t *ret = (out == NULL) 
-        ? prsm_tensor_create_vec(lhs->alloctr, 1)
+        ? prsm_tensor_create(lhs->alloctr, 2, size, size)
         : out;
 
     // check size
-    if (!prsm_tensor_shapes_match_ex(ret, 1, (size_t[]){1})) {
-        prsm_tensor_resize(ret, 1, 1);
+    if (!prsm_tensor_shapes_match_ex(ret, 2, (size_t[]){size, size})) {
+        prsm_tensor_resize(ret, 2, size, size);
     }
 
     // zero out the values
     prsm_tensor_set_zeros(ret);
 
-    // calculate vector dot product
-    prsm_float result = 0;
-    const size_t size = prsm_tensor_size(lhs);
+    // calculate vector-vector multiplication
     VT_FOREACH(i, 0, size) {
-        result += lhs->data[i] * rhs->data[i];
+        VT_FOREACH(j, 0, size) {
+            ret->data[vt_index_2d_to_1d(j, i, size)] += lhs->data[i] * rhs->data[j];
+        }
     }
-
-    // save dot product
-    prsm_tensor_set_val(ret, 0, result);
 
     return ret;
 }

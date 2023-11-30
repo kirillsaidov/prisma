@@ -45,6 +45,7 @@
     - prsm_tensor_set_from_array
     - prsm_tensor_sum
     - prsm_tensor_dot
+    - prsm_tensor_vdot
     - prsm_tensor_add
     - prsm_tensor_sub
     - prsm_tensor_mul
@@ -454,7 +455,7 @@ extern prsm_tensor_t *prsm_tensor_add(prsm_tensor_t *out, const prsm_tensor_t *c
 extern prsm_tensor_t *prsm_tensor_sub(prsm_tensor_t *out, const prsm_tensor_t *const lhs, const prsm_tensor_t *const rhs);
 
 /**
- * @brief  Tensor dot product
+ * @brief  Tensor multiplication
  * @param  out output tensor
  * @param  lhs tensor
  * @param  rhs tensor
@@ -464,6 +465,14 @@ extern prsm_tensor_t *prsm_tensor_sub(prsm_tensor_t *out, const prsm_tensor_t *c
  * @note `out` is zero initialized
  */
 extern prsm_tensor_t *prsm_tensor_dot(prsm_tensor_t *out, const prsm_tensor_t *const lhs, const prsm_tensor_t *const rhs);
+
+/**
+ * @brief  Vector dot product
+ * @param  lhs tensor
+ * @param  rhs tensor
+ * @returns prsm_float
+ */
+extern prsm_float prsm_tensor_vdot(const prsm_tensor_t *const lhs, const prsm_tensor_t *const rhs);
 
 /**
  * @brief  Element-wise multiplication (hadamard product)
