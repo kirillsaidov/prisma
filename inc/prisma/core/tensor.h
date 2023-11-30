@@ -26,7 +26,9 @@
     - prsm_tensor_shapes_match_ex
     - prsm_tensor_equals
     - prsm_tensor_equals_approx
+    - prsm_tensor_equals_array
     - prsm_tensor_assign
+    - prsm_tensor_assign_array
     - prsm_tensor_swap
     - prsm_tensor_is_view
     - prsm_tensor_make_view
@@ -270,6 +272,15 @@ extern bool prsm_tensor_equals(const prsm_tensor_t *const lhs, const prsm_tensor
  * @note if `rtol<0`, then `__FLT_EPSILON__` is used
  */
 extern bool prsm_tensor_equals_approx(const prsm_tensor_t *const lhs, const prsm_tensor_t *const rhs, const prsm_float rtol);
+
+/**
+ * @brief  Checks if tensor data equals to array values
+ * @param  t tensor
+ * @param  arr array
+ * @param  arr_size array length
+ * @returns true if `t.data == arr`
+ */
+extern bool prsm_tensor_equals_array(prsm_tensor_t *t, const prsm_float arr[], const size_t arr_size);
 
 /**
  * @brief  Assigns values to `lhs` from `rhs`
