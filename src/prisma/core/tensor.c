@@ -255,6 +255,7 @@ void prsm_tensor_dup_into(prsm_tensor_t *const out, const prsm_tensor_t *const i
 void prsm_tensor_transpose(prsm_tensor_t *const t) {
     // check for invalid input
     VT_DEBUG_ASSERT(!prsm_tensor_is_null(t), "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INVALID_ARGUMENTS));
+    VT_ENFORCE(t->ndim < 3, "%s: Higher dimensions are not supported!\n", prsm_status_to_str(PRSM_STATUS_OPERATION_FAILURE));
 
     // transpose
     if (t->ndim == 1) {
@@ -289,10 +290,41 @@ void prsm_tensor_transpose(prsm_tensor_t *const t) {
         // update tensor matrix shape
         t->shape[0] = c;
         t->shape[1] = r;
-    } else {
-        VT_UNIMPLEMENTED("Unsupported for now!");
     }
 }
+
+void prsm_tensor_flatten(prsm_tensor_t *const t) {
+    // check for invalid input
+    VT_DEBUG_ASSERT(!prsm_tensor_is_null(t), "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INVALID_ARGUMENTS));
+
+    // resize to vector
+    prsm_tensor_resize(t, 1, prsm_tensor_size(t));
+}
+
+void prsm_tensor_diagflat(prsm_tensor_t *const t) {
+    // check for invalid input
+    VT_DEBUG_ASSERT(!prsm_tensor_is_null(t), "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INVALID_ARGUMENTS));
+    VT_ENFORCE(t->ndim < 2, "%s: Higher dimensions are not supported!\n", prsm_status_to_str(PRSM_STATUS_OPERATION_FAILURE));
+
+    if (t->ndim == 1) {
+        // resize
+        const size_t size = prsm_tensor_size(t);
+        prsm_tensor_resize(t, 2, size, size);
+
+        // copy values to diagonal
+        VT_FOREACH(i, 0, size) {
+            t->data[vt_index_2d_to_1d(i, i, size)] = t->data[i];
+        }
+
+        // zero-init everything except the diagonal
+        VT_FOREACH(i, 0, size) {
+            VT_FOREACH(j, 0, size) {
+                if (i != j) t->data[vt_index_2d_to_1d(i, j, size)] = 0;
+            }
+        }
+    }
+}
+
 
 /* 
     Tensor data operations
@@ -506,6 +538,35 @@ void prsm_tensor_set_all(prsm_tensor_t *const t, const prsm_float value) {
     }
 }
 
+void prsm_tensor_set_diag(prsm_tensor_t *const t, const prsm_float value) {
+    // check for invalid input
+    VT_DEBUG_ASSERT(!prsm_tensor_is_null(t), "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INVALID_ARGUMENTS));
+    VT_ENFORCE(t->ndim < 4, "%s: Higher dimensions are not supported!\n", prsm_status_to_str(PRSM_STATUS_OPERATION_FAILURE));
+
+    // set identity
+    if (t->ndim == 1) {
+        t->data[0] = value;
+    } else if (t->ndim == 2) {
+        VT_FOREACH(i, 0, t->shape[0]) {
+            VT_FOREACH(j, 0, t->shape[1]) {
+                if (i == j) {
+                    t->data[vt_index_2d_to_1d(i, j, t->shape[1])] = value;
+                }
+            }
+        }
+    } else if (t->ndim == 3) {
+        VT_FOREACH(i, 0, t->shape[0]) {
+            VT_FOREACH(j, 0, t->shape[1]) {
+                VT_FOREACH(k, 0, t->shape[2]) {
+                    if (i == j) {
+                        t->data[vt_index_3d_to_1d(i, j, k, t->shape[0], t->shape[1])] = value;
+                    }
+                }
+            }
+        }
+    }
+}
+
 void prsm_tensor_set_ones(prsm_tensor_t *const t) {
     // check for invalid input
     VT_DEBUG_ASSERT(!prsm_tensor_is_null(t), "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INVALID_ARGUMENTS));
@@ -521,7 +582,8 @@ void prsm_tensor_set_zeros(prsm_tensor_t *const t) {
 void prsm_tensor_set_identity(prsm_tensor_t *const t) {
     // check for invalid input
     VT_DEBUG_ASSERT(!prsm_tensor_is_null(t), "%s\n", prsm_status_to_str(PRSM_STATUS_ERROR_INVALID_ARGUMENTS));
-    
+    VT_ENFORCE(t->ndim < 4, "%s: Higher dimensions are not supported!\n", prsm_status_to_str(PRSM_STATUS_OPERATION_FAILURE));
+
     // set identity
     if (t->ndim == 1) {
         t->data[0] = 1;
@@ -543,8 +605,6 @@ void prsm_tensor_set_identity(prsm_tensor_t *const t) {
                 }
             }
         }
-    } else {
-        VT_ENFORCE(0, "%s: Higher dimensions are not supported!\n", prsm_status_to_str(PRSM_STATUS_OPERATION_FAILURE));
     }
 }
 

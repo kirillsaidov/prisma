@@ -20,6 +20,8 @@
     - prsm_tensor_dup
     - prsm_tensor_dup_into
     - prsm_tensor_transpose
+    - prsm_tensor_flatten
+    - prsm_tensor_diagflat
     - prsm_tensor_shapes_match
     - prsm_tensor_shapes_match_ex
     - prsm_tensor_equals
@@ -34,6 +36,7 @@
     - prsm_tensor_get_val
     - prsm_tensor_set_val
     - prsm_tensor_set_all
+    - prsm_tensor_set_diag
     - prsm_tensor_set_ones
     - prsm_tensor_set_zeros
     - prsm_tensor_set_identity
@@ -214,6 +217,20 @@ extern void prsm_tensor_dup_into(prsm_tensor_t *const out, const prsm_tensor_t *
  */
 extern void prsm_tensor_transpose(prsm_tensor_t *const t);
 
+/**
+ * @brief  Flattens a tensor into a vector
+ * @param  t tensor
+ * @returns None
+ */
+extern void prsm_tensor_flatten(prsm_tensor_t *const t);
+
+/**
+ * @brief  Diagonally flattens tensor elements
+ * @param  t tensor
+ * @returns None
+ */
+extern void prsm_tensor_diagflat(prsm_tensor_t *const t);
+
 /* 
     Tensor data operations
 */
@@ -357,6 +374,14 @@ extern void prsm_tensor_set_val(prsm_tensor_t *const t, const size_t idx, const 
  * @returns None
  */
 extern void prsm_tensor_set_all(prsm_tensor_t *const t, const prsm_float value);
+
+/**
+ * @brief  Set diagonal elements to value
+ * @param  t tensor
+ * @param  value value
+ * @returns None
+ */
+extern void prsm_tensor_set_diag(prsm_tensor_t *const t, const prsm_float value);
 
 /**
  * @brief  Set entire tensor to 1
