@@ -19,14 +19,14 @@ typedef struct {
 /// @brief Finds the value given key by iterating over a list
 /// @param list vt_vec_t
 /// @param key string key
-/// @return void*
+/// @return void* or NULL if element not found
 void *dict_find_val(vt_vec_t *list, char *key) {
     const size_t len = vt_vec_len(list);
     VT_FOREACH(i, 0, len) {
         dict_keyval_t *keyval = vt_vec_get(list, i);
         if (vt_str_equals_z(key, keyval->key)) return keyval->value;
     }
-    assert(0 && "dict_find_val could not find key!");
+    return NULL;
 }
 
 /// @brief Updates the value given key by iterating over a list

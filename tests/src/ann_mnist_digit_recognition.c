@@ -64,7 +64,7 @@ void run_ann_mnist_digit_recognition(void) {
 
     VT_LOG_INFO("\talpha         = %.2f", alpha);
     VT_LOG_INFO("\tactivation l2 = %s", VT_STRING_OF(prsm_math_relu));
-    VT_LOG_INFO("\tactivation l3 = %s", VT_STRING_OF(prsm_activate_softmax));
+    VT_LOG_INFO("\tactivation l3 = %s", VT_STRING_OF(prsm_activate_ssoftmax));
     VT_LOG_INFO("\tloss          = %s", VT_STRING_OF(prsm_loss_cce));
     VT_LOG_INFO("\tepochs        = %zu", epochs);
 
@@ -86,7 +86,7 @@ void run_ann_mnist_digit_recognition(void) {
         /* -----------------------
         * BACKWARD
         */
-        // params = ann_model_backward(x_train, y_train, params);
+        params = ann_model_backward(x_train, y_train, params);
 
         /* -----------------------
         * UPDATE
@@ -267,13 +267,15 @@ vt_vec_t *ann_model_forward(vt_vec_t *params, prsm_tensor_t *x) {
 
 vt_vec_t *ann_model_backward(prsm_tensor_t *x, prsm_tensor_t *y, vt_vec_t *params) {
     // get params
-    prsm_tensor_t *w1, *w2, *b1, *b2, *a1, *a2;
+    prsm_tensor_t *w1, *w2, *b1, *b2, *a1, *a2, *z1, *z2;
     w1 = dict_find_val(params, "w1");
     b1 = dict_find_val(params, "b1");
     w2 = dict_find_val(params, "w2");
     b2 = dict_find_val(params, "b2");
     a1 = dict_find_val(params, "a1");
     a2 = dict_find_val(params, "a2");
+    z1 = dict_find_val(params, "z1");
+    z2 = dict_find_val(params, "z2");
 
     // number of observations
     const float N = prsm_tensor_shape(x)[0];
@@ -282,8 +284,37 @@ vt_vec_t *ann_model_backward(prsm_tensor_t *x, prsm_tensor_t *y, vt_vec_t *param
      * LAYER 3
      */
     
-    // // dz2 = a2 - y
-    // prsm_tensor_t *dz2 = prsm_tensor_sub(NULL, a2, y);
+    // DC = dc/da2
+    prsm_tensor_t *DC = dict_find_val(params, "DC");
+    if (!DC) {
+        DC = prsm_tensor_dup(a2);
+        dict_update_val(params, "DC", DC);
+    }
+    prsm_loss_cce_d(DC, a2, y);
+
+    printf("DC: ---------------\n");
+    prsm_tensor_display(DC, NULL);
+
+    // DA2 = da2/dz2 = relu'(z2)
+    // prsm_tensor_t *DA2 = dict_find_val(params, "DA2");
+    // if (!DA2) {
+    //     DA2 = prsm_tensor_dup(a2);
+    //     dict_update_val(params, "DA2", DA2);
+    // }
+    // prsm_activate_ssoftmax(DA2, z2);
+    // printf("a2: ---------------\n");
+    // prsm_tensor_display(DA2, NULL);
+
+    // prsm_activate_ssoftmax_d(DA2, z2);
+    // printf("DA2: ---------------\n");
+    // prsm_tensor_display(DA2, NULL);
+    // printf("z2: ---------------\n");
+    // prsm_tensor_display(z2, NULL);
+
+    // printf("a2: ---------------\n");
+    // prsm_tensor_display(a2, NULL);
+
+
 
     // // dw2 = 1/m * dz2 * a1
     // printf("here\n");

@@ -497,6 +497,9 @@ prsm_tensor_t *prsm_activate_softmax_d(prsm_tensor_t *out, const prsm_tensor_t *
     // run softmax
     ret = prsm_activate_softmax(ret, in);
 
+    // TODO: CONTINUE: flatten 
+    // prsm_tensor_flatten(ret);
+
     // calculate derivative output
     const size_t size = prsm_tensor_size(ret);
     VT_FOREACH(i, 0, size) {

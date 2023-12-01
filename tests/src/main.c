@@ -78,8 +78,8 @@ void test_tensor(void) {
     assert(prsm_tensor_calc_sum(v3) == 7);
 
     // vector dot product
-    prsm_tensor_t *dotprod = prsm_tensor_dot(NULL, v1, v2);
-    assert(prsm_tensor_get_val(dotprod, 0) == 38);
+    prsm_float dotprod = prsm_tensor_vdot(v1, v2);
+    assert(dotprod == 38);
 
     /*
      * MATRIX
@@ -87,6 +87,7 @@ void test_tensor(void) {
 
     // resize vector to matrix
     prsm_tensor_t *mat0 = prsm_tensor_dup(v3);
+    prsm_tensor_set_zeros(mat0);
     prsm_tensor_resize(mat0, 2, 3, 3);
     prsm_tensor_set_identity(mat0);
     assert(prsm_tensor_calc_sum(mat0) == 3);
@@ -150,6 +151,13 @@ void test_tensor(void) {
     assert(prsm_tensor_get_val(mat_vm, 1) == (prsm_float)2.5);
     assert(prsm_tensor_get_val(mat_vm, 2) == (prsm_float)4.5);
     assert(prsm_tensor_get_val(mat_vm, 3) == (prsm_float)6.5);
+
+    // vec by vec
+    prsm_tensor_t* __v1 = prsm_tensor_create(alloctr, 1, 2); __v1->data[0] = 1; __v1->data[1] = 2; 
+    prsm_tensor_t* __v2 = prsm_tensor_create(alloctr, 1, 2); __v2->data[0] = 3; __v2->data[1] = 4; 
+    prsm_tensor_t *__v3 = prsm_tensor_dot(NULL, __v1, __v2);
+    prsm_tensor_display(__v3, NULL);
+    assert(prsm_tensor_equals_array(__v3, (prsm_float[]){3, 6, 4, 8}, prsm_tensor_size(__v3)));
 
     // sum along axis
     prsm_tensor_t *sm = prsm_tensor_create_mat(alloctr, 2, 3);
@@ -222,7 +230,20 @@ void test_tensor(void) {
     // col-wise sum for 3D matrix
     prsm_tensor_sum(nd3m_sum, nd3m, 2);
 
-    prsm_tensor_display(nd3m_sum, NULL);
+    // flatten
+    prsm_tensor_flatten(nd3m_sum);
+    assert(prsm_tensor_equals_array(nd3m_sum, (prsm_float[]){3, 7, 11, 15, 9, 3}, prsm_tensor_size(nd3m_sum)));
+
+    // diagflat
+    prsm_tensor_diagflat(nd3m_sum);
+    assert(prsm_tensor_equals_array(nd3m_sum, (prsm_float[]){
+        3, 0,  0,  0, 0, 0, 
+        0, 7,  0,  0, 0, 0,
+        0, 0, 11,  0, 0, 0,
+        0, 0,  0, 15, 0, 0,
+        0, 0,  0,  0, 9, 0, 
+        0, 0,  0,  0, 0, 3
+    }, prsm_tensor_size(nd3m_sum)));
 }
 
 void test_math(void) {
