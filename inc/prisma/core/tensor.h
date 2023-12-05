@@ -482,7 +482,6 @@ extern prsm_float prsm_tensor_vdot(const prsm_tensor_t *const lhs, const prsm_te
  * @returns prsm_tensor_t*
  * 
  * @note if `out==NULL`, tensor is allocated
- * @note `out` is zero initialized
  */
 extern prsm_tensor_t *prsm_tensor_mul(prsm_tensor_t *out, const prsm_tensor_t *const lhs, const prsm_tensor_t *const rhs);
 
