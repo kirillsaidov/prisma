@@ -285,7 +285,7 @@ vt_vec_t *ann_model_backward(prsm_tensor_t *x, prsm_tensor_t *y, vt_vec_t *param
      * LAYER 3
      */
     
-    // DC = dc/da2 | (8, 10)
+    // DC = dc/da2 | (N, 10)
     prsm_tensor_t *DC = dict_find_val(params, "DC");
     if (!DC) {
         DC = prsm_tensor_dup(a2);
@@ -301,7 +301,7 @@ vt_vec_t *ann_model_backward(prsm_tensor_t *x, prsm_tensor_t *y, vt_vec_t *param
     printf("==> DC:\n");
     prsm_tensor_display(DC, NULL);
 
-    // DA2 = da2/dz2 = ssoftmax'(z2) | (8, 10)
+    // DA2 = da2/dz2 = ssoftmax'(z2) | (N, 10)
     prsm_tensor_t *DA2 = dict_find_val(params, "DA2");
     if (!DA2) {
         DA2 = prsm_tensor_dup(z2);
@@ -316,17 +316,13 @@ vt_vec_t *ann_model_backward(prsm_tensor_t *x, prsm_tensor_t *y, vt_vec_t *param
     printf("==> DA2:\n");
     prsm_tensor_display(DA2, NULL);
     
-    // DZ2 = dz2/dw2 = a1 | (N, 100)
-    prsm_tensor_t *DZ2 = dict_find_val(params, "DZ2");
-    if (!DZ2) {
-        DZ2 = prsm_tensor_dup(a1);
-        dict_update_val(params, "DZ2", DZ2);
-    }
+    // DZ2_dw2 = dz2/dw2 = a1 | (N, 100)
+    prsm_tensor_t *DZ2_dw2 = a1;
 
-    printf("==> DZ2:\n");
-    prsm_tensor_display(DZ2, NULL);
+    printf("==> DZ2_dw2:\n");
+    prsm_tensor_display(DZ2_dw2, NULL);
 
-    // DW2 = DC * DA2_T * DZ2 | (N, 100)
+    // DW2 = (DC * DA2_T * DZ2_dw2)_T * a2 | (N, 100)
     prsm_tensor_t *DW2 = dict_find_val(params, "DW2");
     if (!DW2) {
         DW2 = prsm_tensor_dup(w2);
@@ -334,90 +330,56 @@ vt_vec_t *ann_model_backward(prsm_tensor_t *x, prsm_tensor_t *y, vt_vec_t *param
     }
     
     prsm_tensor_transpose(DA2);
-    {
+    {   
+        // DC * DA2_T * DZ2
         prsm_tensor_t *tmp = prsm_tensor_dot(NULL, DC, DA2);    // (N, N)
-        DW2 = prsm_tensor_dot(DW2, tmp, DZ2);                   // (N, 100)
+        prsm_tensor_t *tmp2 = prsm_tensor_dot(NULL, tmp, DZ2_dw2);  // (N, 100)
+
+        // (DC * DA2_T * DZ2)_T * a2
+        prsm_tensor_transpose(tmp2);
+        DW2 = prsm_tensor_dot(DW2, tmp2, a2);                   // (100, 10)
+
+        prsm_tensor_destroy(tmp);
+        prsm_tensor_destroy(tmp2);
     }
     prsm_tensor_transpose(DA2);
 
     printf("==> DW2:\n");
     prsm_tensor_display(DW2, NULL);
 
-    // DA2 = da2/dz2 = relu'(z2)
-    // prsm_tensor_t *DA2 = dict_find_val(params, "DA2");
-    // if (!DA2) {
-    //     DA2 = prsm_tensor_dup(a2);
-    //     dict_update_val(params, "DA2", DA2);
-    // }
-    // prsm_activate_ssoftmax(DA2, z2);
-    // printf("a2: ---------------\n");
-    // prsm_tensor_display(DA2, NULL);
+    /**
+     * LAYER 2
+     */
 
-    // prsm_activate_ssoftmax_d(DA2, z2);
-    // printf("DA2: ---------------\n");
-    // prsm_tensor_display(DA2, NULL);
-    // printf("z2: ---------------\n");
-    // prsm_tensor_display(z2, NULL);
+    // DZ2_da1 = dz2/da1 = w2 | (100, 10)
+    prsm_tensor_t *DZ2_da1 = w2;
 
-    // printf("a2: ---------------\n");
-    // prsm_tensor_display(a2, NULL);
+    printf("==> DZ2_da1:\n");
+    prsm_tensor_display(DZ2_da1, NULL);
 
+    // DA1 = da1/dz1 = relu'(z1) | (N, 100)
+    prsm_tensor_t *DA1 = dict_find_val(params, "DA1");
+    if (!DA1) {
+        DA1 = prsm_tensor_dup(z1);
+        dict_update_val(params, "DA1", DA1);
+    }
+    VT_FOREACH(i, 0, N) { // for each example
+        prsm_tensor_t z1_view = prsm_tensor_make_view_vec(z1, i);
+        prsm_tensor_t DA1_view = prsm_tensor_make_view_vec(DA1, i);
+        prsm_activate_ssoftmax_d(&DA1_view, &z1_view);
+    }
 
+    printf("==> DA1:\n");
+    prsm_tensor_display(DA1, NULL);
 
-    // // dw2 = 1/m * dz2 * a1
-    // printf("here\n");
-    // printf("shape of dz2: (%zu, %zu)\n", prsm_tensor_shape(dz2)[0], prsm_tensor_shape(dz2)[1]);
-    // printf("shape of  a1: (%zu, %zu)\n", prsm_tensor_shape(a1)[0], prsm_tensor_shape(a1)[1]);
-    // prsm_tensor_transpose(dz2);
-    // prsm_tensor_t *dw2 = prsm_tensor_dot(NULL, dz2, a1);
-    // prsm_tensor_apply_scale_add(dw2, 1.0/m, 0);
-    // printf("here: done\n");
+    // DZ1 = dz1/dw1 = x
+    prsm_tensor_t *DZ1 = x;
 
-    // // db2 = 1/m * sum(dz2, 1)
-    // prsm_tensor_t *db2 = prsm_tensor_sum(NULL, dz2, 1);
-    // prsm_tensor_apply_scale_add(db2, 1.0/m, 0);
+    printf("==> DZ1:\n");
+    prsm_tensor_display(DZ1, NULL);
 
-    // // printf("shape of dz2: (%zu, %zu)\n", prsm_tensor_shape(dz2)[0], prsm_tensor_shape(dz2)[1]);
-    // // printf("shape of  a1: (%zu, %zu)\n", prsm_tensor_shape(a1)[0], prsm_tensor_shape(a1)[1]);
-    // // printf("shape of dw2: (%zu, %zu)\n", prsm_tensor_shape(dw2)[0], prsm_tensor_shape(dw2)[1]);
-    // // printf("shape of db2: (%zu, 1)\n", prsm_tensor_shape(db2)[0]);
+    // DW1 = DC * DA2 * DZ2_da1 * DA1 * DZ1 | (784, 100)
 
-    // /**
-    //  * LAYER 1
-    //  */
-    
-    // // dz1 = w2 * dz2 * acrivation_derivative(a1)
-    // prsm_tensor_t *dz1_tmp1 = prsm_tensor_dot(NULL, w2, dz2); 
-    // prsm_tensor_t *dz1_tmp2 = prsm_activate_relu_d(NULL, a1);
-    // prsm_tensor_transpose(dz1_tmp2);
-    // prsm_tensor_t *dz1 = prsm_tensor_mul(NULL, dz1_tmp1, dz1_tmp2);
-    // prsm_tensor_destroy(dz1_tmp1);
-    // prsm_tensor_destroy(dz1_tmp2);
-
-    // // dw1 = 1/m * dz1 * x
-    // prsm_tensor_t *dw1 = prsm_tensor_dot(NULL, dz1, x);
-    // prsm_tensor_apply_scale_add(dw1, 1.0/m, 0);
-
-    // // db1 = 1/m * sum(dz1, 1)
-    // prsm_tensor_t *db1 = prsm_tensor_sum(NULL, dz1, 1);
-    // prsm_tensor_apply_scale_add(db1, 1.0/m, 0);
-
-    // // printf("shape of  w2: (%zu, %zu)\n", prsm_tensor_shape(w2)[0], prsm_tensor_shape(w2)[1]);
-    // // printf("shape of dz2: (%zu, %zu)\n", prsm_tensor_shape(dz2)[0], prsm_tensor_shape(dz2)[1]);
-    // // // printf("shape of dz1_tmp1: (%zu, %zu)\n", prsm_tensor_shape(dz1_tmp1)[0], prsm_tensor_shape(dz1_tmp1)[1]);
-    // // // printf("shape of dz1_tmp2: (%zu, %zu)\n", prsm_tensor_shape(dz1_tmp2)[0], prsm_tensor_shape(dz1_tmp2)[1]);
-    // // printf("shape of dz1: (%zu, %zu)\n", prsm_tensor_shape(dz1)[0], prsm_tensor_shape(dz1)[1]);
-    // // printf("shape of   x: (%zu, %zu)\n", prsm_tensor_shape(x)[0], prsm_tensor_shape(x)[1]);
-    // // printf("shape of dw1: (%zu, %zu)\n", prsm_tensor_shape(dw1)[0], prsm_tensor_shape(dw1)[1]);
-    // // printf("shape of db1: (%zu, 1)\n", prsm_tensor_shape(db1)[0]);
-
-    // // update backward_cache
-    // vt_vec_push(backward_cache, &(dict_keyval_t){.key = "dw1", .value=dw1});
-    // vt_vec_push(backward_cache, &(dict_keyval_t){.key = "db1", .value=db1});
-    // vt_vec_push(backward_cache, &(dict_keyval_t){.key = "dw2", .value=dw2});
-    // vt_vec_push(backward_cache, &(dict_keyval_t){.key = "db2", .value=db2});
-
-    // return backward_cache;
     return params;
 }
 
