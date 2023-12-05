@@ -497,9 +497,6 @@ prsm_tensor_t *prsm_activate_softmax_d(prsm_tensor_t *out, const prsm_tensor_t *
     // run softmax
     ret = prsm_activate_softmax(ret, in);
 
-    // TODO: CONTINUE: flatten 
-    // prsm_tensor_flatten(ret);
-
     // calculate derivative output
     const size_t size = prsm_tensor_size(ret);
     VT_FOREACH(i, 0, size) {
@@ -609,13 +606,13 @@ prsm_tensor_t *prsm_activate_lsoftmax_d(prsm_tensor_t *out, const prsm_tensor_t 
     }
 
     // run softmax
-    ret = prsm_activate_lsoftmax(ret, in);
+    ret = prsm_activate_ssoftmax(ret, in);
 
     // calculate derivative output
     const size_t size = prsm_tensor_size(ret);
     VT_FOREACH(i, 0, size) {
         const prsm_float v = prsm_tensor_get_val(ret, i);
-        prsm_tensor_set_val(ret, i, v * (1 - v));
+        prsm_tensor_set_val(ret, i, (1 - v));
     }
 
     return ret;

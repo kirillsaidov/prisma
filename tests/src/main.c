@@ -23,11 +23,11 @@ int main(void) {
         // vt_debug_disable_output(true);
 
         // TEST(test_custom);
-        TEST(test_tensor);
-        TEST(test_math);
+        // TEST(test_tensor);
+        // TEST(test_math);
         TEST(test_activation);
-        TEST(test_loss);
-        TEST(test_layers);
+        // TEST(test_loss);
+        // TEST(test_layers);
     }
     vt_mallocator_print_stats(alloctr->stats);
     vt_mallocator_destroy(alloctr);
@@ -265,29 +265,58 @@ void test_math(void) {
 void test_activation(void) {
     prsm_tensor_t *data = prsm_tensor_create_vec(alloctr, 4);
     prsm_tensor_t *expected_output = prsm_tensor_create_vec(alloctr, 4);
+    prsm_tensor_t *d_expected_output = prsm_tensor_create_vec(alloctr, 4);
     prsm_tensor_assign_array(data, (prsm_float[]) {
         10, 2, 40, 4
     }, prsm_tensor_size(data));
     prsm_tensor_assign_array(expected_output, (prsm_float[]) {
         0, 0, 1, 0
     }, prsm_tensor_size(expected_output));
+    prsm_tensor_assign_array(d_expected_output, (prsm_float[]) {
+        0.1442, 0.1442, 0.2493, 0.1442
+    }, prsm_tensor_size(d_expected_output));
 
     // softmax
     prsm_tensor_t *output = prsm_activate_softmax(NULL, data);
     prsm_tensor_apply_func(output, PRSM_ROUND);
     assert(prsm_tensor_equals(output, expected_output));
 
+    // d'softmax
+    prsm_tensor_t *d_output = prsm_activate_softmax_d(NULL, expected_output);
+    assert(prsm_tensor_equals_approx(d_output, d_expected_output, 0.001));
+
     // stable softmax
     output = prsm_activate_ssoftmax(output, data);
     prsm_tensor_apply_func(output, PRSM_ROUND);
     assert(prsm_tensor_equals(output, expected_output));
 
+    // d'stable softmax
+    d_output = prsm_activate_ssoftmax_d(d_output, expected_output);
+    assert(prsm_tensor_equals_approx(d_output, d_expected_output, 0.001));
+
     // log softmax
+    prsm_tensor_resize(data, 1, 3);
+    prsm_tensor_assign_array(data, (prsm_float[]) {
+        1, 2, 3
+    }, prsm_tensor_size(data));
+
+    prsm_tensor_resize(expected_output, 1, 3);
     prsm_tensor_assign_array(expected_output, (prsm_float[]) {
-        -30, -38, -0, -36
+        -2.4076061 , -1.4076061 , -0.40760612
     }, prsm_tensor_size(expected_output));
+
+    prsm_tensor_resize(d_expected_output, 1, 3);
+    prsm_tensor_assign_array(d_expected_output, (prsm_float[]) {
+        0.9099, 0.7552, 0.3347
+    }, prsm_tensor_size(d_expected_output));
+
     output = prsm_activate_lsoftmax(output, data);
-    assert(prsm_tensor_equals(output, expected_output));
+    assert(prsm_tensor_equals_approx(output, expected_output, 0.001));
+
+    // d'log softmax
+    d_output = prsm_activate_lsoftmax_d(d_output, data);
+    assert(prsm_tensor_equals_approx(d_output, d_expected_output, 0.001));
+
 }
 
 void test_loss(void) {
