@@ -10,6 +10,7 @@ vt_vec_t *ann_model_init_params(const size_t N, const size_t n_x, const size_t n
 vt_vec_t *ann_model_forward(vt_vec_t *params, prsm_tensor_t *x);
 vt_vec_t *ann_model_backward(prsm_tensor_t *x, prsm_tensor_t *y, vt_vec_t *params);
 vt_vec_t *ann_model_update(vt_vec_t *params, vt_vec_t *backward_cache, const prsm_float learning_rate);
+prsm_float ann_cost(const prsm_tensor_t *const pred, const prsm_tensor_t *const target);
 prsm_float ann_accuracy(prsm_tensor_t *const pred, const prsm_tensor_t *const target, const bool round);
 
 void run_ann_mnist_digit_recognition(void) {
@@ -79,7 +80,7 @@ void run_ann_mnist_digit_recognition(void) {
         * COST AND ACCURACY
         */
         prsm_tensor_t *yhat = dict_find_val(params, "a2");
-        const prsm_float cost = prsm_loss_cce(yhat, y_train);
+        const prsm_float cost = ann_cost(yhat, y_train);
         const prsm_float accuracy = ann_accuracy(yhat, y_train, true);
         VT_LOG_INFO("\tEpoch %3zu | Error: %.2f | Accuracy: %.2f", epoch, cost, accuracy);
 
@@ -260,7 +261,7 @@ vt_vec_t *ann_model_forward(vt_vec_t *params, prsm_tensor_t *x) {
         prsm_tensor_t tview = prsm_tensor_make_view_vec(a2, i);
         prsm_activate_ssoftmax(&tview, &tview);
     }
-    prsm_tensor_display(z2, NULL); // TODO: remove
+    // prsm_tensor_display(z2, NULL); // TODO: remove
 
     return params;
 }
@@ -284,16 +285,63 @@ vt_vec_t *ann_model_backward(prsm_tensor_t *x, prsm_tensor_t *y, vt_vec_t *param
      * LAYER 3
      */
     
-    // DC = dc/da2
+    // DC = dc/da2 | (8, 10)
     prsm_tensor_t *DC = dict_find_val(params, "DC");
     if (!DC) {
         DC = prsm_tensor_dup(a2);
         dict_update_val(params, "DC", DC);
     }
-    prsm_loss_cce_d(DC, a2, y);
+    VT_FOREACH(i, 0, N) { // for each example
+        prsm_tensor_t y_view = prsm_tensor_make_view_vec(y, i);
+        prsm_tensor_t a2_view = prsm_tensor_make_view_vec(a2, i);
+        prsm_tensor_t DC_view = prsm_tensor_make_view_vec(DC, i);
+        prsm_loss_cce_d(&DC_view, &a2_view, &y_view);
+    }
 
-    printf("DC: ---------------\n");
+    printf("==> DC:\n");
     prsm_tensor_display(DC, NULL);
+
+    // DA2 = da2/dz2 = ssoftmax'(z2) | (8, 10)
+    prsm_tensor_t *DA2 = dict_find_val(params, "DA2");
+    if (!DA2) {
+        DA2 = prsm_tensor_dup(z2);
+        dict_update_val(params, "DA2", DA2);
+    }
+    VT_FOREACH(i, 0, N) { // for each example
+        prsm_tensor_t z2_view = prsm_tensor_make_view_vec(z2, i);
+        prsm_tensor_t DA2_view = prsm_tensor_make_view_vec(DA2, i);
+        prsm_activate_ssoftmax_d(&DA2_view, &z2_view);
+    }
+
+    printf("==> DA2:\n");
+    prsm_tensor_display(DA2, NULL);
+    
+    // DZ2 = dz2/dw2 = a1 | (N, 100)
+    prsm_tensor_t *DZ2 = dict_find_val(params, "DZ2");
+    if (!DZ2) {
+        DZ2 = prsm_tensor_dup(a1);
+        dict_update_val(params, "DZ2", DZ2);
+    }
+
+    printf("==> DZ2:\n");
+    prsm_tensor_display(DZ2, NULL);
+
+    // DW2 = DC * DA2_T * DZ2 | (N, 100)
+    prsm_tensor_t *DW2 = dict_find_val(params, "DW2");
+    if (!DW2) {
+        DW2 = prsm_tensor_dup(w2);
+        dict_update_val(params, "DW2", DW2);
+    }
+    
+    prsm_tensor_transpose(DA2);
+    {
+        prsm_tensor_t *tmp = prsm_tensor_dot(NULL, DC, DA2);    // (N, N)
+        DW2 = prsm_tensor_dot(DW2, tmp, DZ2);                   // (N, 100)
+    }
+    prsm_tensor_transpose(DA2);
+
+    printf("==> DW2:\n");
+    prsm_tensor_display(DW2, NULL);
 
     // DA2 = da2/dz2 = relu'(z2)
     // prsm_tensor_t *DA2 = dict_find_val(params, "DA2");
@@ -418,6 +466,21 @@ vt_vec_t *ann_model_update(vt_vec_t *params, vt_vec_t *backward_cache, const prs
     prsm_tensor_sub(b2, b2, db2);
 
     return params;
+}
+
+prsm_float ann_cost(const prsm_tensor_t *const pred, const prsm_tensor_t *const target) {
+    VT_ENFORCE(prsm_tensor_shapes_match(pred, target), "Shapes don't match!");
+
+    // calculate overall cost
+    prsm_float cost = 0;
+    const size_t N = prsm_tensor_shape(target)[0];
+    VT_FOREACH(i, 0, N) {
+        prsm_tensor_t pred_view = prsm_tensor_make_view_vec(pred, i);
+        prsm_tensor_t target_view = prsm_tensor_make_view_vec(target, i);
+        cost += prsm_loss_cce(&pred_view, &target_view);
+    }
+    
+    return cost/((prsm_float)N);
 }
 
 prsm_float ann_step_func(const prsm_float v) { return v > 0.5 ? 1 : 0; }

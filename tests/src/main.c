@@ -22,10 +22,10 @@ int main(void) {
     {   
         // vt_debug_disable_output(true);
 
-        // TEST(test_custom);
+        TEST(test_custom);
         // TEST(test_tensor);
         // TEST(test_math);
-        TEST(test_activation);
+        // TEST(test_activation);
         // TEST(test_loss);
         // TEST(test_layers);
     }
@@ -316,7 +316,6 @@ void test_activation(void) {
     // d'log softmax
     d_output = prsm_activate_lsoftmax_d(d_output, data);
     assert(prsm_tensor_equals_approx(d_output, d_expected_output, 0.001));
-
 }
 
 void test_loss(void) {
