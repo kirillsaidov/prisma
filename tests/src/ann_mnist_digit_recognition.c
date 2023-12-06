@@ -38,7 +38,7 @@ void run_ann_mnist_digit_recognition(void) {
     }
 
     VT_LOG_INFO("Creating tensors...");
-    const size_t num_rows = 320;
+    const size_t num_rows = 810;
     const size_t num_features = 28*28;
     const size_t output_size = 10;
     prsm_tensor_t *x_train, *y_train, *x_test, *y_test;
@@ -60,8 +60,8 @@ void run_ann_mnist_digit_recognition(void) {
     vt_vec_t *params = ann_model_init_params(num_rows, num_features, layer_hidden_size, output_size);
 
     VT_LOG_INFO("Initializing model options...");
-    const size_t epochs = 320;
-    const prsm_float alpha = 0.05;
+    const size_t epochs = 810;
+    const prsm_float alpha = 0.09;
 
     VT_LOG_INFO("\talpha         = %.2f", alpha);
     VT_LOG_INFO("\tactivation l2 = %s", VT_STRING_OF(prsm_activate_sigmoid));
@@ -80,22 +80,10 @@ void run_ann_mnist_digit_recognition(void) {
         * COST AND ACCURACY
         */
         if (epoch % 10 == 0) {
-            prsm_tensor_t *w1 = dict_find_val(params, "w1");
-            prsm_tensor_t *w2 = dict_find_val(params, "w2");
             prsm_tensor_t *yhat = dict_find_val(params, "a2");
-
-            // printf("==> w1:\n");
-            // prsm_tensor_display(w1, NULL);
-
-            // printf("==> w2:\n");
-            // prsm_tensor_display(w2, NULL);
-
-            // printf("==> yhat:\n");
-            // prsm_tensor_display(yhat, NULL);
-
             const prsm_float cost = ann_cost(yhat, y_train);
             const prsm_float accuracy = ann_accuracy(yhat, y_train, true);
-            VT_LOG_INFO("\tEpoch %3zu | Error: %.2f | Accuracy: %.2f", epoch, cost, accuracy);
+            VT_LOG_INFO("\tEpoch %3zu | Error: %.4f | Accuracy: %.4f", epoch, cost, accuracy);
 
             if (!cost) {
                 break;
@@ -315,10 +303,11 @@ vt_vec_t *ann_model_backward(prsm_tensor_t *x, prsm_tensor_t *y, vt_vec_t *param
         prsm_loss_cce_d(&DC_view, &a2_view, &y_view);
         prsm_activate_softmax_d(&DC_view, &DC_view);
     }
+    prsm_tensor_apply_clip(DC2, -1, 1);
     
     // DZ2_a1 = dz2/dw2 = a1 | (N, 100)
     prsm_tensor_t *DZ2_a1 = a1;
-
+    
     // DW2 = 1/N * DZ2_a1_T * DC2 | (100, 10)
     prsm_tensor_t *DW2 = dict_find_val(params, "DW2");
     if (!DW2) {
@@ -332,9 +321,8 @@ vt_vec_t *ann_model_backward(prsm_tensor_t *x, prsm_tensor_t *y, vt_vec_t *param
     }
     prsm_tensor_transpose(DZ2_a1);
 
-    // adjust
-    prsm_tensor_apply_scale_add(DW2, 1/N, 0);
-
+    // clip
+    prsm_tensor_apply_clip(DW2, -1, 1);
 
     // DB2 = DC2 * 1_T = sum(DC2, 1) => column-wise summation | (100, 1)
     prsm_tensor_t *DB2 = dict_find_val(params, "DB2");
@@ -344,8 +332,8 @@ vt_vec_t *ann_model_backward(prsm_tensor_t *x, prsm_tensor_t *y, vt_vec_t *param
     } else { prsm_tensor_set_zeros(DB2); }
     DB2 = prsm_tensor_sum(DB2, DC2, 0); // we do the reverse since DC2 shape(N, 10) => 0 [DC_T shape(10, N) => 1]
 
-    // adjust
-    prsm_tensor_apply_scale_add(DB2, 1/N, 0);
+    // clip
+    prsm_tensor_apply_clip(DB2, -1, 1);
 
     /**
      * LAYER 2
@@ -365,6 +353,7 @@ vt_vec_t *ann_model_backward(prsm_tensor_t *x, prsm_tensor_t *y, vt_vec_t *param
         prsm_tensor_t DA1_view = prsm_tensor_make_view_vec(DA1, i);
         prsm_activate_sigmoid_d(&DA1_view, &z1_view);
     }
+    prsm_tensor_apply_clip(DA1, -1, 1);
 
     // DZ1_x = dz1/dw1 = x | (N, 784)
     prsm_tensor_t *DZ1_x = x;
@@ -383,6 +372,9 @@ vt_vec_t *ann_model_backward(prsm_tensor_t *x, prsm_tensor_t *y, vt_vec_t *param
     }
     prsm_tensor_transpose(DZ2_w2);
 
+    // clip
+    prsm_tensor_apply_clip(DC1, -1, 1);
+
     // DW1 = DC1 * DZ1_x_T | (784, 100)
     prsm_tensor_t *DW1 = dict_find_val(params, "DW1");
     if (!DW1) {
@@ -396,8 +388,8 @@ vt_vec_t *ann_model_backward(prsm_tensor_t *x, prsm_tensor_t *y, vt_vec_t *param
     }
     prsm_tensor_transpose(DZ1_x);
 
-    // adjust
-    prsm_tensor_apply_scale_add(DW1, 1/N, 0);
+    // clip
+    prsm_tensor_apply_clip(DW1, -1, 1);
 
     // DB1 = DC1 * 1_T = sum(DC1, 1) => column-wise summation | (100, 1)
     prsm_tensor_t *DB1 = dict_find_val(params, "DB1");
@@ -407,8 +399,8 @@ vt_vec_t *ann_model_backward(prsm_tensor_t *x, prsm_tensor_t *y, vt_vec_t *param
     } else { prsm_tensor_set_zeros(DB1); }
     DB1 = prsm_tensor_sum(DB1, DC1, 0); // we do the reverse since DC1 shape(N, 100) => 0 [DC_T shape(100, N) => 1]
 
-    // adjust
-    prsm_tensor_apply_scale_add(DB1, 1/N, 0);
+    // clip
+    prsm_tensor_apply_clip(DB1, -1, 1);
 
     return params;
 }
