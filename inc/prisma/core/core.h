@@ -3,10 +3,6 @@
 
 /** CORE MODULE
  * This module is a collection of all common definitions and code needed by the rest of the library.
-
- * Macros:
-    - 
-
  * Functions:
     - prsm_status_to_str
 */
