@@ -131,7 +131,7 @@ extern prsm_tensor_t *prsm_tensor_create_vec(struct VitaBaseAllocatorType *const
 extern prsm_tensor_t *prsm_tensor_create_mat(struct VitaBaseAllocatorType *const alloctr, const size_t rows, const size_t cols);
 
 /**
- * @brief  Creates a tensor matrix
+ * @brief  Destroys a tensor
  * @param  t tensor
  * @returns None
  */
